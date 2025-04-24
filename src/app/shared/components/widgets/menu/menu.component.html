@@ -5,6 +5,7 @@
         <div class="offcanvas offcanvas-collapse order-xl-2" [class.show]="menuService.mainMenuToggle">
           <div class="offcanvas-header navbar-shadow">
             <h5>{{'menu' | translate}}</h5>
+            
             <button class="btn-close lead" id="toggle_menu_btn" type="button" (click)="mainMenuClose()">
               <div>
                 <i class="ri-close-fill">
@@ -105,41 +106,8 @@
                                 </div>
                               }
 
-                              @if(menu.mega_menu_type === 'bottom_banner'){
-                                <div class="dropdown-column col-xl-12 d-xl-block d-none">
-                                  @if(menu && menu.banner_image){
-                                    <div class="menu-img-banner rounded overflow-hidden mx-0 mt-3 mb-0">
-                                      <img [src]="menu?.banner_image?.original_url" class="img-fluid">
-                                    </div>
-                                  }
-                                </div>
-                              }
+                         
 
-                              @if(menu.mega_menu_type === 'blog_box'){
-                                <div class="dropdown-column col-xl-9 d-xl-block d-none">
-                                  <div class="row">
-                                    @for(blog of blogs; track blog.id){
-                                      <div class="col-6">
-                                        <div class="blog-box sticky-blog">
-                                          <div class="blog-box-image">
-                                            <a [routerLink]="['/blog/', blog?.slug]" class="blog-image">
-                                              <img [src]="blog.blog_thumbnail ? blog?.blog_thumbnail?.original_url : 'assets/images/placeholder/product.png'" class="img-fluid" [alt]="blog.title">
-                                            </a>
-                                          </div>
-
-                                          <a [routerLink]="['/blog/', blog?.slug]" class="blog-detail" >
-                                            <h6>{{ blog.created_at | date: 'dd MMM yyyy hh:mm:a' }}</h6>
-                                            <h5>{{ blog.title }}</h5>
-                                          </a>
-                                        </div>
-                                      </div>
-                                    }
-                                  </div>
-                                  @if(blogs && !blogs.length){
-                                    <!-- <app-no-data [class]="'menu-no-data'" [text]="'No Blog Found'"></app-no-data> -->
-                                  }
-                                </div>
-                              }
                             </div>
                           </div>
                         }

@@ -7,7 +7,7 @@
       },
       "banner": {
         "status": true,
-        "image_url": "/images/theme/fashion_one/fashion_one_5.png",
+        "image_url": "/images/theme/fashion_one/Título (9) 1 (2).png",
         "redirect_link": {
           "link": 19,
           "link_type": "product",
@@ -19,7 +19,7 @@
           {
             "title": "free shipping",
             "status": true,
-            "image_url": "/images/theme/fashion_one/service.png",
+            "image_url": "/images/theme/fashion_one/Título (9) 1 (2).png",
             "description": "free shipping world wide"
           },
           {
@@ -40,7 +40,7 @@
         "banners": [
           {
             "status": true,
-            "image_url": "/images/theme/fashion_one/fashion_one_9.png",
+            "image_url": "/images/theme/fashion_one/Título (9) 1 (2).png",
             "redirect_link": {
               "link": "fashion",
               "link_type": "collection"
@@ -48,7 +48,7 @@
           },
           {
             "status": true,
-            "image_url": "/images/theme/fashion_one/fashion_one_2.png",
+            "image_url": "/images/theme/fashion_one/banner3.png",
             "redirect_link": {
               "link": "fashion",
               "link_type": "collection"
@@ -74,69 +74,6 @@
           }
         }
       },
-      "products_ids": [21, 16, 15, 12, 19],
-      "social_media": {
-        "title": "#WHOWEARWHAT",
-        "status": true,
-        "banners": [
-          {
-            "status": true,
-            "image_url": "/images/theme/fashion_one/fashion_one_insta_7.png",
-            "redirect_link": {
-              "link": "https://instagram.com/",
-              "link_type": "external_url"
-            }
-          },
-          {
-            "status": true,
-            "image_url": "/images/theme/fashion_one/fashion_one_insta_6.png",
-            "redirect_link": {
-              "link": "https://instagram.com/",
-              "link_type": "external_url"
-            }
-          },
-          {
-            "status": true,
-            "image_url": "/images/theme/fashion_one/fashion_one_insta_5.png",
-            "redirect_link": {
-              "link": "https://instagram.com/",
-              "link_type": "external_url"
-            }
-          },
-          {
-            "status": true,
-            "image_url": "/images/theme/fashion_one/fashion_one_insta_4.png",
-            "redirect_link": {
-              "link": "https://instagram.com/",
-              "link_type": "external_url"
-            }
-          },
-          {
-            "status": true,
-            "image_url": "/images/theme/fashion_one/fashion_one_insta_3.png",
-            "redirect_link": {
-              "link": "https://instagram.com/",
-              "link_type": "external_url"
-            }
-          },
-          {
-            "status": true,
-            "image_url": "/images/theme/fashion_one/fashion_one_insta_2.png",
-            "redirect_link": {
-              "link": "https://instagram.com/",
-              "link_type": "external_url"
-            }
-          },
-          {
-            "status": true,
-            "image_url": "/images/theme/fashion_one/fashion_one_insta_1.png",
-            "redirect_link": {
-              "link": "https://instagram.com/",
-              "link_type": "external_url"
-            }
-          }
-        ]
-      },
       "products_list": {
         "tag": "special offer",
         "title": "Latest Drops",
@@ -152,7 +89,7 @@
       },
       "category_product": {
         "tag": "exclusive products",
-        "title": "everyday casual",
+        "title": "top ventas",
         "status": true,
         "category_ids": [8, 9, 10]
       }

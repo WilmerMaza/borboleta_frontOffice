@@ -30,13 +30,13 @@ export class MenuComponent {
 
   @Input() class: string;
 
-  blog$: Observable<Blog[]> = inject(Store).select(BlogState.selectedBlogs);
+
   menu$: Observable<MenuModel> = inject(Store).select(MenuState.menu);
   menuProduct$: Observable<Product[]> = inject(Store).select(ProductState.menuProducts);
 
   public menu: Menu[] = [];
   public products: Product[];
-  public blogs: Blog[];
+
 
   public StorageURL = environment.storageURL;
 
@@ -54,10 +54,7 @@ export class MenuComponent {
       const blogIds = Array.from(new Set(this.concatDynamicProductKeys(menu, 'blog_ids')));
       if(blogIds && blogIds.length){
 
-        this.store.dispatch(new GetSelectedBlogs({status: 1, ids: blogIds?.join()}))
-        this.blog$.subscribe((blog) => {
-          this.blogs = blog.slice(0,2)
-        })
+     
       }
     })
   }
