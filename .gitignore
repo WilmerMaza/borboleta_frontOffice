@@ -1,0 +1,56 @@
+# Node
+node_modules/
+package-lock.json
+npm-debug.log*
+yarn.lock
+yarn-error.log*
+
+# Angular build
+dist/
+.angular/
+out-tsc/
+
+# Angular environments
+src/environments/*.ts
+!src/environments/environment.prod.ts
+
+# Compiled TypeScript
+*.tsbuildinfo
+
+# IDEs y editores
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+
+# MacOS
+.DS_Store
+
+# Windows
+Thumbs.db
+
+# Logs
+*.log
+
+# Tests
+/coverage/
+
+# Serverless / AWS (si aplicas esto en tu arquitectura)
+.serverless/
+.aws-sam/
+
+# Others
+.env
+.env.local
+.env.production
+.env.*.local
+*.local
+*.bak
+
+# Firebase / Netlify / CI
+firebase-debug.log
+functions/lib/
+functions/node_modules/
+.netlify/
