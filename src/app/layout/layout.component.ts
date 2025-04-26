@@ -13,7 +13,6 @@ import { LoginModalComponent } from '../shared/components/widgets/modal/login-mo
 import { NewsletterModalComponent } from '../shared/components/widgets/modal/newsletter-modal/newsletter-modal.component';
 import { RecentPurchasePopupComponent } from '../shared/components/widgets/recent-purchase-popup/recent-purchase-popup.component';
 import { StickyCompareComponent } from '../shared/components/widgets/sticky-compare/sticky-compare.component';
-import { ThemeCustomizerComponent } from '../shared/components/widgets/theme-customizer/theme-customizer.component';
 import { Option } from '../shared/interface/theme-option.interface';
 import { AuthService } from '../shared/services/auth.service';
 import { ThemeOptionService } from '../shared/services/theme-option.service';
@@ -24,7 +23,7 @@ import { ThemeOptionState } from '../shared/store/state/theme-option.state';
 
 @Component({
     selector: 'app-layout',
-    imports: [CommonModule, LoaderComponent, FooterComponent, ThemeCustomizerComponent, RouterModule, LoadingBarRouterModule,
+    imports: [CommonModule, LoaderComponent, FooterComponent, RouterModule, LoadingBarRouterModule,
         HeaderComponent, BackToTopComponent, StickyCompareComponent, NewsletterModalComponent,
         RecentPurchasePopupComponent, ExitModalComponent, LoginModalComponent],
     templateUrl: './layout.component.html',
