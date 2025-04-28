@@ -5,7 +5,7 @@
   padding-right: 40px !important;
 
   &::before {
-    content: '';
+    content: "";
     position: absolute;
     width: 18px;
     height: 18px;
@@ -30,34 +30,19 @@
   width: 100vw;
   background-color: #fff;
   display: flex;
-  align-items: center;
-  justify-content: center;
   position: fixed;
   z-index: 9999;
   top: 0;
   left: 0;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 
   .loader {
     position: relative;
     inset: unset;
     transform: unset;
     margin: 0 auto 13px;
-    width: 50px;
-    height: 50px;
-    background-color: var(--theme-color);
-    border-radius: 100%;
-
-    &:after {
-      content: "";
-      position: absolute;
-      border-radius: 50%;
-      top: 50%;
-      left: 50%;
-      border: 0 solid white;
-      transform: translate(-50%, -50%);
-      animation: loading 1000ms ease-out forwards infinite;
-      transition: all 0.3s ease;
-    }
   }
 
   h3 {
@@ -150,7 +135,12 @@
   .placeholder-glow {
     .placeholder {
       height: calc(12px + (30 - 12) * ((100vw - 320px) / (1920 - 320)));
-      background: linear-gradient(90deg, rgba(212, 212, 212, 0.41) 8%, #cdcdcd 18%, rgba(212, 212, 212, 0.41) 33%);
+      background: linear-gradient(
+        90deg,
+        rgba(212, 212, 212, 0.41) 8%,
+        #cdcdcd 18%,
+        rgba(212, 212, 212, 0.41) 33%
+      );
       background-size: 800px 104px;
       animation: skeleton-loader 2s ease-in-out infinite;
       border-radius: 0;
@@ -163,7 +153,12 @@
     width: 60%;
     display: block;
     margin-inline: auto;
-    background: linear-gradient(90deg, rgba(212, 212, 212, 0.41) 8%, #cdcdcd 18%, rgba(212, 212, 212, 0.41) 33%);
+    background: linear-gradient(
+      90deg,
+      rgba(212, 212, 212, 0.41) 8%,
+      #cdcdcd 18%,
+      rgba(212, 212, 212, 0.41) 33%
+    );
     background-size: 800px 104px;
     animation: skeleton-loader 2s ease-in-out infinite;
   }
@@ -221,7 +216,6 @@
   }
 
   .title2 {
-
     h2,
     h4 {
       display: none;
@@ -247,7 +241,6 @@
 
   .title3,
   .title4 {
-
     h2,
     h4 {
       display: none;
@@ -281,7 +274,7 @@
     }
 
     .skeleton-text-p {
-      margin-bottom: calc(10px + 20*(100vw - 320px) / 1600);
+      margin-bottom: calc(10px + 20 * (100vw - 320px) / 1600);
       width: 100%;
       display: block;
       height: auto;
@@ -289,14 +282,19 @@
       animation: none;
 
       span {
-        background: linear-gradient(90deg, rgba(212, 212, 212, 0.41) 8%, #cdcdcd 18%, rgba(212, 212, 212, 0.41) 33%);
+        background: linear-gradient(
+          90deg,
+          rgba(212, 212, 212, 0.41) 8%,
+          #cdcdcd 18%,
+          rgba(212, 212, 212, 0.41) 33%
+        );
         background-size: 800px 104px;
         animation: skeleton-loader 2s ease-in-out infinite;
         width: 100%;
-        height: calc(14px + (19 - 14)*((100vw - 320px) /(1920 - 320)));
+        height: calc(14px + (19 - 14) * ((100vw - 320px) / (1920 - 320)));
         display: block;
 
-        +span {
+        + span {
           margin-top: 10px;
         }
       }
@@ -309,21 +307,26 @@
     }
 
     .skeleton-text-p {
-      margin-bottom: calc(10px + 20*(100vw - 320px) / 1600);
+      margin-bottom: calc(10px + 20 * (100vw - 320px) / 1600);
       width: 100%;
       height: auto;
       background: none;
       animation: none;
 
       span {
-        background: linear-gradient(90deg, rgba(212, 212, 212, 0.41) 8%, #cdcdcd 18%, rgba(212, 212, 212, 0.41) 33%);
+        background: linear-gradient(
+          90deg,
+          rgba(212, 212, 212, 0.41) 8%,
+          #cdcdcd 18%,
+          rgba(212, 212, 212, 0.41) 33%
+        );
         background-size: 800px 104px;
         animation: skeleton-loader 2s ease-in-out infinite;
         width: 100%;
-        height: calc(14px + (19 - 14)*((100vw - 320px) /(1920 - 320)));
+        height: calc(14px + (19 - 14) * ((100vw - 320px) / (1920 - 320)));
         display: block;
 
-        +span {
+        + span {
           margin-top: 10px;
         }
       }
@@ -340,11 +343,16 @@
 
       .skeleton-img-box {
         margin-right: 15px;
-        width: calc(40px + 20*(100vw - 320px) / 1600);
-        height: calc(40px + 20*(100vw - 320px) / 1600);
+        width: calc(40px + 20 * (100vw - 320px) / 1600);
+        height: calc(40px + 20 * (100vw - 320px) / 1600);
         object-fit: contain;
         transition: all 0.5s ease;
-        background: linear-gradient(90deg, rgba(212, 212, 212, 0.41) 8%, #cdcdcd 18%, rgba(212, 212, 212, 0.41) 33%);
+        background: linear-gradient(
+          90deg,
+          rgba(212, 212, 212, 0.41) 8%,
+          #cdcdcd 18%,
+          rgba(212, 212, 212, 0.41) 33%
+        );
         background-size: 800px 104px;
         animation: skeleton-loader 2s ease-in-out infinite;
         border-radius: 0;
@@ -354,11 +362,16 @@
 
       .service-skeleton-img {
         margin-right: 15px;
-        width: calc(40px + 20*(100vw - 320px) / 1600);
-        height: calc(40px + 20*(100vw - 320px) / 1600);
+        width: calc(40px + 20 * (100vw - 320px) / 1600);
+        height: calc(40px + 20 * (100vw - 320px) / 1600);
         object-fit: contain;
         transition: all 0.5s ease;
-        background: linear-gradient(90deg, rgba(212, 212, 212, 0.41) 8%, #cdcdcd 18%, rgba(212, 212, 212, 0.41) 33%);
+        background: linear-gradient(
+          90deg,
+          rgba(212, 212, 212, 0.41) 8%,
+          #cdcdcd 18%,
+          rgba(212, 212, 212, 0.41) 33%
+        );
         background-size: 800px 104px;
         animation: skeleton-loader 2s ease-in-out infinite;
         border-radius: 0;
@@ -368,7 +381,12 @@
 
       .media-body {
         h4 {
-          background: linear-gradient(90deg, rgba(212, 212, 212, 0.41) 8%, #cdcdcd 18%, rgba(212, 212, 212, 0.41) 33%);
+          background: linear-gradient(
+            90deg,
+            rgba(212, 212, 212, 0.41) 8%,
+            #cdcdcd 18%,
+            rgba(212, 212, 212, 0.41) 33%
+          );
           background-size: 800px 104px;
           animation: skeleton-loader 2s ease-in-out infinite;
           border-radius: 0;
@@ -378,7 +396,12 @@
         }
 
         p {
-          background: linear-gradient(90deg, rgba(212, 212, 212, 0.41) 8%, #cdcdcd 18%, rgba(212, 212, 212, 0.41) 33%);
+          background: linear-gradient(
+            90deg,
+            rgba(212, 212, 212, 0.41) 8%,
+            #cdcdcd 18%,
+            rgba(212, 212, 212, 0.41) 33%
+          );
           background-size: 800px 104px;
           animation: skeleton-loader 2s ease-in-out infinite;
           border-radius: 0;
@@ -390,7 +413,7 @@
         .skeleton-content-h4,
         .skeleton-content-p {
           display: block;
-          height: calc(15px + 5*(100vw - 320px) / 1600);
+          height: calc(15px + 5 * (100vw - 320px) / 1600);
         }
       }
     }
@@ -398,7 +421,12 @@
 
   .about-section {
     h2 {
-      background: linear-gradient(90deg, rgba(212, 212, 212, 0.41) 8%, #cdcdcd 18%, rgba(212, 212, 212, 0.41) 33%);
+      background: linear-gradient(
+        90deg,
+        rgba(212, 212, 212, 0.41) 8%,
+        #cdcdcd 18%,
+        rgba(212, 212, 212, 0.41) 33%
+      );
       background-size: 800px 104px;
       animation: skeleton-loader 2s ease-in-out infinite;
       color: transparent;
@@ -426,11 +454,16 @@
 
     .service-skeleton-img {
       margin-right: 15px;
-      width: calc(40px + 20*(100vw - 320px) / 1600);
-      height: calc(40px + 20*(100vw - 320px) / 1600);
+      width: calc(40px + 20 * (100vw - 320px) / 1600);
+      height: calc(40px + 20 * (100vw - 320px) / 1600);
       object-fit: contain;
       transition: all 0.5s ease;
-      background: linear-gradient(90deg, rgba(212, 212, 212, 0.41) 8%, #cdcdcd 18%, rgba(212, 212, 212, 0.41) 33%);
+      background: linear-gradient(
+        90deg,
+        rgba(212, 212, 212, 0.41) 8%,
+        #cdcdcd 18%,
+        rgba(212, 212, 212, 0.41) 33%
+      );
       background-size: 800px 104px;
       animation: skeleton-loader 2s ease-in-out infinite;
       border-radius: 0;
@@ -439,7 +472,12 @@
     }
 
     h4 {
-      background: linear-gradient(90deg, rgba(212, 212, 212, 0.41) 8%, #cdcdcd 18%, rgba(212, 212, 212, 0.41) 33%);
+      background: linear-gradient(
+        90deg,
+        rgba(212, 212, 212, 0.41) 8%,
+        #cdcdcd 18%,
+        rgba(212, 212, 212, 0.41) 33%
+      );
       background-size: 800px 104px;
       animation: skeleton-loader 2s ease-in-out infinite;
       border-radius: 0;
@@ -449,7 +487,12 @@
     }
 
     p {
-      background: linear-gradient(90deg, rgba(212, 212, 212, 0.41) 8%, #cdcdcd 18%, rgba(212, 212, 212, 0.41) 33%);
+      background: linear-gradient(
+        90deg,
+        rgba(212, 212, 212, 0.41) 8%,
+        #cdcdcd 18%,
+        rgba(212, 212, 212, 0.41) 33%
+      );
       background-size: 800px 104px;
       animation: skeleton-loader 2s ease-in-out infinite;
       border-radius: 0;
@@ -505,7 +548,7 @@
   .service_slide {
     .service-home {
       .row {
-        >div {
+        > div {
           &:nth-child(even) {
             .service-block1 {
               background-color: rgba(255, 255, 255, 0.85);
@@ -539,7 +582,12 @@
         width: 58px;
         height: 58px;
         display: block;
-        background: linear-gradient(90deg, rgba(212, 212, 212, 0.41) 8%, #cdcdcd 18%, rgba(212, 212, 212, 0.41) 33%);
+        background: linear-gradient(
+          90deg,
+          rgba(212, 212, 212, 0.41) 8%,
+          #cdcdcd 18%,
+          rgba(212, 212, 212, 0.41) 33%
+        );
         background-size: 800px 104px;
         animation: skeleton-loader 2s ease-in-out infinite;
         border-radius: 0;
@@ -548,7 +596,12 @@
     }
 
     h4 {
-      background: linear-gradient(90deg, rgba(212, 212, 212, 0.41) 8%, #cdcdcd 18%, rgba(212, 212, 212, 0.41) 33%);
+      background: linear-gradient(
+        90deg,
+        rgba(212, 212, 212, 0.41) 8%,
+        #cdcdcd 18%,
+        rgba(212, 212, 212, 0.41) 33%
+      );
       background-size: 800px 104px;
       animation: skeleton-loader 2s ease-in-out infinite;
       border-radius: 0;
@@ -572,7 +625,12 @@
   .category-block {
     .category-image {
       background: #fff;
-      background: linear-gradient(90deg, rgba(212, 212, 212, 0.41) 8%, #cdcdcd 18%, rgba(212, 212, 212, 0.41) 33%);
+      background: linear-gradient(
+        90deg,
+        rgba(212, 212, 212, 0.41) 8%,
+        #cdcdcd 18%,
+        rgba(212, 212, 212, 0.41) 33%
+      );
       background-size: 800px 104px;
       animation: skeleton-loader 2s ease-in-out infinite;
       border-radius: 100%;
@@ -580,12 +638,16 @@
 
       &.svg-image {
         background: #fff;
-        background: linear-gradient(90deg, rgba(212, 212, 212, 0.41) 8%, #cdcdcd 18%, rgba(212, 212, 212, 0.41) 33%);
+        background: linear-gradient(
+          90deg,
+          rgba(212, 212, 212, 0.41) 8%,
+          #cdcdcd 18%,
+          rgba(212, 212, 212, 0.41) 33%
+        );
         background-size: 800px 104px;
         animation: skeleton-loader 2s ease-in-out infinite;
         border-radius: 100%;
       }
-
 
       img {
         opacity: 0;
@@ -595,7 +657,12 @@
     .category-details {
       h5 {
         background: #fff;
-        background: linear-gradient(90deg, rgba(212, 212, 212, 0.41) 8%, #cdcdcd 18%, rgba(212, 212, 212, 0.41) 33%);
+        background: linear-gradient(
+          90deg,
+          rgba(212, 212, 212, 0.41) 8%,
+          #cdcdcd 18%,
+          rgba(212, 212, 212, 0.41) 33%
+        );
         background-size: 800px 104px;
         animation: skeleton-loader 2s ease-in-out infinite;
         border-radius: 0;
@@ -615,7 +682,12 @@
     h4 {
       a {
         margin-inline: auto;
-        background: linear-gradient(90deg, rgba(212, 212, 212, 0.41) 8%, #cdcdcd 18%, rgba(212, 212, 212, 0.41) 33%);
+        background: linear-gradient(
+          90deg,
+          rgba(212, 212, 212, 0.41) 8%,
+          #cdcdcd 18%,
+          rgba(212, 212, 212, 0.41) 33%
+        );
         background-size: 800px 104px;
         animation: skeleton-loader 2s ease-in-out infinite;
         color: transparent;
@@ -633,7 +705,12 @@
         }
 
         .img-sec {
-          background: linear-gradient(90deg, rgba(212, 212, 212, 0.41) 8%, #cdcdcd 18%, rgba(212, 212, 212, 0.41) 33%);
+          background: linear-gradient(
+            90deg,
+            rgba(212, 212, 212, 0.41) 8%,
+            #cdcdcd 18%,
+            rgba(212, 212, 212, 0.41) 33%
+          );
           background-size: 800px 104px;
           animation: skeleton-loader 2s ease-in-out infinite;
 
@@ -644,7 +721,12 @@
 
         h4 {
           margin-inline: auto;
-          background: linear-gradient(90deg, rgba(212, 212, 212, 0.41) 8%, #cdcdcd 18%, rgba(212, 212, 212, 0.41) 33%);
+          background: linear-gradient(
+            90deg,
+            rgba(212, 212, 212, 0.41) 8%,
+            #cdcdcd 18%,
+            rgba(212, 212, 212, 0.41) 33%
+          );
           background-size: 800px 104px;
           animation: skeleton-loader 2s ease-in-out infinite;
           color: transparent;
@@ -655,7 +737,7 @@
   }
 
   .parallax-cls {
-    >section {
+    > section {
       &:nth-child(odd) {
         .full-banner {
           .home-skeleton {
@@ -684,7 +766,12 @@
     }
 
     h4 {
-      background: linear-gradient(90deg, rgba(212, 212, 212, 0.41) 8%, #cdcdcd 18%, rgba(212, 212, 212, 0.41) 33%);
+      background: linear-gradient(
+        90deg,
+        rgba(212, 212, 212, 0.41) 8%,
+        #cdcdcd 18%,
+        rgba(212, 212, 212, 0.41) 33%
+      );
       background-size: 800px 104px;
       animation: skeleton-loader 2s ease-in-out infinite;
       border-radius: 0;
@@ -694,25 +781,35 @@
 
   .left-sidebar_center {
     .pixelstrap {
-      >li {
-        >a {
+      > li {
+        > a {
           .skeleton-category-img {
             height: 48px;
             width: 48px;
             display: block !important;
             margin-inline: auto;
-            background: linear-gradient(90deg, rgba(212, 212, 212, 0.41) 8%, #cdcdcd 18%, rgba(212, 212, 212, 0.41) 33%);
+            background: linear-gradient(
+              90deg,
+              rgba(212, 212, 212, 0.41) 8%,
+              #cdcdcd 18%,
+              rgba(212, 212, 212, 0.41) 33%
+            );
             background-size: 800px 104px;
             animation: skeleton-loader 2s ease-in-out infinite;
             margin-bottom: 8px;
           }
 
           .skeleton-category-text {
-            height: calc(15px + 5*(100vw - 320px) / 1600);
+            height: calc(15px + 5 * (100vw - 320px) / 1600);
             width: 60%;
             display: block !important;
             margin-inline: auto;
-            background: linear-gradient(90deg, rgba(212, 212, 212, 0.41) 8%, #cdcdcd 18%, rgba(212, 212, 212, 0.41) 33%);
+            background: linear-gradient(
+              90deg,
+              rgba(212, 212, 212, 0.41) 8%,
+              #cdcdcd 18%,
+              rgba(212, 212, 212, 0.41) 33%
+            );
             background-size: 800px 104px;
             animation: skeleton-loader 2s ease-in-out infinite;
           }
@@ -736,7 +833,12 @@
 
   .search-category-skeleton {
     .skeleton-loader {
-      background: linear-gradient(90deg, rgba(212, 212, 212, 0.41) 8%, #cdcdcd 18%, rgba(212, 212, 212, 0.41) 33%);
+      background: linear-gradient(
+        90deg,
+        rgba(212, 212, 212, 0.41) 8%,
+        #cdcdcd 18%,
+        rgba(212, 212, 212, 0.41) 33%
+      );
       background-size: 800px 104px;
       animation: skeleton-loader 2s ease-in-out infinite;
       color: transparent;
@@ -780,11 +882,13 @@
     background: #f6f7f8;
     background-position: -500px 0;
     animation: skeleton-loader 2s ease-in-out infinite;
-    background-image: linear-gradient(135deg,
-        #f6f7f8 0%,
-        #edeef1 20%,
-        #f6f7f8 40%,
-        #f6f7f8 100%);
+    background-image: linear-gradient(
+      135deg,
+      #f6f7f8 0%,
+      #edeef1 20%,
+      #f6f7f8 40%,
+      #f6f7f8 100%
+    );
     background-repeat: no-repeat;
     background-size: 1000px 100%;
     border-radius: 0;
@@ -807,7 +911,12 @@
   .coupon-name {
     .card-name {
       h5 {
-        background: linear-gradient(90deg, rgba(212, 212, 212, 0.41) 8%, #cdcdcd 18%, rgba(212, 212, 212, 0.41) 33%);
+        background: linear-gradient(
+          90deg,
+          rgba(212, 212, 212, 0.41) 8%,
+          #cdcdcd 18%,
+          rgba(212, 212, 212, 0.41) 33%
+        );
         background-size: 800px 104px;
         animation: skeleton-loader 2s ease-in-out infinite;
         width: 70%;
@@ -818,7 +927,12 @@
 
   .coupon-content {
     p {
-      background: linear-gradient(90deg, rgba(212, 212, 212, 0.41) 8%, #cdcdcd 18%, rgba(212, 212, 212, 0.41) 33%);
+      background: linear-gradient(
+        90deg,
+        rgba(212, 212, 212, 0.41) 8%,
+        #cdcdcd 18%,
+        rgba(212, 212, 212, 0.41) 33%
+      );
       background-size: 800px 104px;
       animation: skeleton-loader 2s ease-in-out infinite;
       width: 100%;
@@ -829,7 +943,12 @@
       border-top: unset;
 
       .coupon-code {
-        background: linear-gradient(90deg, rgba(212, 212, 212, 0.41) 8%, #cdcdcd 18%, rgba(212, 212, 212, 0.41) 33%);
+        background: linear-gradient(
+          90deg,
+          rgba(212, 212, 212, 0.41) 8%,
+          #cdcdcd 18%,
+          rgba(212, 212, 212, 0.41) 33%
+        );
         background-size: 800px 104px;
         animation: skeleton-loader 2s ease-in-out infinite;
         width: 30%;
@@ -844,14 +963,24 @@
     width: 66px;
     height: 66px;
     border-radius: 0;
-    background: linear-gradient(90deg, rgba(212, 212, 212, 0.41) 8%, #cdcdcd 18%, rgba(212, 212, 212, 0.41) 33%);
+    background: linear-gradient(
+      90deg,
+      rgba(212, 212, 212, 0.41) 8%,
+      #cdcdcd 18%,
+      rgba(212, 212, 212, 0.41) 33%
+    );
     background-size: 800px 104px;
     animation: skeleton-loader 2s ease-in-out infinite;
   }
 
   .contain-name {
     h3 {
-      background: linear-gradient(90deg, rgba(212, 212, 212, 0.41) 8%, #cdcdcd 18%, rgba(212, 212, 212, 0.41) 33%);
+      background: linear-gradient(
+        90deg,
+        rgba(212, 212, 212, 0.41) 8%,
+        #cdcdcd 18%,
+        rgba(212, 212, 212, 0.41) 33%
+      );
       background-size: 800px 104px;
       animation: skeleton-loader 2s ease-in-out infinite;
       border-radius: 0;
@@ -860,7 +989,12 @@
     }
 
     .product-label {
-      background: linear-gradient(90deg, rgba(212, 212, 212, 0.41) 8%, #cdcdcd 18%, rgba(212, 212, 212, 0.41) 33%);
+      background: linear-gradient(
+        90deg,
+        rgba(212, 212, 212, 0.41) 8%,
+        #cdcdcd 18%,
+        rgba(212, 212, 212, 0.41) 33%
+      );
       background-size: 800px 104px;
       animation: skeleton-loader 2s ease-in-out infinite;
       border-radius: 0;
@@ -874,7 +1008,12 @@
   }
 
   .seller-contact {
-    background: linear-gradient(90deg, rgba(212, 212, 212, 0.41) 8%, #cdcdcd 18%, rgba(212, 212, 212, 0.41) 33%);
+    background: linear-gradient(
+      90deg,
+      rgba(212, 212, 212, 0.41) 8%,
+      #cdcdcd 18%,
+      rgba(212, 212, 212, 0.41) 33%
+    );
     background-size: 800px 104px;
     animation: skeleton-loader 2s ease-in-out infinite;
     border-radius: 0;
@@ -897,7 +1036,13 @@
       height: 15px;
       background-position: -500px 0;
       animation: skeleton-loader 2s ease-in-out infinite;
-      background-image: linear-gradient(135deg, #f6f7f8 0%, #edeef1 20%, #f6f7f8 40%, #f6f7f8 100%);
+      background-image: linear-gradient(
+        135deg,
+        #f6f7f8 0%,
+        #edeef1 20%,
+        #f6f7f8 40%,
+        #f6f7f8 100%
+      );
       width: 53%;
     }
 
@@ -905,14 +1050,26 @@
       height: 18px;
       background-position: -500px 0;
       animation: skeleton-loader 2s ease-in-out infinite;
-      background-image: linear-gradient(135deg, #f6f7f8 0%, #edeef1 20%, #f6f7f8 40%, #f6f7f8 100%);
+      background-image: linear-gradient(
+        135deg,
+        #f6f7f8 0%,
+        #edeef1 20%,
+        #f6f7f8 40%,
+        #f6f7f8 100%
+      );
     }
 
     .blog-button {
       height: 27px;
       background-position: -500px 0;
       animation: skeleton-loader 2s ease-in-out infinite;
-      background-image: linear-gradient(135deg, #f6f7f8 0%, #edeef1 20%, #f6f7f8 40%, #f6f7f8 100%);
+      background-image: linear-gradient(
+        135deg,
+        #f6f7f8 0%,
+        #edeef1 20%,
+        #f6f7f8 40%,
+        #f6f7f8 100%
+      );
       width: 37%;
     }
   }
@@ -920,7 +1077,7 @@
 
 .left-skelton-box {
   background-color: #f8f8f8;
-  padding: calc(18px + 7*(100vw - 320px) / 1600);
+  padding: calc(18px + 7 * (100vw - 320px) / 1600);
 
   ul {
     display: flex;
@@ -931,7 +1088,13 @@
       background: #f6f7f8;
       background-position: -500px 0;
       animation: skeleton-loader 2s ease-in-out infinite;
-      background-image: linear-gradient(135deg, #f6f7f8 0%, #edeef1 20%, #f6f7f8 40%, #f6f7f8 100%);
+      background-image: linear-gradient(
+        135deg,
+        #f6f7f8 0%,
+        #edeef1 20%,
+        #f6f7f8 40%,
+        #f6f7f8 100%
+      );
       background-repeat: no-repeat;
       background-size: 1000px 100%;
       border-radius: 0;
@@ -955,7 +1118,13 @@
         background-color: #f6f7f8;
         background-position: -500px 0;
         animation: skeleton-loader 2s ease-in-out infinite;
-        background-image: linear-gradient(135deg, #f6f7f8 0%, #edeef1 20%, #f6f7f8 40%, #f6f7f8 100%);
+        background-image: linear-gradient(
+          135deg,
+          #f6f7f8 0%,
+          #edeef1 20%,
+          #f6f7f8 40%,
+          #f6f7f8 100%
+        );
         top: auto;
         border-radius: 0;
 
@@ -973,7 +1142,12 @@
     .product-image-box {
       background-position: -500px 0;
       width: 100%;
-      background: linear-gradient(90deg, rgba(248, 248, 248, 0.85) 8%, #eee 18%, rgba(248, 248, 248, 0.85) 33%);
+      background: linear-gradient(
+        90deg,
+        rgba(248, 248, 248, 0.85) 8%,
+        #eee 18%,
+        rgba(248, 248, 248, 0.85) 33%
+      );
       background-size: 800px 104px;
       animation: skeleton-loader 2s ease-in-out infinite;
       aspect-ratio: 163 / 208;
@@ -981,14 +1155,18 @@
   }
 
   .product-detail {
-
     .product-title,
     h6,
     .price {
       background-position: -500px 0;
       width: 100%;
       height: 18px;
-      background: linear-gradient(90deg, rgba(248, 248, 248, 0.85) 8%, #eee 18%, rgba(248, 248, 248, 0.85) 33%);
+      background: linear-gradient(
+        90deg,
+        rgba(248, 248, 248, 0.85) 8%,
+        #eee 18%,
+        rgba(248, 248, 248, 0.85) 33%
+      );
       background-size: 800px 104px;
       animation: skeleton-loader 2s ease-in-out infinite;
     }
@@ -1045,7 +1223,12 @@
 
     .rating {
       height: 21px;
-      background: linear-gradient(90deg, rgba(212, 212, 212, 0.41) 8%, #cdcdcd 18%, rgba(212, 212, 212, 0.41) 33%);
+      background: linear-gradient(
+        90deg,
+        rgba(212, 212, 212, 0.41) 8%,
+        #cdcdcd 18%,
+        rgba(212, 212, 212, 0.41) 33%
+      );
       background-size: 800px 104px;
       animation: skeleton-loader 2s ease-in-out infinite;
       border-radius: 0;
@@ -1054,7 +1237,12 @@
 
     .name {
       height: 17px;
-      background: linear-gradient(90deg, rgba(212, 212, 212, 0.41) 8%, #cdcdcd 18%, rgba(212, 212, 212, 0.41) 33%);
+      background: linear-gradient(
+        90deg,
+        rgba(212, 212, 212, 0.41) 8%,
+        #cdcdcd 18%,
+        rgba(212, 212, 212, 0.41) 33%
+      );
       background-size: 800px 104px;
       animation: skeleton-loader 2s ease-in-out infinite;
       border-radius: 0;
@@ -1064,7 +1252,12 @@
 
     .price {
       height: 21px;
-      background: linear-gradient(90deg, rgba(212, 212, 212, 0.41) 8%, #cdcdcd 18%, rgba(212, 212, 212, 0.41) 33%);
+      background: linear-gradient(
+        90deg,
+        rgba(212, 212, 212, 0.41) 8%,
+        #cdcdcd 18%,
+        rgba(212, 212, 212, 0.41) 33%
+      );
       background-size: 800px 104px;
       animation: skeleton-loader 2s ease-in-out infinite;
       border-radius: 0;
@@ -1077,7 +1270,12 @@
 .search-category-skeleton {
   .skeleton-loader {
     display: block !important;
-    background: linear-gradient(90deg, rgba(212, 212, 212, 0.41) 8%, #cdcdcd 18%, rgba(212, 212, 212, 0.41) 33%);
+    background: linear-gradient(
+      90deg,
+      rgba(212, 212, 212, 0.41) 8%,
+      #cdcdcd 18%,
+      rgba(212, 212, 212, 0.41) 33%
+    );
     background-size: 800px 104px;
     animation: skeleton-loader 2s ease-in-out infinite;
     width: 7%;
@@ -1092,7 +1290,13 @@
         background: #f6f7f8;
         background-position: -500px 0;
         animation: skeletonShine 1s linear 0s infinite normal forwards;
-        background-image: linear-gradient(135deg, #f6f7f8 0%, #edeef1 20%, #f6f7f8 40%, #f6f7f8 100%);
+        background-image: linear-gradient(
+          135deg,
+          #f6f7f8 0%,
+          #edeef1 20%,
+          #f6f7f8 40%,
+          #f6f7f8 100%
+        );
         background-repeat: no-repeat;
         background-size: 1000px 100%;
         width: 92px;
@@ -1101,7 +1305,13 @@
 
         html.dark & {
           background: rgba(246, 247, 248, 0.05);
-          background-image: linear-gradient(135deg, #3f4242 0%, rgba(237, 238, 241, 0.1) 20%, #3f4242 40%, #3f4242 100%);
+          background-image: linear-gradient(
+            135deg,
+            #3f4242 0%,
+            rgba(237, 238, 241, 0.1) 20%,
+            #3f4242 40%,
+            #3f4242 100%
+          );
         }
 
         &:before {
@@ -1119,7 +1329,13 @@
     background: #f6f7f8;
     background-position: -500px 0;
     animation: skeletonShine 1s linear 0s infinite normal forwards;
-    background-image: linear-gradient(135deg, #f6f7f8 0%, #edeef1 20%, #f6f7f8 40%, #f6f7f8 100%);
+    background-image: linear-gradient(
+      135deg,
+      #f6f7f8 0%,
+      #edeef1 20%,
+      #f6f7f8 40%,
+      #f6f7f8 100%
+    );
     background-repeat: no-repeat;
     background-size: 1000px 100%;
     border-radius: 0;
@@ -1135,7 +1351,13 @@
 
     html.dark & {
       background: rgba(246, 247, 248, 0.05);
-      background-image: linear-gradient(135deg, #3f4242 0%, rgba(237, 238, 241, 0.1) 20%, #3f4242 40%, #3f4242 100%);
+      background-image: linear-gradient(
+        135deg,
+        #3f4242 0%,
+        rgba(237, 238, 241, 0.1) 20%,
+        #3f4242 40%,
+        #3f4242 100%
+      );
     }
 
     &::after {

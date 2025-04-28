@@ -1,0 +1,22 @@
+    .loader {
+      width: 200px;
+      margin: 100px auto;
+    }
+    svg {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    /* Animación de aleteo: escala vertical de las alas */
+    #wings {
+      transform-box: fill-box;
+      /* Origen en punto medio para un aleteo natural */
+      transform-origin: center;
+      animation: flap 0.8s ease-in-out infinite;
+    }
+
+    @keyframes flap {
+      0%, 100% { transform: scaleY(1); }
+      50%      { transform: scaleY(0.75); }
+    }
