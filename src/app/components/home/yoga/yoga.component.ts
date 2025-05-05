@@ -5,10 +5,10 @@ import { forkJoin, of } from 'rxjs';
 import { ImageLinkComponent } from '../../../shared/components/widgets/image-link/image-link.component';
 import { FeaturedBanner, Yoga } from '../../../shared/interface/theme.interface';
 import { ThemeOptionService } from '../../../shared/services/theme-option.service';
-import { GetBlogs } from '../../../shared/store/action/blog.action';
+
 import { GetBrands } from '../../../shared/store/action/brand.action';
 import { GetProductByIds } from '../../../shared/store/action/product.action';
-import { ThemeBlogComponent } from '../widgets/theme-blog/theme-blog.component';
+
 import { ThemeBrandComponent } from '../widgets/theme-brand/theme-brand.component';
 import { ThemeProductComponent } from '../widgets/theme-product/theme-product.component';
 import { ThemeSocialMediaComponent } from '../widgets/theme-social-media/theme-social-media.component';
@@ -17,7 +17,7 @@ import { ThemeTitleComponent } from '../widgets/theme-title/theme-title.componen
 @Component({
     selector: 'app-yoga',
     imports: [CommonModule, ImageLinkComponent, ThemeTitleComponent,
-        ThemeProductComponent, ThemeBlogComponent, ThemeSocialMediaComponent,
+        ThemeProductComponent, ThemeSocialMediaComponent,
         ThemeBrandComponent
     ],
     templateUrl: './yoga.component.html',
@@ -77,14 +77,7 @@ export class YogaComponent {
       }
 
       // Get Blog
-      let getBlog$;
-      if (this.data?.content?.featured_blogs?.blog_ids?.length && this.data?.content?.featured_blogs?.status) {
-        getBlog$ = this.store.dispatch(new GetBlogs({
-          status: 1,
-          ids: this.data?.content?.featured_blogs?.blog_ids?.join(',')
-        }));
-      } else { getBlog$ = of(null); }
-
+    
       // Get Brand
       let getBrands$;
       if (this.data?.content?.brand?.brand_ids?.length && this.data?.content?.brand?.status) {
@@ -95,7 +88,7 @@ export class YogaComponent {
       } else { getBrands$ = of(null); }
 
       if (this.platformId) {
-        forkJoin([getProduct$, getBlog$, getBrands$]).subscribe({
+        forkJoin([getProduct$, getBrands$]).subscribe({
           complete: () => {
             document.body.classList.remove('skeleton-body');
             this.themeOptionService.preloader = false;
