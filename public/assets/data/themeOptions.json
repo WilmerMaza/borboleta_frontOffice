@@ -2,12 +2,12 @@
     "id": 1,
     "options": {
         "seo": {
-            "og_title": "MultiKart Marketplace: Uniting Vendors for Shopping Excellence",
-            "meta_tags": "Multikart Marketplace: Where Vendors Shine Together",
-            "meta_title": "Online Marketplace, Vendor Collaboration, E-commerce Platform",
+            "og_title": "Borboleta",
+            "meta_tags": "Borboleta",
+            "meta_title": "Borboleta",
             "og_image_id": 107,
-            "og_description": "Experience a unique shopping journey at MultiKart Marketplace, where vendors collaborate to provide a vast array of products. Explore, shop, and connection in one convenient destination.",
-            "meta_description": "Discover MultiKart Marketplace – a vibrant online platform where vendors unite to showcase their products, creating a diverse shopping experience. Explore a wide range of offerings and connect with sellers on a single platform.",
+            "og_description": "Borboleta",
+            "meta_description": "Borboleta",
             "og_image": {
                 "id": 107,
                 "name": "fashion_two_1",
@@ -50,7 +50,7 @@
                 "created_by_id": "1",
                 "created_at": "2024-06-25T10:19:57.000000Z",
                 "asset_url": "/storage/3939/logo-(1).png",
-                "original_url": "assets/images/settings/logo-dark.png"
+                "original_url": "assets/images/settings/Logo_Borboleta.png"
             },
             "footer_logo": {
                 "id": 3950,
@@ -61,7 +61,7 @@
                 "created_by_id": "1",
                 "created_at": "2024-06-25T11:42:51.000000Z",
                 "asset_url": "/storage/3950/f6.png",
-                "original_url": "assets/images/settings/footer-logo.png"
+                "original_url": "/assets/images/settings/Logo_Borboleta.png"
             }
         },
         "popup": {
@@ -89,14 +89,14 @@
         },
         "footer": {
             "title": "KNOW IT ALL FIRST!",
-            "twitter": "https://twitter.com/",
+            "whatsApp": "https://walink.co/2f2e97",
             "bg_color": "#212121",
             "bg_image": "/images/footer/christmas.jpg",
             "facebook": "https://facebook.com/",
-            "instagram": "https://instagram.com/",
-            "pinterest": "https://pinterest.com/",
+            "instagram": "https://www.instagram.com/borboleta.co___?igsh=MTNpdmZ3dHM4Y3NncQ==",
+            "tiktok": "https://www.tiktok.com/@borboleta_col?_t=ZS-8vvVXsKSqv3&_r=1",
             "sub_title": "Never Miss Anything From Store By Signing Up To Our Newsletter.",
-            "about_email": "Support@Multikart.com",
+            "about_email": "Borboleta.tiendavirtual@gmail.com",
             "help_center": [
                 {
                     "id": 1,
@@ -158,11 +158,11 @@
             ],
             "footer_about": "Discover the latest trends and enjoy seamless shopping with our exclusive collections.",
             "footer_style": "footer_one",
-            "about_address": "Multikart Demo Store, Demo Store India 345-659",
+            "about_address": "Cartagena, Cra. 68 #31-24, frente a La Castellana. Puntos de referencia: entrando por Celuclock, al lado de Mundo Urbano.",
             "app_store_url": "https://www.apple.com/in/app-store/",
             "support_email": "support@gmail.com",
             "play_store_url": "https://play.google.com/store/apps",
-            "support_number": "123-456-7898",
+            "support_number": "3016268644",
             "footer_copyright": true,
             "copyright_content": "2023-24 themeforest powered by pixelstrap",
             "footer_categories": [
@@ -184,7 +184,7 @@
                 98,
                 107
             ],
-            "header_options": "header_one",
+            "header_options": "header_six",
             "support_number": "123 - 456 - 7890",
             "top_bar_content": [
                 {
@@ -250,19 +250,19 @@
             "start_selling": {
                 "title": "Start Selling",
                 "status": true,
-                "description": "Multikart marketplace is India’s leading platform for selling online. Be it a manufacturer, vendor or supplier, simply sell your products online on Multikart and become a top ecommerce player with minimum investment. Through a team of experts offering exclusive seller workshops, training, seller support and convenient seller portal, Multikart focuses on educating and empowering sellers across India. Selling on Multikart.com is easy and absolutely free. All you need is to register, list your catalogue and start selling your products."
+                "description": "Borboleta"
             }
         },
         "general": {
             "mode": "light",
             "taglines": [
-                "⚡ Come Back !!",
-                "🎉 Offers for you..."
+                 "Borboleta"
+               
             ],
             "cart_style": "cart_sidebar",
             "site_title": "Multikart Marketplace: Where Vendors Shine Together",
             "site_tagline": "Shop Unique, Sell Exceptional – Multikart Multi-Vendor Universe.",
-            "primary_color": "#ec8951",
+            "primary_color": "#222222",
             "secondary_color": null,
             "back_to_top_enable": true,
             "celebration_effect": true,

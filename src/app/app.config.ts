@@ -26,7 +26,7 @@ import { SettingService } from './shared/services/setting.service';
 import { AccountState } from './shared/store/state/account.state';
 import { AttributeState } from './shared/store/state/attribute.state';
 import { AuthState } from './shared/store/state/auth.state';
-import { BlogState } from './shared/store/state/blog.state';
+// Blog state removed
 import { BrandState } from './shared/store/state/brand.state';
 import { CartState } from './shared/store/state/cart.state';
 import { CategoryState } from './shared/store/state/category.state';
@@ -109,7 +109,7 @@ export const appConfig: ApplicationConfig = {
       NgxsModule.forRoot([
         AccountState,
         AttributeState,
-        BlogState,
+        // Blog state removed
         BrandState,
         CartState,
         CategoryState,

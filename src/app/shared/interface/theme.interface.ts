@@ -220,6 +220,7 @@ export interface FashionOneContent {
   offer_banner: FeaturedBannersFashionOne;
   products_list: ProductList;
   banner: FeaturedBanner;
+  banner_piepagina: FeaturedBanner;
   category_product: ProductTabSection;
   services: Service;
   featured_blogs: BlogSection;

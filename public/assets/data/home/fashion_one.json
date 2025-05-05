@@ -7,7 +7,16 @@
       },
       "banner": {
         "status": true,
-        "image_url": "/images/theme/fashion_one/fashion_one_5.png",
+        "image_url": "/images/theme/fashion_one/bannermedio.png",
+        "redirect_link": {
+          "link": 19,
+          "link_type": "product",
+          "product_ids": 19
+        }
+      },
+      "banner_piepagina": {
+        "status": true,
+        "image_url": "/images/theme/fashion_one/multibanner.png",
         "redirect_link": {
           "link": 19,
           "link_type": "product",
@@ -138,8 +147,8 @@
         ]
       },
       "products_list": {
-        "tag": "special offer",
-        "title": "Latest Drops",
+        "tag": "Ofertas especiales",
+        "title": "Top ventas",
         "status": true,
         "description": "Looking for the latest trends in clothing, shoes and accessories? Welcome to our 'Latest Drops' edit, bringing you all the latest styles from all your fave brands.",
         "product_ids": [21, 16, 15, 12]
