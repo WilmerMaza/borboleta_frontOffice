@@ -1,8 +1,6 @@
-import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable, Subject } from 'rxjs';
-import { CartAddOrUpdate, CartModel } from '../interface/cart.interface';
-import { environment } from '../../../environments/environment.development';
+import { Observable, Subject, of } from 'rxjs';
+import { CartModel } from '../interface/cart.interface';
 
 @Injectable({
   providedIn: 'root'
@@ -11,17 +9,35 @@ export class CartService {
 
   private subjectQty = new Subject<boolean>();
 
-  constructor(private http: HttpClient) {}
+  constructor() {}
+
+
 
   getCartItems(): Observable<CartModel> {
-    return this.http.get<CartModel>(`${environment.URL}/cart.json`);
+    const data = localStorage.getItem('cart');
+    if (data) {
+      return of(JSON.parse(data) as CartModel);
+    }
+
+    return of({
+
+      items: [],
+      total: 0,
+      is_digital_only: false,
+      stickyCartOpen: false,
+      sidebarCartOpen: false
+    });
   }
+
 
   updateQty() {
     this.subjectQty.next(true);
   }
 
-  getUpdateQtyClickEvent(): Observable<boolean>{
+  /**
+   * Devuelve el observable que escucha los cambios de cantidad
+   */
+  getUpdateQtyClickEvent(): Observable<boolean> {
     return this.subjectQty.asObservable();
   }
 

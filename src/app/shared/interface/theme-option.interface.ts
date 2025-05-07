@@ -181,7 +181,7 @@ export interface Member {
    designation: string;
    description: string;
    instagram: string;
-   Tiktok: string;
+   tiktok: string;
    pinterest: string;
    facebook: string;
 }

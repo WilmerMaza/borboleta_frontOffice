@@ -1,7 +1,11 @@
-import { CommonModule, isPlatformBrowser } from '@angular/common';
+// CommonModule is already imported below - removing duplicate import
 import { Component, Inject, Input, PLATFORM_ID } from '@angular/core';
 import { Store } from '@ngxs/store';
 import { forkJoin, of } from 'rxjs';
+
+import { CommonModule } from '@angular/common';
+
+import { isPlatformBrowser } from '@angular/common';
 
 import { ImageLinkComponent } from '../../../../shared/components/widgets/image-link/image-link.component';
 import { ThemeBrandComponent } from '../../widgets/theme-brand/theme-brand.component';
@@ -11,22 +15,24 @@ import { ThemeProductComponent } from '../../widgets/theme-product/theme-product
 import { ThemeServicesComponent } from '../../widgets/theme-services/theme-services.component';
 import { ThemeSocialMediaComponent } from '../../widgets/theme-social-media/theme-social-media.component';
 import { ThemeTitleComponent } from '../../widgets/theme-title/theme-title.component';
+import { CategoriesComponent } from '../../../../shared/components/widgets/categories/categories.component';
+import { CategoryIconsComponent } from '../category-icons/category-icons.component';
 
 import { FashionOne } from '../../../../shared/interface/theme.interface';
 
 import { ThemeOptionService } from '../../../../shared/services/theme-option.service';
 
-
 import { GetBrands } from '../../../../shared/store/action/brand.action';
 import { GetCategories } from '../../../../shared/store/action/category.action';
 import { GetProductByIds } from '../../../../shared/store/action/product.action';
+import { productSlider } from '../../../../shared/data/owl-carousel';
 
 @Component({
     selector: 'app-fashion-1',
     providers: [Store],
     imports: [CommonModule, ThemeHomeSliderComponent, 
         ThemeTitleComponent, ThemeProductComponent, ThemeProductTabSectionComponent, ThemeServicesComponent,
-        ThemeBrandComponent, ImageLinkComponent],
+        ThemeBrandComponent, ImageLinkComponent, CategoriesComponent, CategoryIconsComponent],
     templateUrl: './fashion-1.component.html',
     styleUrl: './fashion-1.component.scss'
 })
@@ -35,12 +41,27 @@ export class Fashion1Component {
   @Input() data?: FashionOne;
   @Input() slug?: string;
 
+  public options = productSlider;
   private platformId: boolean;
 
   constructor(private store: Store,
     @Inject(PLATFORM_ID) platformId: Object,
     private themeOptionService: ThemeOptionService) {
       this.platformId = isPlatformBrowser(platformId);
+      this.options = {
+        ...this.options,
+        responsive: {
+          0: {
+            items: 1,
+          },
+          668: {
+            items: 2,
+          },
+          992: {
+            items: 3,
+          }
+        }
+      }
     }
 
   ngOnInit() {
@@ -75,7 +96,17 @@ export class Fashion1Component {
         }));
       } else { getBrands$ = of(null); }
 
-
+      if(this.platformId) {
+        // Skeleton Loader
+        document.body.classList.add('skeleton-body');
+        
+        forkJoin([getProducts$, getCategory$, getBrands$]).subscribe({
+          complete: () => {
+            document.body.classList.remove('skeleton-body');
+            this.themeOptionService.preloader = false;
+          }
+        });
+      }
     }
   }
 }

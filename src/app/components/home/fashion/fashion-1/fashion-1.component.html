@@ -5,9 +5,20 @@
     </div>
   </section>
   <!-- Home Section End -->
+  <app-theme-title [title]="{title: 'NUEVA COLECCION', status: true}" [type]="'basic'"></app-theme-title>
+  <section class="section-b-space pt-0">
+    <div class="container">
+      <app-theme-product [productIds]="data?.content?.products_list?.product_ids || []" [style]="'horizontal'" [slider]="true"></app-theme-product>
+    </div>
+  </section>
+  <!-- Nueva Co
+
+
+
+
   <app-theme-title [title]="data?.content?.products_list" [type]="'basic'"></app-theme-title>
   <!-- Banner Section Start -->
-  <section class="pb-0 ratio2_1 banner-section">
+
     <div class="container">
       <div class="row g-sm-4 g-3">
         @if(data?.content?.offer_banner?.banner_1?.status){
@@ -52,9 +63,8 @@
         }
       </div>
     </div>
-  </section>
   <!-- Banner Section End -->
-  
+
   <!-- Product slider Start -->
   @if(data?.content?.products_list?.status && data?.content?.products_list?.product_ids){
     
@@ -68,6 +78,9 @@
   }
   <!-- Product slider end -->
   
+  <!-- Nueva Colección Start -->
+
+  <app-category-icons></app-category-icons>
   <!-- Full Banner Start -->
   @if(data?.content?.banner?.status){
   <section class="p-0 banner-sale">
