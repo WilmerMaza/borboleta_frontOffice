@@ -29,7 +29,7 @@
         },
         {
             "id": 3,
-            "title": "Nueva Coleccion",
+            "title": "nav.title",
             "sort": "1",
             "link_type": "sub",
             "is_target_blank": null,
@@ -57,7 +57,7 @@
             "child": [
                 {
                     "id": 4,
-                    "title": "Collection",
+                    "title": "colletion",
                     "sort": "0",
                     "link_type": "sub",
                     "is_target_blank": null,

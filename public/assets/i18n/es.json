@@ -422,5 +422,30 @@
   "no_link_found": "No se encontró el enlace",
   "no_category_found": "No se encontró la categoría",
   "more_and_enjoy": "Más y Disfruta",
-  "free_shipping": "Envío Gratis"
+  "free_shipping": "Envío Gratis",
+  "nav": {
+    "Home": "Inicio",
+    "title": "Nueva colección",
+    "sub_title": "colección",
+    "collection_list": "Lista de colecciones",
+    "collection_4_grid": "Colección en cuadrícula de 4",
+    "collection_3_grid": "Colección en cuadrícula de 3",
+    "collection_2_grid": "Colección en cuadrícula de 2",
+    "collection_right_sidebar": "Colección con barra lateral derecha",
+    "collection_left_sidebar": "Colección con barra lateral izquierda",
+    "promotions_text": "Promociones"
+  },
+  "Buscar": "Buscar por marca y categorí",
+  "special_offers": "Ofertas especiales",
+  "top_ventas": "top ventas",
+  "latest_drops_intro": "¿Buscas las últimas tendencias en ropa, calzado y accesorios? Bienvenido a nuestra selección 'Últimas Novedades', donde encontrarás todos los estilos más recientes de tus marcas favoritas.",
+  "glamour_gaze": "Glamour Gaze",
+  "exclusive_products": "Productos exclusivos",
+  "everyday_casual": "Casual de todos los días",
+  "tops": "Blusas",
+  "DRESSES": "Vestidos",
+  "WINTER_WEAR": "Ropa de invierno"  
+  
+
+
 }
