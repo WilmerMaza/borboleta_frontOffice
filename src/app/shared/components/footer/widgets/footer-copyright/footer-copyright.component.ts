@@ -1,9 +1,10 @@
 import { Component, Input } from '@angular/core';
 import { Option } from '../../../../interface/theme-option.interface';
+import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
     selector: 'app-footer-copyright',
-    imports: [],
+    imports: [TranslateModule],
     templateUrl: './footer-copyright.component.html',
     styleUrl: './footer-copyright.component.scss'
 })

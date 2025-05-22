@@ -165,6 +165,7 @@
   "sort_item": "Trier l'élément",
   "filters": "Filtres",
   "clear_all": "Tout effacer",
+  "clear_all": "Tout effacer",
   "back": "Dos",
   "brand": "Marque",
   "rating": "Notation",
@@ -422,5 +423,24 @@
   "no_link_found": "No link found",
   "no_category_found": "No category found",
   "more_and_enjoy": "Plus et profitez-en",
-  "free_shipping": "Livraison gratuite"
+  "free_shipping": "Livraison gratuite",
+
+  "nav": {
+      "Home": "Accueil",
+      "new_collection_text": "Nouvelle Collection",
+      "promotions_text": "Promotions"
+    },
+     "Buscar": "Rechercher par marque et catégorie",
+    "special_offers": "Offres spéciales",
+    "top_ventas": "Meilleures ventes",
+    "latest_drops_intro": "Vous cherchez les dernières tendances en matière de vêtements, chaussures et accessoires ? Bienvenue dans notre sélection 'Dernières Nouveautés', qui réunit tous les styles récents de vos marques préférées.",
+    "glamour_gaze": "Regard Glamour",
+    "exclusive_products": "Produits exclusifs",
+    "everyday_casual": "Décontracté au quotidien",
+    "tops": "Hauts"
+    
+   
+  
+      
+  
 }

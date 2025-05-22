@@ -11,11 +11,12 @@ import { ProductService } from '../../../../shared/services/product.service';
 import { ProductState } from '../../../../shared/store/state/product.state';
 import { NoDataComponent } from '../../../../shared/components/widgets/no-data/no-data.component';
 import { horizontalProductSlider, productSlider } from '../../../../shared/data/owl-carousel';
+import { TranslateModule } from '@ngx-translate/core';
 
 
 @Component({
     selector: 'app-theme-product',
-    imports: [CommonModule, ProductBoxComponent, CarouselModule, NoDataComponent],
+    imports: [CommonModule, ProductBoxComponent, CarouselModule, NoDataComponent, TranslateModule],
     templateUrl: './theme-product.component.html',
     styleUrl: './theme-product.component.scss'
 })

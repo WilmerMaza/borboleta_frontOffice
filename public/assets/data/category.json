@@ -1383,7 +1383,7 @@
                 },
                 {
                     "id": 9,
-                    "name": "Dresses",
+                    "name": "DRESSES",
                     "slug": "dresses",
                     "description": null,
                     "category_image_id": 3587,
@@ -1416,7 +1416,7 @@
                 },
                 {
                     "id": 10,
-                    "name": "Winter Wear",
+                    "name": "WINTER_WEAR",
                     "slug": "winter-wear",
                     "description": null,
                     "category_image_id": 3590,

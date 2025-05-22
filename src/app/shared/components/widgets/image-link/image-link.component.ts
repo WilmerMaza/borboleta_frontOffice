@@ -6,10 +6,11 @@ import { Select, Store } from '@ngxs/store';
 import { ProductState } from '../../../store/state/product.state';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../../environments/environment';
+import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
     selector: 'app-image-link',
-    imports: [CommonModule, RouterModule],
+    imports: [CommonModule, RouterModule, TranslateModule],
     templateUrl: './image-link.component.html',
     styleUrl: './image-link.component.scss'
 })
