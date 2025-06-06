@@ -3,6 +3,7 @@ import { Component, inject } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Select, Store } from '@ngxs/store';
 import { Observable } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
 
 import { ThemeOptionService } from '../../shared/services/theme-option.service';
 
@@ -84,22 +85,49 @@ export class HomeComponent {
   activeTheme$: Observable<string> = inject(Store).select(ThemeState.activeTheme) as Observable<string>;
 
   public theme: string;
-  public homePage:any
+  public homePage:any;
+  public products: any[] = [];
 
-  constructor(private store: Store,
+  constructor(
+    private store: Store,
     private route: ActivatedRoute,
-    private themeOptionService: ThemeOptionService) {
-      this.route.queryParams.subscribe(params => {
-        this.themeOptionService.preloader = true;
-        this.activeTheme$.subscribe(theme => {
-          this.theme = params['theme'] ? params['theme'] : theme;
-          if(this.theme){
-            this.store.dispatch(new GetHomePage(params['theme'] ? params['theme'] : theme)).subscribe((data: any) => {
-              this.homePage = data.theme.homePage;
-              this.themeOptionService.preloader = false;
-            })
-          }
-        })
+    private themeOptionService: ThemeOptionService,
+    private http: HttpClient
+  ) {
+    // Cargar productos
+    this.loadProducts();
+
+    this.route.queryParams.subscribe(params => {
+      this.themeOptionService.preloader = true;
+      this.activeTheme$.subscribe(theme => {
+        this.theme = params['theme'] ? params['theme'] : theme;
+        if(this.theme){
+          this.store.dispatch(new GetHomePage(params['theme'] ? params['theme'] : theme)).subscribe((data: any) => {
+            this.homePage = data.theme.homePage;
+            this.themeOptionService.preloader = false;
+          })
+        }
+      })
+    });
+  }
+
+  loadProducts() {
+    console.log('Iniciando carga de productos...');
+    this.http.get('http://localhost:4000/api/products').subscribe({
+      next: (response: any) => {
+        console.log('Respuesta completa de la API:', response);
+        if (response && response.products) {
+          this.products = response.products;
+          console.log('Productos cargados:', this.products);
+        } else {
+          console.log('No se encontraron productos en la respuesta');
+          this.products = [];
+        }
+      },
+      error: (error) => {
+        console.error('Error al cargar productos:', error);
+        this.products = [];
+      }
     });
   }
 }
