@@ -64,9 +64,16 @@ import { SingleProductComponent } from './single-product/single-product.componen
 
 @Component({
     selector: 'app-home',
-    imports: [CommonModule,
-        Fashion1Component, Fashion2Component, Fashion3Component, Fashion4Component, Fashion5Component,
-        Fashion6Component, Fashion7Component, Furniture1Component, Furniture2Component, FurnitureDarkComponent,
+    imports: [
+        CommonModule,
+        Fashion1Component, 
+        Fashion2Component, 
+        Fashion3Component, 
+        Fashion4Component, 
+        Fashion5Component,
+        Fashion6Component, 
+        Fashion7Component,
+        Furniture1Component, Furniture2Component, FurnitureDarkComponent,
         Electronic1Component, Electronic2Component, Electronic3Component, Marketplace1Component,
         Marketplace2Component, Marketplace3Component, Marketplace4Component, Vegetables1Component,
         Vegetables2Component, Vegetables3Component, Vegetables4Component, Jewellery1Component,
@@ -75,59 +82,38 @@ import { SingleProductComponent } from './single-product/single-product.componen
         ChristmasComponent, ShoesComponent, KidsComponent, BooksComponent, BeautyComponent,
         SurfboardComponent, GogglesComponent, GymComponent, VideoSliderComponent, PetsComponent,
         NurseryComponent, GameComponent, FlowerComponent, GradientComponent, VideoComponent,
-        FullPageComponent, ParallaxComponent, DigitalDownloadComponent, SingleProductComponent],
+        FullPageComponent, ParallaxComponent, DigitalDownloadComponent, SingleProductComponent
+    ],
     templateUrl: './home.component.html',
     styleUrl: './home.component.scss'
 })
 export class HomeComponent {
+    homePage$: Observable<object> = inject(Store).select(ThemeState.homePage) as Observable<object>;
+    activeTheme$: Observable<string> = inject(Store).select(ThemeState.activeTheme) as Observable<string>;
 
-  homePage$: Observable<object> = inject(Store).select(ThemeState.homePage) as Observable<object>;
-  activeTheme$: Observable<string> = inject(Store).select(ThemeState.activeTheme) as Observable<string>;
+    public theme: string;
+    public homePage: any;
+    public products: any[] = [];
 
-  public theme: string;
-  public homePage:any;
-  public products: any[] = [];
-
-  constructor(
-    private store: Store,
-    private route: ActivatedRoute,
-    private themeOptionService: ThemeOptionService,
-    private http: HttpClient
-  ) {
-    // Cargar productos
-    this.loadProducts();
-
-    this.route.queryParams.subscribe(params => {
-      this.themeOptionService.preloader = true;
-      this.activeTheme$.subscribe(theme => {
-        this.theme = params['theme'] ? params['theme'] : theme;
-        if(this.theme){
-          this.store.dispatch(new GetHomePage(params['theme'] ? params['theme'] : theme)).subscribe((data: any) => {
-            this.homePage = data.theme.homePage;
-            this.themeOptionService.preloader = false;
-          })
-        }
-      })
-    });
-  }
-
-  loadProducts() {
-    console.log('Iniciando carga de productos...');
-    this.http.get('http://localhost:4000/api/products').subscribe({
-      next: (response: any) => {
-        console.log('Respuesta completa de la API:', response);
-        if (response && response.products) {
-          this.products = response.products;
-          console.log('Productos cargados:', this.products);
-        } else {
-          console.log('No se encontraron productos en la respuesta');
-          this.products = [];
-        }
-      },
-      error: (error) => {
-        console.error('Error al cargar productos:', error);
-        this.products = [];
-      }
-    });
-  }
+    constructor(
+        private store: Store,
+        private route: ActivatedRoute,
+        private themeOptionService: ThemeOptionService,
+        private http: HttpClient
+    ) {
+        this.route.queryParams.subscribe(params => {
+            this.themeOptionService.preloader = true;
+            this.activeTheme$.subscribe(theme => {
+                this.theme = params['theme'] ? params['theme'] : theme;
+                if(this.theme) {
+                    this.store.dispatch(new GetHomePage(params['theme'] ? params['theme'] : theme))
+                        .subscribe((data: any) => {
+                            this.homePage = data.theme.homePage;
+                            this.themeOptionService.preloader = false;
+                        });
+                }
+            });
+        });
+    }
 }
+
