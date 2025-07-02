@@ -105,20 +105,24 @@ export class CategoryState{
 
   @Action(GetCategories)
   getCategories(ctx: StateContext<CategoryStateModel>, action: GetCategories) {
+    console.log('GetCategories action ejecutándose con payload:', action.payload);
     return this.categoryService.getCategories(action.payload).pipe(
       tap({
-        next: result => {
-          if(result && result.data) {
-            ctx.patchState({
-             categories: {
-               data: result.data,
-               total: result?.total ? result?.total : result.data.length
-             }
-           });
-          }
+        next: result => { 
+          console.log('Datos recibidos del backend:', result);
+          
+          ctx.patchState({
+            category: {
+              data: result.data || [],
+              total: result?.total || 0,
+        
+            }
+          });
+          
+          console.log('Estado después de patchState:', ctx.getState());
         },
-        error: err => {
-          throw new Error(err?.error?.message);
+        error: err => { 
+          console.error('Error loading categories:', err);
         }
       })
     );
@@ -223,6 +227,7 @@ export class CategoryState{
           });
         },
         error: err => {
+          this.categoryService.searchSkeleton = false;
           throw new Error(err?.error?.message);
         },
         complete: () => {
@@ -234,11 +239,10 @@ export class CategoryState{
 
   @Action(GetCategoryBySlug)
   getCategoryBySlug(ctx: StateContext<CategoryStateModel>, action: GetCategoryBySlug) {
-    return this.categoryService.getCategories().pipe(
+    return this.categoryService.getCategoryBySlug(action.slug).pipe(
       tap({
-        next: results => {
-          if(results && results.data) {
-            const result = results.data.find(category => category.slug == action.slug);
+        next: result => {
+          if(result) {
             const state = ctx.getState();
             ctx.patchState({
               ...state,

@@ -40,13 +40,17 @@ export class ProductBoxImageVariantComponent {
      this.variant = options.product.image_variant
     })
 
-    this.flipImage = this.gallery_images.map((image: any) => {
-      let images
-      if(this.imageType.includes(image.mime_type)){
-        images = image;
-      }
-      return images!
-    })
+    if(this.gallery_images && Array.isArray(this.gallery_images)) {
+      this.flipImage = this.gallery_images.map((image: any) => {
+        let images
+        if(this.imageType.includes(image.mime_type)){
+          images = image;
+        }
+        return images!
+      }).filter(image => image !== undefined);
+    } else {
+      this.flipImage = [];
+    }
   }
 
   startAutoplay() {

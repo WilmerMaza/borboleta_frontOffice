@@ -1,7 +1,7 @@
 @if(banners){
   @if(filteredBanners && filteredBanners.length > 1) {
     <owl-carousel-o [options]="options">
-      @for(banner of filteredBanners; track i; let i = $index){
+      @for(banner of filteredBanners; track banner.redirect_link || $index; let i = $index){
         @if(banner.status && banner.image_url){
           @if(videoType.includes(banner && banner.image_url && banner.image_url.substring(banner.image_url.lastIndexOf('.') + 1))){
             <ng-template carouselSlide>

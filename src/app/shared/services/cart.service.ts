@@ -1,6 +1,7 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject, PLATFORM_ID } from '@angular/core';
 import { Observable, Subject, of } from 'rxjs';
 import { CartModel } from '../interface/cart.interface';
+import { isPlatformBrowser } from '@angular/common';
 
 @Injectable({
   providedIn: 'root'
@@ -8,15 +9,18 @@ import { CartModel } from '../interface/cart.interface';
 export class CartService {
 
   private subjectQty = new Subject<boolean>();
+  private platformId = inject(PLATFORM_ID);
 
   constructor() {}
 
 
 
   getCartItems(): Observable<CartModel> {
-    const data = localStorage.getItem('cart');
-    if (data) {
-      return of(JSON.parse(data) as CartModel);
+    if (isPlatformBrowser(this.platformId)) {
+      const data = localStorage.getItem('cart');
+      if (data) {
+        return of(JSON.parse(data) as CartModel);
+      }
     }
 
     return of({

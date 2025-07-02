@@ -69,6 +69,8 @@ export class LanguageComponent {
     this.active = false;
     this.translate.use(language.code);
     this.selectedLanguage = language;
-    localStorage.setItem("language", JSON.stringify(this.selectedLanguage));
+    if (isPlatformBrowser(this.platformId)) {
+      localStorage.setItem("language", JSON.stringify(this.selectedLanguage));
+    }
   }
 }

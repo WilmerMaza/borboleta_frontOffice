@@ -6,7 +6,7 @@
       }
       <div class="slide-7">
         <owl-carousel-o [options]="options">
-          @for(media of media.banners; track i; let i = $index){
+          @for(media of media.banners; track media.redirect_link?.link || $index; let i = $index){
             @if(media.status){
               <ng-template carouselSlide>
                 <div>

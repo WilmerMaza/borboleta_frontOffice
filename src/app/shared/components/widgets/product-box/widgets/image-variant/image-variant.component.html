@@ -1,6 +1,6 @@
 @if(variant === 'image_slider'){
     <owl-carousel-o [options]="customOptions" (mouseenter)="startAutoplay()" (mouseleave)="stopAutoplay()">
-        @for(image of product.product_galleries; track image.id){
+        @for(image of product.product_galleries; track image.id || $index){
             <ng-template carouselSlide>
                 <img [src]="thumbnail ? thumbnail.original_url  : image?.original_url ? image?.original_url : 'assets/images/placeholder/product.png'" class="img-fluid bg-img"
                 [alt]="product.name">
@@ -9,7 +9,7 @@
     </owl-carousel-o>
 } @else if(variant === 'image_flip') {
     <div class="flip">
-        @for(image of flipImage.slice(0,2); let i = $index; track image.id){
+        @for(image of flipImage.slice(0,2); let i = $index; track image?.id || $index){
             <div class="{{ i === 0 ? 'front' : 'back' }}">
                 <a [routerLink]="['/product', product.slug]">
                     <img [src]="image ? image?.original_url : 'assets/images/placeholder/product.png'" class="img-fluid bg-img"

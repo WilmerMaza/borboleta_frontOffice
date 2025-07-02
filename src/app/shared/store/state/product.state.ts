@@ -1,4 +1,3 @@
-
 import { Injectable } from "@angular/core";
 import { Router } from "@angular/router";
 import { Action, Selector, State, StateContext, Store } from "@ngxs/store";
@@ -112,104 +111,75 @@ export class ProductState{
   getProducts(ctx: StateContext<ProductStateModel>, action: GetProducts) {
     this.productService.skeletonLoader = true;
     return this.productService.getProducts(action.payload).pipe(
-
       tap({
         next: (result: ProductModel) => {
           let products = result.data || [];
-          if(action?.payload) {
-            // Note:- For Internal filter purpose only, once you apply filter logic on server side then you can remove  it as per your requirement.
-            // Note:- we have covered only few filters as demo purpose
-            products = result.data.filter(product =>
-              (action?.payload?.['store_slug'] && product?.store?.slug == action?.payload?.['store_slug']) ||
-              (
-                action?.payload?.['category'] && product?.categories?.length &&
-                product?.categories?.some(category => action?.payload?.['category']?.split(',')?.includes(category.slug))
-              )
-            )
-
-            products = products.length ? products : result.data;
-
-            if(action?.payload?.['sortBy']) {
-              if(action?.payload?.['sortBy'] === 'asc') {
-                products = products.sort((a, b) => {
-                  if (a.id < b.id) {
-                    return -1;
-                  } else if (a.id > b.id) {
-                    return 1;
-                  }
-                  return 0;
-                })
-              } else if(action?.payload?.['sortBy'] === 'desc') {
-                products = products.sort((a, b) => {
-                  if (a.id > b.id) {
-                    return -1;
-                  } else if (a.id < b.id) {
-                    return 1;
-                  }
-                  return 0;
-                })
-              } else if (action?.payload?.['sortBy'] === 'a-z') {
-                products = products.sort((a, b) => {
-                  if (a.name < b.name) {
-                    return -1;
-                  } else if (a.name > b.name) {
-                    return 1;
-                  }
-                  return 0;
-                })
-              } else if (action?.payload?.['sortBy'] === 'z-a') {
-                products = products.sort((a, b) => {
-                  if (a.name > b.name) {
-                    return -1;
-                  } else if (a.name < b.name) {
-                    return 1;
-                  }
-                  return 0;
-                })
-              } else if (action?.payload?.['sortBy'] === 'low-high') {
-                products = products.sort((a, b) => {
-                  if (a.sale_price < b.sale_price) {
-                    return -1;
-                  } else if (a.price > b.price) {
-                    return 1;
-                  }
-                  return 0;
-                })
-              } else if (action?.payload?.['sortBy'] === 'high-low') {
-                products = products.sort((a, b) => {
-                  if (a.sale_price > b.sale_price) {
-                    return -1;
-                  } else if (a.price < b.price) {
-                    return 1;
-                  }
-                  return 0;
-                })
-              }
-            } else if(!action?.payload?.['ids']) {
-              products = products.sort((a, b) => {
-                if (a.id < b.id) {
-                  return -1;
-                } else if (a.id > b.id) {
-                  return 1;
-                }
-                return 0;
-              })
-            }
-
-            if(action?.payload?.['search']) {
-              products = products.filter(product => product.name.toLowerCase().includes(action?.payload?.['search'].toLowerCase()))
-            }
-
-            if(action?.payload?.['brand']){
-              products = products.filter(product => product?.brand?.slug === action?.payload?.['brand'])
-
-            }
-          }
+          
+          // Mapear los datos para convertir _id a id y ajustar la estructura
+          products = products.map((product: any) => {
+            const price = product.price ? parseFloat(product.price) : 0;
+            const discount = product.discount ? parseFloat(product.discount) : 0;
+            const sale_price = discount > 0 ? price - (price * discount / 100) : price;
+            
+            return {
+              ...product,
+              id: parseInt(product._id) || product.id || 0,
+              price: price, // MRP/Precio original
+              sale_price: sale_price, // Precio de venta (calculado con descuento)
+              discount: discount,
+              is_sale_enable: product.is_sale_enable || false,
+              stock_status: product.stock_status || 'in_stock',
+              quantity: product.quantity ? parseFloat(product.quantity) : 0,
+              stock: product.stock ? parseFloat(product.stock) : 0,
+              status: product.status !== undefined ? product.status : true,
+              categories: product.categories || [],
+              attributes: product.attributes || [],
+              variations: product.variations ? product.variations.map((variation: any) => {
+                const varPrice = variation.price ? parseFloat(variation.price) : 0;
+                const varDiscount = variation.discount ? parseFloat(variation.discount) : discount;
+                const varSalePrice = varDiscount > 0 ? varPrice - (varPrice * varDiscount / 100) : varPrice;
+                
+                return {
+                  ...variation,
+                  id: parseInt(variation._id) || variation.id || 0,
+                  price: varPrice,
+                  sale_price: varSalePrice,
+                  discount: varDiscount,
+                  quantity: variation.quantity ? parseFloat(variation.quantity) : 0,
+                  status: variation.status !== undefined ? variation.status : true,
+                  stock_status: variation.stock_status || 'in_stock',
+                  attribute_values: variation.attribute_values || []
+                };
+              }) : [],
+              related_products: product.related_products || [],
+              cross_sell_products: product.cross_sell_products || [],
+              product_galleries: product.product_galleries || [],
+              reviews: product.reviews || [],
+              reviews_count: product.reviews_count || 0,
+              rating_count: product.rating_count || 0,
+              is_featured: product.is_featured || false,
+              is_trending: product.is_trending || false,
+              is_approved: product.is_approved !== undefined ? product.is_approved : false,
+              wholesales: product.wholesales || [],
+              wholesale_price_type: product.wholesale_price_type || null,
+              is_external: product.is_external || false,
+              external_url: product.external_url || null,
+              external_button_text: product.external_button_text || null,
+              social_share: product.social_share !== undefined ? product.social_share : true,
+              is_wishlist: false,
+              is_return: product.is_return || false,
+              is_free_shipping: product.is_free_shipping || false,
+              safe_checkout: product.safe_checkout !== undefined ? product.safe_checkout : true,
+              secure_checkout: product.secure_checkout !== undefined ? product.secure_checkout : true,
+              encourage_order: product.encourage_order !== undefined ? product.encourage_order : true,
+              encourage_view: product.encourage_view !== undefined ? product.encourage_view : true
+            };
+          });
 
           ctx.patchState({
             product: {
               data: products,
-              total: products.length ? products.length : result.data.length
+              total: products.length
             }
           });
         },
@@ -217,6 +187,7 @@ export class ProductState{
           this.productService.skeletonLoader = false;
         },
         error: err => {
+          this.productService.skeletonLoader = false;
           throw new Error(err?.error?.message);
         }
       })
@@ -244,24 +215,70 @@ export class ProductState{
   @Action(GetProductBySlug)
   getProductBySlug(ctx: StateContext<ProductStateModel>, { slug }: GetProductBySlug) {
     this.themeOptionService.preloader = true;
-    return this.productService.getProducts().pipe(
-
+    return this.productService.getProductBySlug(slug).pipe(
       tap({
-        next: results => {
-          if(results && results.data) {
-            const result = results.data.find(product => product.slug == slug)!;
+        next: (result: any) => {
+          if(result) {
+            const price = result.price ? parseFloat(result.price) : 0;
+            const discount = result.discount ? parseFloat(result.discount) : 0;
+            const sale_price = discount > 0 ? price - (price * discount / 100) : price;
+            
+            const product = {
+              ...result,
+              id: parseInt(result._id) || result.id || 0,
+              price: price, // MRP/Precio original
+              sale_price: sale_price, // Precio de venta (calculado con descuento)
+              discount: discount,
+              is_sale_enable: result.is_sale_enable || false,
+              stock_status: result.stock_status || 'in_stock',
+              quantity: result.quantity ? parseFloat(result.quantity) : 0,
+              stock: result.stock ? parseFloat(result.stock) : 0,
+              status: result.status !== undefined ? result.status : true,
+              categories: result.categories || [],
+              attributes: result.attributes || [],
+              variations: result.variations ? result.variations.map((variation: any) => {
+                const varPrice = variation.price ? parseFloat(variation.price) : 0;
+                const varDiscount = variation.discount ? parseFloat(variation.discount) : discount;
+                const varSalePrice = varDiscount > 0 ? varPrice - (varPrice * varDiscount / 100) : varPrice;
+                
+                return {
+                  ...variation,
+                  id: parseInt(variation._id) || variation.id || 0,
+                  price: varPrice,
+                  sale_price: varSalePrice,
+                  discount: varDiscount,
+                  quantity: variation.quantity ? parseFloat(variation.quantity) : 0,
+                  status: variation.status !== undefined ? variation.status : true,
+                  stock_status: variation.stock_status || 'in_stock',
+                  attribute_values: variation.attribute_values || []
+                };
+              }) : [],
+              related_products: result.related_products || [],
+              cross_sell_products: result.cross_sell_products || [],
+              product_galleries: result.product_galleries || [],
+              reviews: result.reviews || [],
+              reviews_count: result.reviews_count || 0,
+              rating_count: result.rating_count || 0,
+              is_featured: result.is_featured || false,
+              is_trending: result.is_trending || false,
+              is_approved: result.is_approved !== undefined ? result.is_approved : false,
+              wholesales: result.wholesales || [],
+              wholesale_price_type: result.wholesale_price_type || null,
+              is_external: result.is_external || false,
+              external_url: result.external_url || null,
+              external_button_text: result.external_button_text || null,
+              social_share: result.social_share !== undefined ? result.social_share : true,
+              is_wishlist: false,
+              is_return: result.is_return || false,
+              is_free_shipping: result.is_free_shipping || false,
+              safe_checkout: result.safe_checkout !== undefined ? result.safe_checkout : true,
+              secure_checkout: result.secure_checkout !== undefined ? result.secure_checkout : true,
+              encourage_order: result.encourage_order !== undefined ? result.encourage_order : true,
+              encourage_view: result.encourage_view !== undefined ? result.encourage_view : true
+            };
 
-            result.related_products = result.related_products && result.related_products.length ? result.related_products : [];
-            result.cross_sell_products = result.cross_sell_products && result.cross_sell_products.length ? result.cross_sell_products : [];
-
-            const ids = [...result.related_products, ...result.cross_sell_products];
-            const categoryIds = [...result?.categories?.map(category => category.id)];
-            this.store.dispatch(new GetRelatedProducts({ids: ids?.join(','), category_ids: categoryIds?.join(','), status: 1}));
-
-            const state = ctx.getState();
             ctx.patchState({
-              ...state,
-              selectedProduct: result
+              selectedProduct: product
             });
           }
         },
@@ -269,7 +286,7 @@ export class ProductState{
           this.themeOptionService.preloader = false;
         },
         error: err => {
-          this.router.navigate(['/404']);
+          this.themeOptionService.preloader = false;
           throw new Error(err?.error?.message);
         }
       })

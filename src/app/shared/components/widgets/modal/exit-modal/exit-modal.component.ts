@@ -1,4 +1,4 @@
-import { Component, HostListener, inject, TemplateRef, ViewChild } from '@angular/core';
+import { Component, HostListener, inject, TemplateRef, ViewChild, Inject, PLATFORM_ID } from '@angular/core';
 import { Observable } from 'rxjs';
 import { ThemeOptionState } from '../../../../store/state/theme-option.state';
 import { Select, Store } from '@ngxs/store';
@@ -7,6 +7,7 @@ import { ModalDismissReasons, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { UpdateSession } from '../../../../store/action/theme-option.action';
 import { ButtonComponent } from '../../button/button.component';
 import { environment } from './../../../../../../environments/environment';
+import { isPlatformBrowser } from '@angular/common';
 
 @Component({
     selector: 'app-exit-modal',
@@ -27,7 +28,11 @@ export class ExitModalComponent {
   public themeOption: Option;
   public storageURL = environment.storageURL
 
-  constructor(private modalService: NgbModal, private store: Store){
+  constructor(
+    private modalService: NgbModal, 
+    private store: Store,
+    @Inject(PLATFORM_ID) private platformId: Object
+  ){
     this.exit$.subscribe(res => this.exit = res);
     this.themeOption$.subscribe(res => this.themeOption = res);
   }
@@ -43,7 +48,9 @@ export class ExitModalComponent {
   }
 
   async openModal() {
-    localStorage.setItem("exit", 'true');
+    if (isPlatformBrowser(this.platformId)) {
+      localStorage.setItem("exit", 'true');
+    }
     this.modalOpen = true;
     this.modalService.open(this.ExitModal, {
       ariaLabelledBy: 'profile-Modal',

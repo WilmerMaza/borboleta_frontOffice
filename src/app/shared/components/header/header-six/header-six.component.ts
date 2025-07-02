@@ -1,5 +1,5 @@
 import { CommonModule, isPlatformBrowser } from '@angular/common';
-import { Component, HostListener, Inject, Input, PLATFORM_ID } from '@angular/core';
+import { Component, HostListener, Inject, Input, OnInit, PLATFORM_ID } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
 import { Option } from '../../../interface/theme-option.interface';
@@ -22,7 +22,7 @@ import { NoticeComponent } from "../widgets/notice/notice.component";
     templateUrl: './header-six.component.html',
     styleUrl: './header-six.component.scss'
 })
-export class HeaderSixComponent {
+export class HeaderSixComponent implements OnInit {
 
   @Input() data: Option | null;
   @Input() logo: string | null | undefined;
@@ -31,12 +31,19 @@ export class HeaderSixComponent {
   @Input() path: string;
 
   public stick: boolean = false;
-  public categoryFilter: boolean = false;
+  public categoryFilter: boolean = true;
   public isBrowser: boolean;
 
   constructor(public menuService:MenuService, @Inject(PLATFORM_ID) platformId: object){
     this.isBrowser = isPlatformBrowser(platformId);
   }
+
+  ngOnInit() {
+    console.log('HeaderSixComponent - data recibido:', this.data);
+    console.log('HeaderSixComponent - categoryFilter:', this.categoryFilter);
+    console.log('HeaderSixComponent - category_ids:', this.data?.header?.category_ids);
+  }
+
   // @HostListener Decorator
   @HostListener("window:scroll", [])
   onWindowScroll() {

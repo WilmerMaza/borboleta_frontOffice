@@ -66,14 +66,16 @@ export class SettingsComponent {
       }
     });
 
-    let language = localStorage.getItem("language");
+    if (this.isBrowser) {
+      let language = localStorage.getItem("language");
 
-    if (language == null) {
-      localStorage.setItem("language", JSON.stringify(this.selectedLanguage));
-      this.translate.use(this.selectedLanguage.code);
-    } else {
-      this.selectedLanguage = JSON.parse(language);
-      this.translate.use(this.selectedLanguage.code);
+      if (language == null) {
+        localStorage.setItem("language", JSON.stringify(this.selectedLanguage));
+        this.translate.use(this.selectedLanguage.code);
+      } else {
+        this.selectedLanguage = JSON.parse(language);
+        this.translate.use(this.selectedLanguage.code);
+      }
     }
   }
 
@@ -81,7 +83,9 @@ export class SettingsComponent {
     this.active = false;
     this.translate.use(language.code);
     this.selectedLanguage = language;
-    localStorage.setItem("language", JSON.stringify(this.selectedLanguage));
+    if (this.isBrowser) {
+      localStorage.setItem("language", JSON.stringify(this.selectedLanguage));
+    }
   }
 
   selectCurrency(currency: Currency) {

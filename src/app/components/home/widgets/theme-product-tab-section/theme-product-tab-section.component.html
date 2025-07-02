@@ -53,9 +53,9 @@
         <div class="product-4 product-m" [class]="!slider ? class : ''">
           @if(productService.skeletonCategoryProductLoader){
             <owl-carousel-o [options]="options">
-              @for(item of skeletonItems; track item){
+              @for(item of skeletonItems; track $index){
                 <ng-template carouselSlide>
-                  <app-skeleton-product-box></app-skeleton-product-box>
+                  <app-skeleton-product-box [style]="product_box_style"></app-skeleton-product-box>
                 </ng-template>
               }
             </owl-carousel-o>
@@ -82,7 +82,7 @@
             <div [class]="class" [class.product-tab]="product_box_style == 'horizontal'"  [class]="class">
               @if(style == 'horizontal' && product_box_style == 'horizontal'){
                 @if(productService.skeletonCategoryProductLoader){
-                  @for(item of skeletonItems; track item){
+                  @for(item of skeletonItems; track $index){
                     <app-skeleton-product-box [style]="product_box_style"></app-skeleton-product-box>
                   }
                 } @else {
@@ -96,7 +96,7 @@
                 }
               }@else {
                 @if(productService.skeletonCategoryProductLoader){
-                  @for(item of skeletonItems; track item){
+                  @for(item of skeletonItems; track $index){
                     <app-skeleton-product-box></app-skeleton-product-box>
                   }
                 } @else {

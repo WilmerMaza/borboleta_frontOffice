@@ -1,10 +1,10 @@
-import { Component, inject, TemplateRef, ViewChild } from '@angular/core';
+import { Component, inject, TemplateRef, ViewChild, Inject, PLATFORM_ID } from '@angular/core';
 import { ModalDismissReasons, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { Select, Store } from '@ngxs/store';
 import { ThemeOptionState } from '../../../../store/state/theme-option.state';
 import { Observable } from 'rxjs';
 import { Option } from '../../../../interface/theme-option.interface';
-import { CommonModule } from '@angular/common';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
@@ -21,10 +21,15 @@ export class SaleModalComponent {
   public closeResult: string;
   public modalOpen: boolean = true;
 
-  constructor(private modalService: NgbModal){}
+  constructor(
+    private modalService: NgbModal,
+    @Inject(PLATFORM_ID) private platformId: Object
+  ){}
 
   async openModal() {
-    localStorage.setItem("exit", 'true');
+    if (isPlatformBrowser(this.platformId)) {
+      localStorage.setItem("exit", 'true');
+    }
     this.modalOpen = true;
     this.modalService.open(this.SaleModal, {
       ariaLabelledBy: 'profile-Modal',

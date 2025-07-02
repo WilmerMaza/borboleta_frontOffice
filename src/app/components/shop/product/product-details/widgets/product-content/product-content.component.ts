@@ -148,6 +148,11 @@ export class ProductContentComponent {
   }
 
   wholesalePriceCal() {
+    if (!this.product.wholesales || !Array.isArray(this.product.wholesales)) {
+      this.totalPrice = this.productQty * (this.selectedVariation ? this.selectedVariation.sale_price : this.product.sale_price);
+      return;
+    }
+    
     let wholesale = this.product.wholesales.find(value => value.min_qty <= this.productQty && value.max_qty >= this.productQty) || null;
     if(wholesale && this.product.wholesale_price_type == 'fixed') {
       this.totalPrice = this.productQty * wholesale.value;

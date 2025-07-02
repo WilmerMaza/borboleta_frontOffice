@@ -23,7 +23,7 @@
       <!-- skeleton loader -->
       @if(categoryService.searchSkeleton){
         <div class="filter-row filter-skeleton">
-          @for(item of skeleton; track item){
+          @for(item of skeleton; track $index){
             <div class="skeleton__p"></div>
           }
         </div>
@@ -34,7 +34,7 @@
       <!-- skeleton loader -->
       @if(productService.searchSkeleton){
         <ul class="skeleton-ul">
-          @for(item of skeleton; track item){
+          @for(item of skeleton; track $index){
             <li class="result-item">
               <div class="suggestion-image"></div>
               <div class="suggestion-category">

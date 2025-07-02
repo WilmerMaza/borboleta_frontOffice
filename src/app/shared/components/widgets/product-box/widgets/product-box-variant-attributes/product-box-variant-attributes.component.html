@@ -1,8 +1,8 @@
-@for(attribute of attributes; track i;let i = $index){
+@for(attribute of attributes; track attribute.id || $index){
   @if(attribute?.style == 'dropdown' || isAllVariantStyleDropdown){
-    <select id="input-state-{{i}}" class="form-control form-select" #selectedValue (change)="setVariant(product.variations, attribute.attribute_values[$any($event.target).value])">
+    <select id="input-state-{{$index}}" class="form-control form-select" #selectedValue (change)="setVariant(product.variations, attribute.attribute_values[$any($event.target).value])">
       <option selected disabled>{{ 'choose' | translate }} {{ attribute?.name }}</option>
-      @for(value of attribute.attribute_values; track attributeIndex; let attributeIndex = $index;){
+      @for(value of attribute.attribute_values; track value.id || $index; let attributeIndex = $index;){
         @if(attributeValues && attributeValues.includes(value.id)){
           <option [selected]="variantIds.includes(value.id) && !soldOutAttributesIds.includes(value.id)" [value]="attributeIndex" [disabled]="soldOutAttributesIds.includes(value.id)">
             {{ value?.value }}
@@ -13,11 +13,11 @@
   }
   @else if(attribute?.style == 'radio'){
     <div class="d-flex digital-price">
-      @for(value of attribute.attribute_values; ; track attributeIndex; let attributeIndex = $index;){
+      @for(value of attribute.attribute_values; track value.id || $index; let attributeIndex = $index;){
         @if(attributeValues && attributeValues.includes(value.id)){
           <div class="form-check" (mouseleave)="removeVariation()">
-            <input type="radio" class="form-check-input" [id]="'radio-' + i + '-' + attributeIndex" [name]="'radio-group-' + i" [value]="attributeIndex" [checked]="variantIds.includes(value.id) && !soldOutAttributesIds.includes(value.id)" [disabled]="soldOutAttributesIds.includes(value.id)" [ngClass]="{ 'disabled': soldOutAttributesIds.includes(value.id) }" (change)="setVariant(product.variations, attribute.attribute_values[$any($event.target).value])" (mouseover)="setVariant(product.variations, value, 'hover')" />
-            <label [for]="'radio-' + i + '-' + attributeIndex" class="form-check-label mb-0">{{ value?.value }} </label>
+            <input type="radio" class="form-check-input" [id]="'radio-' + $index + '-' + attributeIndex" [name]="'radio-group-' + $index" [value]="attributeIndex" [checked]="variantIds.includes(value.id) && !soldOutAttributesIds.includes(value.id)" [disabled]="soldOutAttributesIds.includes(value.id)" [ngClass]="{ 'disabled': soldOutAttributesIds.includes(value.id) }" (change)="setVariant(product.variations, attribute.attribute_values[$any($event.target).value])" (mouseover)="setVariant(product.variations, value, 'hover')" />
+            <label [for]="'radio-' + $index + '-' + attributeIndex" class="form-check-label mb-0">{{ value?.value }} </label>
             @if(showPrice){
               <h5 class="sold text-content ms-auto">
                 <span class="theme-color price">{{ value.sale_price | currencySymbol }}</span>
@@ -32,7 +32,7 @@
     </div>
   }
   @else if(attribute.style == 'image_price'){
-    @for(value of attribute.attribute_values; ; track attributeIndex; let attributeIndex = $index;){
+    @for(value of attribute.attribute_values; track value.id || $index; let attributeIndex = $index;){
       @if(attributeValues && attributeValues.includes(value.id)){
 
         <li class=""  [class.active]="variantIds.includes(value.id) && !soldOutAttributesIds.includes(value.id)" [ngClass]="{ 'disabled': soldOutAttributesIds.includes(value.id) }">
@@ -48,7 +48,7 @@
   }
   @else if(attribute?.style == 'color'){
     <ul class="circle general-variant {{attribute?.style}}">
-      @for(value of attribute.attribute_values; track value.hex_color){
+      @for(value of attribute.attribute_values; track value.id || value.hex_color || $index){
         @if(attributeValues && attributeValues.includes(value.id)){
           <li
             [class.active]="variantIds.includes(value.id) && !soldOutAttributesIds.includes(value.id)"
@@ -64,7 +64,7 @@
     </ul>
   }@else {
     <ul class="general-variant {{attribute?.style}}">
-      @for(value of attribute.attribute_values; track attributeIndex; let attributeIndex = $index;){
+      @for(value of attribute.attribute_values; track value.id || $index; let attributeIndex = $index;){
         @if(attributeValues && attributeValues.includes(value.id)){
           <li
             [class.active]="variantIds.includes(value.id) && !soldOutAttributesIds.includes(value.id)"
