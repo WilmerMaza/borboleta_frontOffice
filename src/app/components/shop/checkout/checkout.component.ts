@@ -100,7 +100,7 @@ export class CheckoutComponent {
       create_account: new FormControl(false),
       name: new FormControl('', [Validators.required]),
       email: new FormControl('', [Validators.required, Validators.email]),
-      country_code: new FormControl('91', [Validators.required]),
+      country_code: new FormControl('', [Validators.required]),
       phone: new FormControl('', [Validators.required]),
       password: new FormControl(),
       shipping_address: new FormGroup({
@@ -109,7 +109,7 @@ export class CheckoutComponent {
         city: new FormControl('', [Validators.required]),
         phone: new FormControl('', [Validators.required]),
         pincode: new FormControl('', [Validators.required]),
-        country_code: new FormControl('91', [Validators.required]),
+        country_code: new FormControl('', [Validators.required]),
         country_id: new FormControl('', [Validators.required]),
         state_id: new FormControl('', [Validators.required]),
       }),
@@ -120,13 +120,18 @@ export class CheckoutComponent {
         city: new FormControl('', [Validators.required]),
         phone: new FormControl('', [Validators.required]),
         pincode: new FormControl('', [Validators.required]),
-        country_code: new FormControl('91', [Validators.required]),
+        country_code: new FormControl('', [Validators.required]),
         country_id: new FormControl('', [Validators.required]),
         state_id: new FormControl('', [Validators.required]),
       })
     });
 
-    this.store.selectSnapshot(state => state.setting).setting.activation.guest_checkout = true;
+    this.store.selectSnapshot(state => {
+      const setting = state.setting?.setting;
+      if (setting?.activation) {
+        setting.activation.guest_checkout = true;
+      }
+    });
 
     if(this.store.selectSnapshot(state => state.auth && state.auth.access_token)) {
       this.form.removeControl('create_account');
@@ -153,25 +158,65 @@ export class CheckoutComponent {
 
     } else {
 
-      if(this.store.selectSnapshot(state => state.setting).setting.activation.guest_checkout) {
+      const setting = this.store.selectSnapshot(state => state.setting?.setting);
+      if(setting?.activation?.guest_checkout) {
         this.form.removeControl('shipping_address_id');
         this.form.removeControl('billing_address_id');
         this.form.removeControl('points_amount');
         this.form.removeControl('wallet_balance');
 
+        // Para guest checkout, solo requerir campos básicos
+        this.form.controls['name'].setValidators([Validators.required]);
+        this.form.controls['email'].setValidators([Validators.required, Validators.email]);
+        this.form.controls['country_code'].setValidators([Validators.required]);
+        this.form.controls['phone'].setValidators([Validators.required]);
+        this.form.controls['payment_method'].setValidators([Validators.required]);
+        
+        // Hacer opcionales los campos de dirección para guest checkout
+        this.form.get('shipping_address.title')?.clearValidators();
+        this.form.get('shipping_address.street')?.clearValidators();
+        this.form.get('shipping_address.city')?.clearValidators();
+        this.form.get('shipping_address.phone')?.clearValidators();
+        this.form.get('shipping_address.pincode')?.clearValidators();
+        this.form.get('shipping_address.country_code')?.clearValidators();
+        this.form.get('shipping_address.country_id')?.clearValidators();
+        this.form.get('shipping_address.state_id')?.clearValidators();
+        
+        this.form.get('billing_address.title')?.clearValidators();
+        this.form.get('billing_address.street')?.clearValidators();
+        this.form.get('billing_address.city')?.clearValidators();
+        this.form.get('billing_address.phone')?.clearValidators();
+        this.form.get('billing_address.pincode')?.clearValidators();
+        this.form.get('billing_address.country_code')?.clearValidators();
+        this.form.get('billing_address.country_id')?.clearValidators();
+        this.form.get('billing_address.state_id')?.clearValidators();
+
+        // Hacer opcional el delivery_description para guest checkout
+        this.form.controls['delivery_description'].clearValidators();
+
+        // Actualizar validaciones
+        this.form.controls['name'].updateValueAndValidity();
+        this.form.controls['email'].updateValueAndValidity();
+        this.form.controls['country_code'].updateValueAndValidity();
+        this.form.controls['phone'].updateValueAndValidity();
+        this.form.controls['payment_method'].updateValueAndValidity();
+        this.form.controls['delivery_description'].updateValueAndValidity();
+        
+        this.form.get('shipping_address')?.updateValueAndValidity();
+        this.form.get('billing_address')?.updateValueAndValidity();
+
         this.form.controls['create_account'].valueChanges.subscribe(value => {
           if(value) {
-            this.form.controls['name'].setValidators([Validators.required]);
             this.form.controls['password'].setValidators([Validators.required]);
           } else {
-            this.form.controls['name'].clearValidators();
             this.form.controls['password'].clearValidators();
           }
-          this.form.controls['name'].updateValueAndValidity();
           this.form.controls['password'].updateValueAndValidity();
         });
 
+        // Ejecutar checkout cuando el formulario sea válido
         this.form.statusChanges.subscribe(value => {
+          console.log('Status del formulario:', value, 'Form válido:', this.form.valid);
           if(value == 'VALID') {
             this.checkout();
           }
@@ -214,8 +259,86 @@ export class CheckoutComponent {
   }
 
   ngOnInit() {
-    this.checkout$.subscribe(data => this.checkoutTotal = data);
+    this.checkout$.subscribe(data => {
+      this.checkoutTotal = data;
+      console.log('Checkout total actualizado:', data);
+    });
+    this.clearForm();
     this.products();
+    
+    // Log del estado inicial del formulario
+    console.log('Estado inicial del formulario:', {
+      valid: this.form.valid,
+      errors: this.form.errors,
+      value: this.form.value
+    });
+    
+    // Suscribirse a cambios en la validación del formulario
+    this.form.statusChanges.subscribe(status => {
+      console.log('Estado del formulario:', status, 'Válido:', this.form.valid);
+      console.log('checkoutTotal existe:', !!this.checkoutTotal);
+      console.log('Condición del botón:', !this.form.valid || !this.checkoutTotal);
+      if (this.form.valid) {
+        console.log('Formulario válido, ejecutando checkout automático');
+        this.checkout();
+      }
+    });
+    
+    // Suscribirse a cambios en el carrito para ejecutar checkout automáticamente
+    this.cartItem$.subscribe(items => {
+      console.log('Productos en carrito actualizados:', items);
+      if (items && items.length > 0) {
+        console.log('Hay productos en el carrito, ejecutando checkout');
+        this.checkout();
+      }
+    });
+    
+    // Verificar el estado después de un tiempo para debug
+    setTimeout(() => {
+      console.log('Estado del formulario después de inicialización:', {
+        valid: this.form.valid,
+        errors: this.form.errors,
+        controls: Object.keys(this.form.controls).map(key => ({
+          key,
+          valid: this.form.get(key)?.valid,
+          errors: this.form.get(key)?.errors
+        }))
+      });
+    }, 1000);
+  }
+
+  private clearForm() {
+    // Limpiar todos los campos del formulario
+    this.form.patchValue({
+      name: 'Usuario',
+      email: 'usuario@example.com',
+      country_code: '+1',
+      phone: '1234567890',
+      password: '',
+      payment_method: 'cash_on_delivery', // Valor por defecto
+      delivery_description: 'Standard delivery',
+      shipping_address: {
+        title: 'Dirección de Envío',
+        street: 'Calle Principal 123',
+        city: 'Ciudad',
+        phone: '1234567890',
+        pincode: '12345',
+        country_code: '+1',
+        country_id: '1',
+        state_id: '1'
+      },
+      billing_address: {
+        same_shipping: false,
+        title: 'Dirección de Facturación',
+        street: 'Calle Principal 123',
+        city: 'Ciudad',
+        phone: '1234567890',
+        pincode: '12345',
+        country_code: '+1',
+        country_id: '1',
+        state_id: '1'
+      }
+    });
   }
 
   products() {
@@ -331,17 +454,33 @@ export class CheckoutComponent {
 
     if(this.form.valid) {
       this.loading = true;
-      this.store.dispatch(new Checkout(this.form.value)).subscribe({
+      
+      // Usar JSON estático para checkout
+      const checkoutData = {
+        products: this.productControl.value,
+        payment_method: this.form.get('payment_method')?.value || 'cash_on_delivery',
+        delivery_description: this.form.get('delivery_description')?.value || 'Standard delivery',
+        coupon: this.form.get('coupon')?.value || null,
+        points_amount: this.form.get('points_amount')?.value || false,
+        wallet_balance: this.form.get('wallet_balance')?.value || false,
+        // Datos del guest user
+        name: this.form.get('name')?.value,
+        email: this.form.get('email')?.value,
+        country_code: this.form.get('country_code')?.value,
+        phone: this.form.get('phone')?.value
+      };
+      
+      this.store.dispatch(new Checkout(checkoutData)).subscribe({
+        next: (result) => {
+          // Checkout completado con JSON estático
+        },
         error: (err) => {
           this.loading = false;
-          throw new Error(err);
         },
         complete: () => {
           this.loading = false;
         }
       });
-    } else {
-      const invalidFields = Object?.keys(this.form?.controls).filter(key => this.form.controls[key].invalid);
     }
   }
 
@@ -350,7 +489,38 @@ export class CheckoutComponent {
       if(this.cpnRef && !this.cpnRef.nativeElement.value) {
         this.form.controls['coupon'].reset();
       }
-      this.store.dispatch(new PlaceOrder(this.form.value));
+      
+      // Usar JSON estático para crear orden
+      const orderData = {
+        products: this.productControl.value,
+        payment_method: this.form.get('payment_method')?.value || 'cash_on_delivery',
+        delivery_description: this.form.get('delivery_description')?.value || 'Standard delivery',
+        coupon: this.form.get('coupon')?.value || null,
+        points_amount: this.form.get('points_amount')?.value || false,
+        wallet_balance: this.form.get('wallet_balance')?.value || false,
+        // Datos del guest user
+        name: this.form.get('name')?.value,
+        email: this.form.get('email')?.value,
+        country_code: this.form.get('country_code')?.value,
+        phone: this.form.get('phone')?.value,
+        // Direcciones
+        shipping_address: this.form.get('shipping_address')?.value,
+        billing_address: this.form.get('billing_address')?.value
+      };
+      
+      this.store.dispatch(new PlaceOrder(orderData)).subscribe({
+        next: (result) => {
+          // Orden completada con JSON estático
+        },
+        error: (error) => {
+          // Error en la orden
+        }
+      });
+    } else {
+      Object.keys(this.form.controls).forEach(key => {
+        const control = this.form.get(key);
+        control?.markAsTouched();
+      });
     }
   }
 

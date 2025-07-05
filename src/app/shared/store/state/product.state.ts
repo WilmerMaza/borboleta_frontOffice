@@ -218,32 +218,36 @@ export class ProductState{
     return this.productService.getProductBySlug(slug).pipe(
       tap({
         next: (result: any) => {
-          if(result) {
-            const price = result.price ? parseFloat(result.price) : 0;
-            const discount = result.discount ? parseFloat(result.discount) : 0;
+          // Extraer los datos del producto de la respuesta
+          const productData = result.data || result;
+          
+          if(productData) {
+            // Asegurar que los valores sean números válidos
+            const price = productData.price !== null && productData.price !== undefined ? parseFloat(productData.price) : 0;
+            const discount = productData.discount !== null && productData.discount !== undefined ? parseFloat(productData.discount) : 0;
             const sale_price = discount > 0 ? price - (price * discount / 100) : price;
             
             const product = {
-              ...result,
-              id: parseInt(result._id) || result.id || 0,
+              ...productData,
+              id: productData._id || productData.id || 0,
               price: price, // MRP/Precio original
               sale_price: sale_price, // Precio de venta (calculado con descuento)
               discount: discount,
-              is_sale_enable: result.is_sale_enable || false,
-              stock_status: result.stock_status || 'in_stock',
-              quantity: result.quantity ? parseFloat(result.quantity) : 0,
-              stock: result.stock ? parseFloat(result.stock) : 0,
-              status: result.status !== undefined ? result.status : true,
-              categories: result.categories || [],
-              attributes: result.attributes || [],
-              variations: result.variations ? result.variations.map((variation: any) => {
-                const varPrice = variation.price ? parseFloat(variation.price) : 0;
-                const varDiscount = variation.discount ? parseFloat(variation.discount) : discount;
+              is_sale_enable: productData.is_sale_enable || false,
+              stock_status: productData.stock_status || 'in_stock',
+              quantity: productData.quantity ? parseFloat(productData.quantity) : 0,
+              stock: productData.stock ? parseFloat(productData.stock) : 0,
+              status: productData.status !== undefined ? productData.status : true,
+              categories: productData.categories || [],
+              attributes: productData.attributes || [],
+              variations: productData.variations ? productData.variations.map((variation: any) => {
+                const varPrice = variation.price !== null && variation.price !== undefined ? parseFloat(variation.price) : 0;
+                const varDiscount = variation.discount !== null && variation.discount !== undefined ? parseFloat(variation.discount) : discount;
                 const varSalePrice = varDiscount > 0 ? varPrice - (varPrice * varDiscount / 100) : varPrice;
                 
                 return {
                   ...variation,
-                  id: parseInt(variation._id) || variation.id || 0,
+                  id: variation._id || variation.id || 0,
                   price: varPrice,
                   sale_price: varSalePrice,
                   discount: varDiscount,
@@ -253,28 +257,28 @@ export class ProductState{
                   attribute_values: variation.attribute_values || []
                 };
               }) : [],
-              related_products: result.related_products || [],
-              cross_sell_products: result.cross_sell_products || [],
-              product_galleries: result.product_galleries || [],
-              reviews: result.reviews || [],
-              reviews_count: result.reviews_count || 0,
-              rating_count: result.rating_count || 0,
-              is_featured: result.is_featured || false,
-              is_trending: result.is_trending || false,
-              is_approved: result.is_approved !== undefined ? result.is_approved : false,
-              wholesales: result.wholesales || [],
-              wholesale_price_type: result.wholesale_price_type || null,
-              is_external: result.is_external || false,
-              external_url: result.external_url || null,
-              external_button_text: result.external_button_text || null,
-              social_share: result.social_share !== undefined ? result.social_share : true,
+              related_products: productData.related_products || [],
+              cross_sell_products: productData.cross_sell_products || [],
+              product_galleries: productData.product_galleries || [],
+              reviews: productData.reviews || [],
+              reviews_count: productData.reviews_count || 0,
+              rating_count: productData.rating_count || 0,
+              is_featured: productData.is_featured || false,
+              is_trending: productData.is_trending || false,
+              is_approved: productData.is_approved !== undefined ? productData.is_approved : false,
+              wholesales: productData.wholesales || [],
+              wholesale_price_type: productData.wholesale_price_type || null,
+              is_external: productData.is_external || false,
+              external_url: productData.external_url || null,
+              external_button_text: productData.external_button_text || null,
+              social_share: productData.social_share !== undefined ? productData.social_share : true,
               is_wishlist: false,
-              is_return: result.is_return || false,
-              is_free_shipping: result.is_free_shipping || false,
-              safe_checkout: result.safe_checkout !== undefined ? result.safe_checkout : true,
-              secure_checkout: result.secure_checkout !== undefined ? result.secure_checkout : true,
-              encourage_order: result.encourage_order !== undefined ? result.encourage_order : true,
-              encourage_view: result.encourage_view !== undefined ? result.encourage_view : true
+              is_return: productData.is_return || false,
+              is_free_shipping: productData.is_free_shipping || false,
+              safe_checkout: productData.safe_checkout !== undefined ? productData.safe_checkout : true,
+              secure_checkout: productData.secure_checkout !== undefined ? productData.secure_checkout : true,
+              encourage_order: productData.encourage_order !== undefined ? productData.encourage_order : true,
+              encourage_view: productData.encourage_view !== undefined ? productData.encourage_view : true
             };
 
             ctx.patchState({
@@ -282,12 +286,12 @@ export class ProductState{
             });
           }
         },
-        complete: () => {
-          this.themeOptionService.preloader = false;
-        },
         error: err => {
           this.themeOptionService.preloader = false;
           throw new Error(err?.error?.message);
+        },
+        complete: () => {
+          this.themeOptionService.preloader = false;
         }
       })
     );

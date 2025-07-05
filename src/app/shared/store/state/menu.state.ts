@@ -41,9 +41,20 @@ export class MenuState {
     return this.menuService.getMenu(action.payload).pipe(
       tap({
         next: result => {
+          // Función recursiva para inicializar active: false en todos los menús
+          const initializeMenuActive = (menus: any[]): any[] => {
+            return menus.map(menu => ({
+              ...menu,
+              active: false,
+              child: menu.child ? initializeMenuActive(menu.child) : []
+            }));
+          };
+
+          const menusWithActive = result.data ? initializeMenuActive(result.data) : [];
+
           ctx.patchState({
             menu: {
-              data: result.data,
+              data: menusWithActive,
               total: result?.total ? result?.total : result.data?.length
             }
           });

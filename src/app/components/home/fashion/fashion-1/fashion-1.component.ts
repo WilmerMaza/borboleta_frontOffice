@@ -8,14 +8,12 @@ import { CommonModule } from '@angular/common';
 import { isPlatformBrowser } from '@angular/common';
 
 import { ImageLinkComponent } from '../../../../shared/components/widgets/image-link/image-link.component';
-import { ThemeBrandComponent } from '../../widgets/theme-brand/theme-brand.component';
 import { ThemeHomeSliderComponent } from '../../widgets/theme-home-slider/theme-home-slider.component';
 import { ThemeProductTabSectionComponent } from '../../widgets/theme-product-tab-section/theme-product-tab-section.component';
 import { ThemeProductComponent } from '../../widgets/theme-product/theme-product.component';
 import { ThemeServicesComponent } from '../../widgets/theme-services/theme-services.component';
 import { ThemeSocialMediaComponent } from '../../widgets/theme-social-media/theme-social-media.component';
 import { ThemeTitleComponent } from '../../widgets/theme-title/theme-title.component';
-import { CategoriesComponent } from '../../../../shared/components/widgets/categories/categories.component';
 import { CategoryIconsComponent } from '../category-icons/category-icons.component';
 
 import { FashionOne } from '../../../../shared/interface/theme.interface';
@@ -32,7 +30,7 @@ import { productSlider } from '../../../../shared/data/owl-carousel';
     providers: [Store],
     imports: [CommonModule, ThemeHomeSliderComponent, 
         ThemeTitleComponent, ThemeProductComponent, ThemeProductTabSectionComponent, ThemeServicesComponent,
-        ThemeBrandComponent, ImageLinkComponent, CategoriesComponent, CategoryIconsComponent],
+        ImageLinkComponent, CategoryIconsComponent],
     templateUrl: './fashion-1.component.html',
     styleUrl: './fashion-1.component.scss'
 })

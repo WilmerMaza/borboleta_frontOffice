@@ -46,7 +46,7 @@
       }
       <div class="cart_media" [class.empty-cart]="!(cartItem$ | async)?.length">
         <ul class="cart_product">
-          @for(item of cartItem$ | async; track item.id){
+          @for(item of cartItem$ | async; track item.id + '_' + (item.variation ? item.variation.id : item.product.id); let i = $index){
             <li>
               <div class="media">
                 <a href="javascript:void(0)">

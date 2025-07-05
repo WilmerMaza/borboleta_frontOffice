@@ -3,13 +3,15 @@ import { Component, inject } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Select, Store } from '@ngxs/store';
 import { Observable } from 'rxjs';
-import { HttpClient } from '@angular/common/http';
 
 import { ThemeOptionService } from '../../shared/services/theme-option.service';
 
 import { GetHomePage } from '../../shared/store/action/theme.action';
+import { GetProducts } from '../../shared/store/action/product.action';
 
 import { ThemeState } from '../../shared/store/state/theme.state';
+import { ProductState } from '../../shared/store/state/product.state';
+import { ProductBoxComponent } from '../../shared/components/widgets/product-box/product-box.component';
 import { BagComponent } from './bag/bag.component';
 import { BeautyComponent } from './beauty/beauty.component';
 import { BicycleComponent } from './bicycle/bicycle.component';
@@ -75,7 +77,8 @@ import { SingleProductComponent } from './single-product/single-product.componen
         ChristmasComponent, ShoesComponent, KidsComponent, BooksComponent, BeautyComponent,
         SurfboardComponent, GogglesComponent, GymComponent, VideoSliderComponent, PetsComponent,
         NurseryComponent, GameComponent, FlowerComponent, GradientComponent, VideoComponent,
-        FullPageComponent, ParallaxComponent, DigitalDownloadComponent, SingleProductComponent],
+        FullPageComponent, ParallaxComponent, DigitalDownloadComponent, SingleProductComponent,
+        ProductBoxComponent],
     templateUrl: './home.component.html',
     styleUrl: './home.component.scss'
 })
@@ -83,6 +86,7 @@ export class HomeComponent {
 
   homePage$: Observable<object> = inject(Store).select(ThemeState.homePage) as Observable<object>;
   activeTheme$: Observable<string> = inject(Store).select(ThemeState.activeTheme) as Observable<string>;
+  products$: Observable<any> = inject(Store).select(ProductState.product) as Observable<any>;
 
   public theme: string;
   public homePage:any;
@@ -91,10 +95,9 @@ export class HomeComponent {
   constructor(
     private store: Store,
     private route: ActivatedRoute,
-    private themeOptionService: ThemeOptionService,
-    private http: HttpClient
+    private themeOptionService: ThemeOptionService
   ) {
-    // Cargar productos
+    // Cargar productos usando el store
     this.loadProducts();
 
     this.route.queryParams.subscribe(params => {
@@ -109,20 +112,26 @@ export class HomeComponent {
         }
       })
     });
+
+    // Suscribirse a los productos del store
+    this.products$.subscribe(productState => {
+      if (productState && productState.data && productState.data.length > 0) {
+        this.products = productState.data;
+      } else {
+        this.products = [];
+      }
+    });
   }
 
   loadProducts() {
-    console.log('Iniciando carga de productos...');
-    this.http.get('http://localhost:4000/api/products').subscribe({
+    const params = {
+      status: 1,
+      approve: 1,
+      paginate: 20 // Limitar a 20 productos para la página principal
+    };
+    this.store.dispatch(new GetProducts(params)).subscribe({
       next: (response: any) => {
-        console.log('Respuesta completa de la API:', response);
-        if (response && response.products) {
-          this.products = response.products;
-          console.log('Productos cargados:', this.products);
-        } else {
-          console.log('No se encontraron productos en la respuesta');
-          this.products = [];
-        }
+        // Productos cargados correctamente
       },
       error: (error) => {
         console.error('Error al cargar productos:', error);

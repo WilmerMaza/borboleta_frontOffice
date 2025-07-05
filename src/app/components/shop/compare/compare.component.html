@@ -7,7 +7,7 @@
         @if((compareItems$ | async)?.length){
           <div class="slide-4 compare-box">
             <owl-carousel-o [options]="options">
-              @for(product of (compareItems$ | async); track product.id){
+              @for(product of (compareItems$ | async); track product.id + '_' + product.slug; let i = $index){
                 @if(product){
                   <ng-template carouselSlide>
                     <div>

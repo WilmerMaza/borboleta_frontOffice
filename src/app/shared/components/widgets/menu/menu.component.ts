@@ -75,13 +75,14 @@ export class MenuComponent {
   }
 
   toggle(menu: Menu){
-    if(!menu.active){
-      this.menu.forEach(item => {
-        if(this.menu.includes(menu)){
-          item.active = false;
-        }
-      })
-    }
+    // Cerrar todos los otros menús primero
+    this.menu.forEach(item => {
+      if (item !== menu) {
+        item.active = false;
+      }
+    });
+    
+    // Alternar el estado del menú actual
     menu.active = !menu.active;
   }
 

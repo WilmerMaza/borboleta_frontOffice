@@ -12,7 +12,7 @@
         </div>
       }
     } @else {
-        @for(product of filter['layout'] == 'collection_product_infinite_scroll' ? (moreProduct$ | async) : paginateProduct; track product.id){
+        @for(product of filter['layout'] == 'collection_product_infinite_scroll' ? (moreProduct$ | async) : paginateProduct; track product.id + '_' + product.slug; let i = $index){
           <div [class]="gridClass">
             @if(listView){
               <app-product-box-eleven [product]="product" [style]="'vertical'"></app-product-box-eleven>

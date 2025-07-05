@@ -2,6 +2,8 @@ import { Injectable } from "@angular/core";
 import { Router } from "@angular/router";
 import { Action, Selector, State, StateContext } from "@ngxs/store";
 import { tap } from "rxjs";
+import { Store } from "@ngxs/store";
+import { of } from "rxjs";
 
 import { Order, OrderCheckout } from "../../interface/order.interface";
 
@@ -35,7 +37,8 @@ export class OrderState {
 
   constructor(private notificationService: NotificationService,
     private router: Router,
-    private orderService: OrderService) {}
+    private orderService: OrderService,
+    private store: Store) {}
 
   @Selector()
   static order(state: OrderStateModel) {
@@ -100,9 +103,9 @@ export class OrderState {
   checkout(ctx: StateContext<OrderStateModel>, action: Checkout) {
     const state = ctx.getState();
 
-    // It Just Static Values as per cart default value (When you are using api then you need calculate as per your requirement)
+    // JSON estático para checkout
     const order = {
-      total : {
+      total: {
         convert_point_amount: 65.66,
         convert_wallet_balance: 8.47,
         coupon_total_discount: 10,
@@ -114,7 +117,7 @@ export class OrderState {
         total: 41.80,
         wallet_balance: 8.47,
       }
-    }
+    };
 
     ctx.patchState({
       ...state,
@@ -124,7 +127,27 @@ export class OrderState {
 
   @Action(PlaceOrder)
   placeOrder(ctx: StateContext<OrderStateModel>, action: PlaceOrder) {
-    // Place order Logic Here
+    // JSON estático para crear orden
+    const mockOrder = {
+      success: true,
+      data: {
+        id: Math.floor(Math.random() * 1000) + 1000,
+        order_number: Math.floor(Math.random() * 9000) + 1000,
+        payment_status: 'PENDING',
+        total: 41.80
+      },
+      message: 'Orden creada exitosamente'
+    };
+
+    // Simular delay de red
+    setTimeout(() => {
+      this.notificationService.showSuccess('Orden creada exitosamente');
+      this.router.navigate(['/order-success'], { 
+        queryParams: { order_id: mockOrder.data.id } 
+      });
+    }, 1000);
+
+    return of(mockOrder);
   }
 
   @Action(RePayment)
@@ -155,5 +178,5 @@ export class OrderState {
   downloadInvoice(ctx: StateContext<OrderStateModel>, action: DownloadInvoice) {
     // Download invoice Logic Here
   }
- 
+
 }

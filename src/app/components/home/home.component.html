@@ -1,30 +1,32 @@
 <!-- Sección de Productos -->
-<div class="container mt-4">
-  <h2>Nuestros Productos</h2>
-  
-  @if(products && products.length > 0) {
-    <div class="row">
-      @for(product of products; track product.id) {
-        <div class="col-md-4 mb-4">
-          <div class="card h-100">
-            @if(product.image) {
-              <img [src]="product.image" class="card-img-top" [alt]="product.name" style="height: 200px; object-fit: cover;">
+@if(products && products.length > 0) {
+  <section class="section-b-space">
+    <div class="container">
+      <div class="row">
+        <div class="col-12">
+          <h2 class="title text-center mb-4">Nuestros Productos</h2>
+        </div>
+        <div class="col-12">
+          <div class="row row-cols-xl-4 row-cols-md-3 row-cols-2 g-sm-4 g-3">
+            @for(product of products; track product.id) {
+              <div class="col">
+                <app-product-box [product]="product" [style]="'vertical'"></app-product-box>
+              </div>
             }
-            <div class="card-body">
-              <h5 class="card-title">{{product.name}}</h5>
-              <p class="card-text">{{product.description}}</p>
-              <p class="card-text"><strong>Precio: ${{product.price}}</strong></p>
-            </div>
           </div>
         </div>
-      }
+      </div>
     </div>
-  } @else {
-    <div class="alert alert-info">
-      No se encontraron productos disponibles en este momento.
+  </section>
+} @else {
+  <section class="section-b-space">
+    <div class="container">
+      <div class="alert alert-info text-center">
+        No se encontraron productos disponibles en este momento.
+      </div>
     </div>
-  }
-</div>
+  </section>
+}
 
 <!-- Resto del contenido -->
 @if(homePage?.slug == 'fashion_one'){

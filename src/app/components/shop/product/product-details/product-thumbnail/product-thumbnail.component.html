@@ -8,7 +8,7 @@
               <div class="row g-sm-4 g-3">
                 <div class="col-12">
                   <div class="product-slick position-relative">
-                    @if(product.is_sale_enable || product.is_trending || product.is_featured){
+                    @if(product && (product.is_sale_enable || product.is_trending || product.is_featured)){
                       <ul class="product-detail-label">
                         @if(product.is_sale_enable){
                           <li class="soldout">{{ 'sale' | translate }}</li>
@@ -23,7 +23,7 @@
                     }
                     <owl-carousel-o [options]="productMainThumbSlider" #owlCar id="thumbnailCarousel" (initialized)="onCarouselLoad()" (changed)="onSlideChange($event)">
                       @if(product.product_galleries?.length || selectedVariation && selectedVariation.variation_galleries.length){
-                        @for(image of (selectedVariation && selectedVariation.variation_galleries.length ? selectedVariation && selectedVariation.variation_galleries : product.product_galleries); track image.id; let i = $index){
+                        @for(image of (selectedVariation && selectedVariation.variation_galleries.length ? selectedVariation && selectedVariation.variation_galleries : product.product_galleries); track image.id + '_' + i; let i = $index){
                           <ng-template carouselSlide [id]="image.id.toString()">
                             @if(videType.includes(image.mime_type)){
                               <div class="slider-main-img">

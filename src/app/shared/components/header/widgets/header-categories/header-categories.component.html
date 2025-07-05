@@ -2,7 +2,7 @@
 <nav>
   <ul>
     @if(categories && categories.length){
-      @for(category of categories; track category.id){
+      @for(category of categories; track category.id + '_' + category.slug; let i = $index){
         <li>
           <a href="javascript:void(0)" [routerLink]="['/category', category.slug]">
             {{ category.name }}

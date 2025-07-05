@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Params } from '../interface/core.interface';
-import { Observable } from 'rxjs';
+import { Observable, tap } from 'rxjs';
 import { Product, ProductModel } from '../interface/product.interface';
 import { environment } from '../../../environments/environment.development';
 
@@ -18,15 +18,45 @@ export class ProductService {
   constructor(private http: HttpClient) {}
 
   getProducts(payload?: Params): Observable<ProductModel> {
-    return this.http.get<ProductModel>(`${environment.URLS}/products`, { params: payload });
+    const url = `${environment.URLS}/products`;
+    return this.http.get<ProductModel>(url, { params: payload }).pipe(
+      tap({
+        next: (response) => {
+          // Respuesta recibida
+        },
+        error: (error) => {
+          console.error('❌ Error en getProducts:', error);
+        }
+      })
+    );
   }
 
   getProductBySlug(slug: string): Observable<Product> {
-    return this.http.get<Product>(`${environment.URLS}/products/slug/${slug}`);
+    const url = `${environment.URLS}/products/slug/${slug}`;
+    return this.http.get<Product>(url).pipe(
+      tap({
+        next: (response) => {
+          // Respuesta recibida
+        },
+        error: (error) => {
+          console.error('❌ Error en getProductBySlug:', error);
+        }
+      })
+    );
   }
 
   getProductBySearchList(payload?: Params): Observable<any> {
-    return this.http.get<any>(`${environment.URLS}/products`, { params: payload });
+    const url = `${environment.URLS}/products`;
+    return this.http.get<any>(url, { params: payload }).pipe(
+      tap({
+        next: (response) => {
+          // Respuesta recibida
+        },
+        error: (error) => {
+          console.error('❌ Error en getProductBySearchList:', error);
+        }
+      })
+    );
   }
 
  

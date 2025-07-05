@@ -39,9 +39,7 @@ export class HeaderSixComponent implements OnInit {
   }
 
   ngOnInit() {
-    console.log('HeaderSixComponent - data recibido:', this.data);
-    console.log('HeaderSixComponent - categoryFilter:', this.categoryFilter);
-    console.log('HeaderSixComponent - category_ids:', this.data?.header?.category_ids);
+    // El data viene como @Input del componente padre
   }
 
   // @HostListener Decorator

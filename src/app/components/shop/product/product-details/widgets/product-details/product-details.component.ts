@@ -40,8 +40,8 @@ export class ProductDetailsComponent {
 
   ngOnChanges(changes: SimpleChanges) {
     if (changes['product'] && changes['product'].currentValue) {
-      this.selectedVariation = null;
       this.product = changes['product'].currentValue;
+      this.selectedVariation = this.product.selected_variant || this.product.variations?.[0] || null;
     }
 
     if (isPlatformBrowser(this.platformId)) {

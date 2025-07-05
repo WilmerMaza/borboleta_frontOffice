@@ -64,23 +64,17 @@ export class DisplayVariantAttributesComponent {
       this.checkVariantAvailability(this.product);
     }, 0);
 
-    if(changes['showPrice']?.currentValue && this.product?.attributes){
+    if(changes['showPrice']?.currentValue){
       this.product.attributes.forEach(attribute => {
-        if(attribute?.attribute_values) {
-          attribute.attribute_values.forEach(value => {
-            if(this.product?.variations) {
-              this.product.variations.forEach(variation => {
-                if(variation?.attribute_values) {
-                  variation.attribute_values.forEach(att => {
-                    if (att.id !== value.id)
-                      value['price'] = variation.price;
-                      value['sale_price'] = variation.sale_price;
-                  });
-                }
-              });
-            }
+        attribute.attribute_values.forEach(value => {
+          this.product.variations.forEach(variation => {
+            variation.attribute_values.forEach(att => {
+              if (att.id !== value.id)
+                value['price'] = variation.price;
+                value['sale_price'] = variation.sale_price;
+            });
           });
-        }
+        });
       });
     }
   }
@@ -91,27 +85,27 @@ export class DisplayVariantAttributesComponent {
     this.selectedVariation = null;
     this.hoverVariation = null
 
-    if(product?.variations) {
-      product.variations.forEach(variation => {
-        if(variation?.attribute_values) {
-          variation.attribute_values.filter(attribute_value => {
-            if(this.attributeValues.indexOf(attribute_value?.id) === -1)
-              this.attributeValues.push(attribute_value?.id);
-          });
-        }
-      });
+    if (!product || !product.variations) {
+      return;
     }
 
+    product.variations.forEach(variation => {
+      variation?.attribute_values?.filter(attribute_value => {
+        if(this.attributeValues.indexOf(attribute_value?.id) === -1)
+          this.attributeValues.push(attribute_value?.id);
+      });
+    });
+
     // Set cart variant Default
-    if(this.cartItem?.variation?.attribute_values) {
-      this.cartItem.variation.attribute_values.filter(attribute_val => {
+    if(this.cartItem?.variation) {
+      this.cartItem?.variation.attribute_values.filter(attribute_val => {
         this.setVariant(this.product.variations, attribute_val);
       });
     }
 
-    if(!this.cartItem && product?.attributes) {
+    if(!this.cartItem) {
       // Set First variant Default
-      for (const attribute of product.attributes) {
+      for (const attribute of product?.attributes) {
         if (this.attributeValues?.length && attribute?.attribute_values?.length) {
           let values: number[] = [];
           for (const value of attribute.attribute_values) {
@@ -131,24 +125,20 @@ export class DisplayVariantAttributesComponent {
     }
 
     // Set Variation Image
-    if(product?.variations) {
-      product.variations.forEach(variation => {
-        let attrValues = variation?.attribute_values?.map(attribute_value => attribute_value?.id);
-        if(product?.attributes) {
-          product.attributes.filter(attribute => {
-            if(attribute.style == 'image' && attribute?.attribute_values) {
-              attribute.attribute_values.filter(attribute_value => {
-                if(this.attributeValues.includes(attribute_value.id)) {
-                  if(attrValues?.includes(attribute_value.id)) {
-                    attribute_value.variation_image = variation.variation_image;
-                  }
-                }
-              });
+    product.variations?.forEach(variation => {
+      let attrValues = variation?.attribute_values?.map(attribute_value => attribute_value?.id);
+      product?.attributes.filter(attribute => {
+        if(attribute.style == 'image') {
+          attribute.attribute_values.filter(attribute_value => {
+            if(this.attributeValues.includes(attribute_value.id)) {
+              if(attrValues.includes(attribute_value.id)) {
+                attribute_value.variation_image = variation.variation_image;
+              }
             }
           });
         }
       });
-    }
+    });
   }
 
   setVariant(variations: Variation[], value: AttributeValue, event?: string) {
@@ -159,54 +149,46 @@ export class DisplayVariantAttributesComponent {
     } else {
       this.selectedOptions[index].id = value?.id;
     }
-    if(variations) {
-      variations.forEach(variation => {
-        let attrValues = variation?.attribute_values?.map(attribute_value => attribute_value?.id);
-        this.variantIds = this.selectedOptions?.map(variants => variants?.id);
-        let doValuesMatch = attrValues?.length === this.selectedOptions.length &&
-        attrValues?.every(value => this.variantIds.includes(value));
-        if(doValuesMatch) {
-          this.selectedVariation = variation;
-          this.product['quantity'] = this.selectedVariation ? this.selectedVariation?.quantity : this.product?.quantity;
-          this.product['sku'] = this.selectedVariation ? this.selectedVariation?.sku : this.product?.sku;
-          this.product['sale_price'] = this.selectedVariation ? this.selectedVariation?.sale_price : this.product?.sale_price;
-          if(this.owlCar && this.selectedVariation.variation_image) {
-            this.owlCar.to(this.selectedVariation.variation_image.id.toString());
-          }
-
-          this.checkStockAvailable();
+    variations?.forEach(variation => {
+      let attrValues = variation?.attribute_values?.map(attribute_value => attribute_value?.id);
+      this.variantIds = this.selectedOptions?.map(variants => variants?.id);
+      let doValuesMatch = attrValues.length === this.selectedOptions.length &&
+      attrValues.every(value => this.variantIds.includes(value));
+      if(doValuesMatch) {
+        this.selectedVariation = variation;
+        this.product['quantity'] = this.selectedVariation ? this.selectedVariation?.quantity : this.product?.quantity;
+        this.product['sku'] = this.selectedVariation ? this.selectedVariation?.sku : this.product?.sku;
+        this.product['sale_price'] = this.selectedVariation ? this.selectedVariation?.sale_price : this.product?.sale_price;
+        if(this.owlCar && this.selectedVariation.variation_image) {
+          this.owlCar.to(this.selectedVariation.variation_image.id.toString());
         }
 
-        if(variation.stock_status == 'out_of_stock' || (!variation.status || !this.product.status)) {
-          if(variation?.attribute_values) {
-            variation.attribute_values.filter(attr_value =>  {
-              if(attrValues?.some(value => this.variantIds.includes(value))) {
-                if(attrValues?.every(value => this.variantIds.includes(value))){
-                  this.soldOutAttributesIds.push(attr_value.id);
-                } else if(!this.variantIds.includes(attr_value.id)) {
-                  this.soldOutAttributesIds.push(attr_value.id);
-                }
-              } else if(attrValues?.length == 1 && attrValues.includes(attr_value.id)) {
-                this.soldOutAttributesIds.push(attr_value.id);
-              }
-            });
+        this.checkStockAvailable();
+      }
+
+      if(variation.stock_status == 'out_of_stock' || (!variation.status || !this.product.status)) {
+        variation?.attribute_values.filter(attr_value =>  {
+          if(attrValues.some(value => this.variantIds.includes(value))) {
+            if(attrValues.every(value => this.variantIds.includes(value))){
+              this.soldOutAttributesIds.push(attr_value.id);
+            } else if(!this.variantIds.includes(attr_value.id)) {
+              this.soldOutAttributesIds.push(attr_value.id);
+            }
+          } else if(attrValues.length == 1 && attrValues.includes(attr_value.id)) {
+            this.soldOutAttributesIds.push(attr_value.id);
           }
-        }
-      });
-    }
+        });
+      }
+    });
 
     // Set Attribute Value
-    if(this.product?.attributes) {
-      this.product.attributes.filter(attribute => {
-        if(attribute?.attribute_values) {
-          attribute.attribute_values.filter(a_value => {
-            if(a_value.id == value.id) {
-              attribute.selected_value = a_value.value;
-            }
-          })
+    this.product?.attributes.filter(attribute => {
+      attribute.attribute_values.filter(a_value => {
+        if(a_value.id == value.id) {
+          attribute.selected_value = a_value.value;
         }
-      });
-    }
+      })
+    });
 
     if(this.selectedVariation && this.selectedVariation?.status
       && this.selectedVariation.stock_status == 'in_stock') {

@@ -41,12 +41,23 @@ export class AccountState{
     return this.accountService.getUserDetails().pipe(
       tap({
         next: result => {
-          ctx.patchState({
-            user: result,
-            permissions: result.permission,
-          });
+          if (result) {
+            ctx.patchState({
+              user: result,
+              permissions: result.permission,
+            });
+          } else {
+            ctx.patchState({
+              user: null,
+              permissions: []
+            });
+          }
         },
         error: err => {
+          ctx.patchState({
+            user: null,
+            permissions: []
+          });
           throw new Error(err?.error?.message);
         }
       })

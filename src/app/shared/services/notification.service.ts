@@ -35,7 +35,6 @@ export class NotificationService {
     this.alertSubject.next({type: 'error', message: message});
       this.zone.run(() => {
         if(this.notification && message) {
-          console.log("🚀 ~ NotificationService ~ this.zone.run ~ this.notification:", this.notification)
           this.toastr.error(message);
         }
       });

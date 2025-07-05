@@ -73,18 +73,21 @@ export interface CheckoutTotal {
 }
 
 export interface CheckoutPayload {
-    consumer_id: number;
+    consumer_id?: number;
     products: OrderProduct[];
-    shipping_address_id: number;
-    billing_address_id: number;
+    shipping_address_id?: number;
+    billing_address_id?: number;
     coupon?: string;
     points_amount?: boolean;
     wallet_balance?: boolean;
     delivery_description?: string;
     delivery_interval?: string;
     payment_method?: string;
+    name?: string;
+    email?: string;
+    country_code?: string;
+    phone?: string;
 }
-
 
 export interface OrderProduct {
     product_id: number;
