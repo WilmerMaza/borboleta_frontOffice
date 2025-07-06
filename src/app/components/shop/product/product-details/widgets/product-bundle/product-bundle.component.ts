@@ -81,7 +81,7 @@ export class ProductBundleComponent {
         const params: CartAddOrUpdate = {
           id: this.cartItem && (product.selected_variant && this.cartItem?.variation &&
             product.selected_variant?.id == this.cartItem?.variation?.id) ? this.cartItem.id : null,
-          product_id: product?.id,
+          product_id: product.numeric_id,
           product: product ? product : null,
           variation: product.selected_variant? product.selected_variant : null,
           variation_id: product.selected_variant ? product?.selected_variant?.id : null,

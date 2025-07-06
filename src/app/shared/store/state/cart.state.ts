@@ -39,6 +39,8 @@ export class CartState {
   ngxsOnInit(ctx: StateContext<CartStateModel>) {
     ctx.dispatch(new ToggleSidebarCart(false));
     ctx.dispatch(new CloseStickyCart());
+    // Cargar el carrito automáticamente al inicializar
+    ctx.dispatch(new GetCartItems());
   }
 
   @Selector()
@@ -49,6 +51,11 @@ export class CartState {
   @Selector()
   static cartTotal(state: CartStateModel) {
     return state.total;
+  }
+
+  @Selector()
+  static cartItemsCount(state: CartStateModel) {
+    return state.items.reduce((total, item) => total + Math.max(0, item.quantity || 0), 0);
   }
 
   @Selector()
@@ -68,22 +75,110 @@ export class CartState {
 
   @Action(GetCartItems)
   getCartItems(ctx: StateContext<CartStateModel>) {
-    // if (!this.store.selectSnapshot(state => state.auth && state.auth.access_token)) {
-    //   return;
-    // }
-    return this.cartService.getCartItems().pipe(
+    // Usar un userId genérico o sessionId
+    const sessionId = 'anonymous'; // O generar un sessionId único
+    return this.cartService.getCart(sessionId).pipe(
       tap({
-        next: result => {
+        next: (result: any) => {
+          console.log('🛒 === DATOS COMPLETOS DEL BACKEND ===');
+          console.log('Resultado completo:', JSON.stringify(result, null, 2));
+          
+          // El backend envía los datos en result.data
+          const cartData = result?.data || result;
+          console.log('📦 Datos del carrito procesados:', cartData);
+          
           // Set Selected Variant
-          result.items.filter((item: Cart) => {
-            if(item?.variation) {
-              item.variation.selected_variation = item?.variation?.attribute_values?.map(values => values.value)?.join('/');
-            }
-          });
-          ctx.patchState(result);
+          if (cartData && cartData.items) {
+            console.log(`📊 Número total de items recibidos: ${cartData.items.length}`);
+            console.log(`🎯 PRODUCTOS ENCONTRADOS:`);
+            cartData.items.forEach((item: Cart, index: number) => {
+              console.log(`  ${index + 1}. ${item.product?.name || 'Sin nombre'} (ID: ${item.product?.id}, Product_ID: ${item.product_id})`);
+            });
+            
+            // Log detallado de cada item
+            cartData.items.forEach((item: Cart, index: number) => {
+              console.log(`\n🔍 ITEM ${index + 1}:`);
+              console.log('  ID del item:', item.id);
+              console.log('  Product ID:', item.product_id);
+              console.log('  Tipo de product_id:', typeof item.product_id);
+              console.log('  Product object:', item.product);
+              console.log('  Product name:', item.product?.name);
+              console.log('  Product _id:', item.product?._id);
+              console.log('  Product numeric_id:', item.product?.numeric_id);
+              console.log('  Quantity:', item.quantity);
+              console.log('  Sub total:', item.sub_total);
+              console.log('  Variation:', item.variation);
+              console.log('  Variation ID:', item.variation_id);
+            });
+            
+            // MOSTRAR TODOS LOS PRODUCTOS TEMPORALMENTE
+            const itemsAntes = cartData.items.length;
+            console.log(`\n📊 PROCESANDO ${itemsAntes} PRODUCTOS:`);
+            
+            cartData.items.forEach((item: Cart, index: number) => {
+              console.log(`\n🔍 PRODUCTO ${index + 1}:`);
+              console.log('  - Nombre:', item.product?.name);
+              console.log('  - Item ID:', item.id);
+              console.log('  - Product ID (original):', item.product_id);
+              console.log('  - Product numeric_id:', item.product?.numeric_id);
+              console.log('  - Product _id:', item.product?._id);
+              
+              // ASIGNAR PRODUCT_ID SI NO LO TIENE
+              if (!item.product_id) {
+                if (item.product?.numeric_id) {
+                  item.product_id = item.product.numeric_id;
+                  console.log(`  ✅ Asignando numeric_id como product_id: ${item.product.numeric_id}`);
+                } else if (item.product?.id) {
+                  item.product_id = item.product.id;
+                  console.log(`  ✅ Asignando id como product_id: ${item.product.id}`);
+                } else {
+                  console.warn(`  ❌ No se pudo asignar product_id para: ${item.product?.name}`);
+                }
+              }
+              
+              console.log('  - Product ID (final):', item.product_id);
+              console.log('  - Cantidad:', item.quantity);
+              console.log('  - Sub Total:', item.sub_total);
+            });
+            
+            console.log(`\n📈 RESUMEN:`);
+            console.log(`  - Productos procesados: ${cartData.items.length}`);
+            console.log(`  - Productos con product_id válido: ${cartData.items.filter((item: Cart) => !!item.product_id).length}`);
+            
+            console.log(`\n📈 Resumen del filtro:`);
+            console.log(`  - Items antes del filtro: ${itemsAntes}`);
+            console.log(`  - Items después del filtro: ${cartData.items.length}`);
+            console.log(`  - Items eliminados: ${itemsAntes - cartData.items.length}`);
+            
+            // Procesar items válidos
+            cartData.items.forEach((item: Cart, index: number) => {
+              console.log(`\n💰 Procesando item válido ${index + 1}:`);
+              console.log('  - Nombre:', item.product?.name);
+              console.log('  - Precio unitario:', item.sub_total / item.quantity);
+              console.log('  - Cantidad:', item.quantity);
+              console.log('  - Sub total:', item.sub_total);
+              
+              if(item?.variation) {
+                item.variation.selected_variation = item?.variation?.attribute_values?.map((values: any) => values.value)?.join('/');
+                console.log('  - Variación seleccionada:', item.variation.selected_variation);
+              }
+            });
+          } else {
+            console.log('⚠️ No hay items en el carrito o cartData.items es undefined');
+          }
+          
+          const finalState = cartData || { items: [], total: 0, is_digital_only: false };
+          console.log('\n🎯 ESTADO FINAL DEL CARRITO:');
+          console.log('  - Items válidos:', finalState.items.length);
+          console.log('  - Total:', finalState.total);
+          console.log('  - Es solo digital:', finalState.is_digital_only);
+          console.log('=====================================\n');
+          
+          ctx.patchState(finalState);
         },
-        error: err => {
-          throw new Error(err?.error?.message);
+        error: (error) => {
+          console.error('❌ Error al obtener carrito:', error);
+          ctx.patchState({ items: [], total: 0, is_digital_only: false });
         }
       })
     );
@@ -91,16 +186,42 @@ export class CartState {
 
   @Action(AddToCart)
   add(ctx: StateContext<CartStateModel>, action: AddToCart) {
-     if (action.payload.id) {
-      return this.store.dispatch(new UpdateCart(action.payload));
-    }
+    console.log('🛒 === AGREGANDO AL CARRITO ===');
+    console.log('Payload completo:', action.payload);
+    console.log('Product ID enviado:', action.payload.product_id);
+    console.log('Product object:', action.payload.product);
+    console.log('Variation:', action.payload.variation);
+    console.log('Quantity:', action.payload.quantity);
+    
+    // El backend ya envía product_id como number, no necesitamos conversión
+    const payload = {
+      product_id: action.payload.product_id,
+      variation_id: action.payload.variation_id,
+      quantity: action.payload.quantity
+    };
 
-    return this.store.dispatch(new AddToCartLocalStorage(action.payload));
+    console.log('📤 Enviando al backend:', payload);
+
+    const sessionId = 'anonymous';
+    return this.cartService.addToCart(payload, sessionId).pipe(
+      tap({
+        next: (result: any) => {
+          console.log('📥 Respuesta del backend después de agregar:', result);
+          console.log('Estructura de la respuesta:', JSON.stringify(result, null, 2));
+          
+          // Recargar el carrito después de agregar
+          console.log('🔄 Recargando carrito...');
+          this.store.dispatch(new GetCartItems());
+        },
+        error: (error) => {
+          console.error('❌ Error al agregar al carrito:', error);
+        }
+      })
+    );
   }
 
   @Action(AddToCartLocalStorage)
   addToLocalStorage(ctx: StateContext<CartStateModel>, action: AddToCartLocalStorage) {
-
     let salePrice = action.payload.variation ?  action.payload.variation.sale_price : action.payload.product?.sale_price;
     let result: CartModel = {
       is_digital_only: false,
@@ -194,6 +315,7 @@ export class CartState {
 
   @Action(UpdateCart)
   update(ctx: StateContext<CartStateModel>, action: UpdateCart) {
+    console.log('🔄 Ejecutando UpdateCart:', action.payload);
     const state = ctx.getState();
     const cart = [...state.items];
     const index = cart.findIndex(item => Number(item.id) === Number(action.payload.id));
@@ -202,6 +324,7 @@ export class CartState {
       Number(cart[index].id) === Number(action.payload.id) &&
       Number(cart[index]?.variation_id) != Number(action.payload.variation_id)) {
 
+        console.log('🔄 Reemplazando item en carrito');
         return this.store.dispatch(new ReplaceCart(action.payload));
     }
 
@@ -237,6 +360,7 @@ export class CartState {
     }
 
     if (cart[index].quantity < 1) {
+      console.log('🗑️ Eliminando item del carrito (cantidad < 1)');
       this.store.dispatch(new DeleteCart(action.payload.id!));
       return of();
     }
@@ -247,87 +371,72 @@ export class CartState {
 
     ctx.patchState({
       ...state,
-      is_digital_only: cart.map(item => item.product && item?.product?.product_type).every(item => item == 'digital'),
+      items: cart,
       total: total
     });
-
-    if (!this.store.selectSnapshot(state => state.auth && state.auth.access_token)) {
-      return;
-    }
-    // return this.cartService.updateCart(action.payload).pipe(
-    //   tap({
-    //     error: err => {
-    //       throw new Error(err?.error?.message);
-    //     }
-    //   })
-    // );
   }
 
   @Action(ReplaceCart)
   replace(ctx: StateContext<CartStateModel>, action: ReplaceCart) {
-
+    console.log('🔄 Ejecutando ReplaceCart:', action.payload);
     const state = ctx.getState();
     const cart = [...state.items];
     const index = cart.findIndex(item => Number(item.id) === Number(action.payload.id));
 
-    // Update Cart If cart id same but variant id is different
-    if(cart[index]?.variation && action.payload.variation_id &&
-      Number(cart[index].id) === Number(action.payload.id) &&
-      Number(cart[index]?.variation_id) != Number(action.payload.variation_id)) {
-      cart[index].variation = action.payload.variation!;
-      cart[index].variation_id = action.payload.variation_id;
-      cart[index].variation.selected_variation = cart[index]?.variation?.attribute_values?.map(values => values.value)?.join('/')
-    }
+    if (index !== -1) {
+      cart[index] = {
+        ...cart[index],
+        variation: action.payload.variation!,
+        variation_id: action.payload.variation_id,
+        quantity: action.payload.quantity,
+        sub_total: action.payload.quantity * (action.payload.variation?.sale_price || cart[index].product.sale_price)
+      };
 
-    cart[index].quantity = 0;
+      if(cart[index]?.variation) {
+        cart[index].variation.selected_variation = cart[index]?.variation?.attribute_values?.map(values => values.value)?.join('/');
+      }
 
-    const productQty = cart[index]?.variation ? cart[index]?.variation?.quantity : cart[index]?.product?.quantity;
+      let total = cart.reduce((prev, curr: Cart) => {
+        return (prev + Number(curr.sub_total));
+      }, 0);
 
-    if (productQty < cart[index]?.quantity + action?.payload.quantity) {
-      this.notificationService.showError(`You can not add more items than available. In stock ${productQty} items.`);
-      return false;
-    }
-
-    cart[index].quantity = cart[index]?.quantity + action?.payload.quantity;
-    cart[index].sub_total = cart[index]?.quantity * (cart[index]?.variation ? cart[index]?.variation?.sale_price : cart[index].product.sale_price);
-
-    if (cart[index].quantity < 1) {
-      this.store.dispatch(new DeleteCart(action.payload.id!));
-      return of();
-    }
-
-    let total = state.items.reduce((prev, curr: Cart) => {
-      return (prev + Number(curr.sub_total));
-    }, 0);
-
-    ctx.patchState({
-      ...state,
-      total: total
-    });
-
-    if (!this.store.selectSnapshot(state => state.auth && state.auth.access_token)) {
-      return;
+      ctx.patchState({
+        ...state,
+        items: cart,
+        total: total
+      });
     }
   }
 
   @Action(DeleteCart)
   delete(ctx: StateContext<CartStateModel>, { id }: DeleteCart) {
+    console.log('🗑️ Ejecutando DeleteCart para id:', id);
+    
+    // Primero actualizar el estado local
     const state = ctx.getState();
-
-    let cart = state.items.filter(value => value.id !== id);
+    const cart = state.items.filter(item => Number(item.id) !== Number(id));
     let total = cart.reduce((prev, curr: Cart) => {
       return (prev + Number(curr.sub_total));
     }, 0);
 
     ctx.patchState({
+      ...state,
       items: cart,
-      is_digital_only: state.items.map(item => item.product && item?.product?.product_type).every(item => item == 'digital'),
       total: total
     });
 
-    if (!this.store.selectSnapshot(state => state.auth && state.auth.access_token)) {
-      return;
-    }
+    // Luego llamar al endpoint del backend
+    const sessionId = 'anonymous';
+    return this.cartService.removeCartItem(id.toString(), sessionId).pipe(
+      tap({
+        next: (result: any) => {
+          console.log('✅ Item eliminado exitosamente del backend:', result);
+        },
+        error: (error) => {
+          console.error('❌ Error al eliminar item del backend:', error);
+        }
+      })
+    );
   }
 
   @Action(SyncCart)
@@ -337,34 +446,34 @@ export class CartState {
 
   @Action(CloseStickyCart)
   closeStickyCart(ctx: StateContext<CartStateModel>) {
-    const state = ctx.getState();
+    console.log('❌ Cerrando sticky cart');
     ctx.patchState({
-      ...state,
-      stickyCartOpen: false,
+      stickyCartOpen: false
     });
   }
 
   @Action(ToggleSidebarCart)
   toggleSidebarCart(ctx: StateContext<CartStateModel>, { value }: ToggleSidebarCart) {
-    const state = ctx.getState();
+    console.log('🔄 Toggle sidebar cart:', value);
     ctx.patchState({
-      ...state,
-      sidebarCartOpen: value,
+      sidebarCartOpen: value
     });
   }
 
   @Action(ClearCart)
   clearCart(ctx: StateContext<CartStateModel>) {
-    if (!this.store.selectSnapshot(state => state.auth && state.auth.access_token)) {
-      return ctx.patchState({
-        items: [],
-        total: 0
-      });
-    } else {
-      return ctx.patchState({
-        items: [],
-        total: 0
-      });
-    }
+    console.log('🗑️ Ejecutando ClearCart');
+    const sessionId = 'anonymous';
+    return this.cartService.clearCart(sessionId).pipe(
+      tap({
+        next: (result: any) => {
+          console.log('✅ Carrito vaciado exitosamente:', result);
+          ctx.patchState({ items: [], total: 0, is_digital_only: false });
+        },
+        error: (error) => {
+          console.error('❌ Error al vaciar carrito:', error);
+        }
+      })
+    );
   }
 }

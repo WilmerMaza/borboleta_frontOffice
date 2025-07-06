@@ -44,7 +44,7 @@ export class CompareComponent {
     if(product) {
       const params: CartAddOrUpdate = {
         id: null,
-        product_id: product?.id,
+        product_id: product?.numeric_id || product?.id,
         product: product ? product : null,
         variation: null,
         variation_id: null,

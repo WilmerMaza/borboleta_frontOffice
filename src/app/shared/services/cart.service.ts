@@ -1,48 +1,52 @@
-import { Injectable, inject, PLATFORM_ID } from '@angular/core';
-import { Observable, Subject, of } from 'rxjs';
-import { CartModel } from '../interface/cart.interface';
-import { isPlatformBrowser } from '@angular/common';
+import { Injectable } from '@angular/core';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { Observable, Subject } from 'rxjs';
+import { environment } from '../../../environments/environment.development';
 
 @Injectable({
   providedIn: 'root'
 })
 export class CartService {
+  private updateQtyClickEvent = new Subject<void>();
 
-  private subjectQty = new Subject<boolean>();
-  private platformId = inject(PLATFORM_ID);
+  constructor(private http: HttpClient) {}
 
-  constructor() {}
-
-
-
-  getCartItems(): Observable<CartModel> {
-    if (isPlatformBrowser(this.platformId)) {
-      const data = localStorage.getItem('cart');
-      if (data) {
-        return of(JSON.parse(data) as CartModel);
-      }
-    }
-
-    return of({
-
-      items: [],
-      total: 0,
-      is_digital_only: false,
-      stickyCartOpen: false,
-      sidebarCartOpen: false
-    });
+  // Obtener el carrito del usuario (user-id en headers)
+  getCart(userId: string): Observable<any> {
+    const headers = new HttpHeaders({ 'user-id': userId });
+    return this.http.get<any>(`${environment.URLS}/cart`, { headers });
   }
 
-
-  updateQty() {
-    this.subjectQty.next(true);
+  // Agregar producto al carrito
+  addToCart(payload: { product_id: number, variation_id?: number | null, quantity: number }, userId: string): Observable<any> {
+    const headers = new HttpHeaders({ 'user-id': userId });
+    return this.http.post<any>(`${environment.URLS}/cart`, payload, { headers });
   }
 
-  /**
-   * Devuelve el observable que escucha los cambios de cantidad
-   */
-  getUpdateQtyClickEvent(): Observable<boolean> {
-    return this.subjectQty.asObservable();
+  
+  updateCartItem(cart_item_id: string, quantity: number, userId: string): Observable<any> {
+    const headers = new HttpHeaders({ 'user-id': userId });
+    return this.http.put<any>(`${environment.URLS}/cart/${cart_item_id}`, { quantity }, { headers });
   }
 
+  // Eliminar producto del carrito
+  removeCartItem(cart_item_id: string, userId: string): Observable<any> {
+    const headers = new HttpHeaders({ 'user-id': userId });
+    return this.http.delete<any>(`${environment.URLS}/cart/${cart_item_id}`, { headers });
+  }
+
+  // Vaciar el carrito
+  clearCart(userId: string): Observable<any> {
+    const headers = new HttpHeaders({ 'user-id': userId });
+    return this.http.delete<any>(`${environment.URLS}/cart`, { headers });
+  }
+
+  // Métodos para compatibilidad con componentes existentes
+  getUpdateQtyClickEvent(): Observable<void> {
+    return this.updateQtyClickEvent.asObservable();
+  }
+
+  updateQty(): void {
+    this.updateQtyClickEvent.next();
+  }
 }

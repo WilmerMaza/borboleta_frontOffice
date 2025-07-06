@@ -47,7 +47,7 @@ export class VariationModalComponent {
     if(product && this.variation) {
       const params: CartAddOrUpdate = {
         id: this.variation.id,
-        product_id: product?.id,
+        product_id: product?.numeric_id || product?.id,
         product: product ? product : null,
         variation: this.selectedVariation ? this.selectedVariation : null,
         variation_id: this.selectedVariation ? this.selectedVariation.id : null,

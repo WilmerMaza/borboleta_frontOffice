@@ -114,7 +114,7 @@ export class ProductContentComponent {
       const params: CartAddOrUpdate = {
         id: this.cartItem && (this.selectedVariation && this.cartItem?.variation &&
           this.selectedVariation?.id == this.cartItem?.variation?.id) ? this.cartItem.id : null,
-        product_id: product?.id,
+        product_id: product?.numeric_id || product?.id,
         product: product ? product : null,
         variation: this.selectedVariation ? this.selectedVariation : null,
         variation_id: this.selectedVariation?.id ? this.selectedVariation?.id : null,

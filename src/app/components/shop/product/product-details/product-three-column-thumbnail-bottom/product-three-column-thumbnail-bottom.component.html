@@ -7,22 +7,22 @@
             <div class="row g-sm-4 g-3">
               <div class="col-12">
                 <div class="product-slick position-relative">
-                  @if(product.is_sale_enable || product.is_trending || product.is_featured){
+                  @if(product?.is_sale_enable || product?.is_trending || product?.is_featured){
                     <ul class="product-detail-label">
-                      @if(product.is_sale_enable){
+                      @if(product?.is_sale_enable){
                         <li class="soldout">{{ 'sale' | translate }}</li>
                       }
-                      @if(product.is_trending){
+                      @if(product?.is_trending){
                         <li class="trending">{{ 'trending' | translate }}</li>
                       }
-                      @if(product.is_featured){
+                      @if(product?.is_featured){
                         <li class="featured">{{ 'featured' | translate }}</li>
                       }
                     </ul>
                   }
                   <owl-carousel-o [options]="productMainThumbSlider" #owlCar id="thumbnailCarousel" (initialized)="onCarouselLoad()" (changed)="onSlideChange($event)">
-                    @if(product.product_galleries?.length || selectedVariation && selectedVariation.variation_galleries.length){
-                      @for(image of (selectedVariation && selectedVariation.variation_galleries.length ? selectedVariation && selectedVariation.variation_galleries : product.product_galleries); track image.id; let i = $index){
+                    @if(product?.product_galleries?.length || selectedVariation && selectedVariation.variation_galleries.length){
+                      @for(image of (selectedVariation && selectedVariation.variation_galleries.length ? selectedVariation && selectedVariation.variation_galleries : product?.product_galleries); track image.id; let i = $index){
                         <ng-template carouselSlide [id]="image.id.toString()">
                           @if(videType.includes(image.mime_type)){
                             <div class="slider-main-img">
@@ -48,22 +48,22 @@
                       }
                     }
                   </owl-carousel-o>
-                  @if(!product.product_galleries?.length){
-                    <img [src]="product.product_thumbnail ? product.product_thumbnail.original_url : 'assets/images/placeholder/product.png'" class="img-fluid" [alt]="product.name">
+                  @if(!product?.product_galleries?.length){
+                    <img [src]="product?.product_thumbnail?.original_url || 'assets/images/placeholder/product.png'" class="img-fluid" [alt]="product?.name">
                   }
 
-                  @if(product.product_type == 'digital'){
+                  @if(product?.product_type == 'digital'){
                     <app-product-digital-options [product]="product"></app-product-digital-options>
                   }
                   
                 </div>
               </div>
 
-              @if(product.product_galleries?.length || selectedVariation && selectedVariation.variation_galleries.length){
+              @if(product?.product_galleries?.length || selectedVariation && selectedVariation.variation_galleries.length){
                 <div class="col-12">
                   <div class="slider-nav ">
                     <owl-carousel-o [options]="productThumbSlider" #thumbnailCarousel>
-                      @for(image of (selectedVariation && selectedVariation.variation_galleries.length ? selectedVariation && selectedVariation.variation_galleries : product.product_galleries); track image.id){
+                      @for(image of (selectedVariation && selectedVariation.variation_galleries.length ? selectedVariation && selectedVariation.variation_galleries : product?.product_galleries); track image.id){
                         <ng-template carouselSlide [id]="image.id.toString()">
                           <div>
                             <div class="slider-image" [ngClass]="{'active' : (image.id.toString() === activeSlide)}">
@@ -78,7 +78,7 @@
                                   <i class="ri-music-2-line"></i>
                                 </button>
                               }@else {
-                                <img [src]="image ? image.original_url : 'assets/images/placeholder/product.png'" class="img-fluid" [alt]="product.name" (click)="owlCar.to(activeSlide = image.id.toString())">
+                                <img [src]="image ? image.original_url : 'assets/images/placeholder/product.png'" class="img-fluid" [alt]="product?.name" (click)="owlCar.to(activeSlide = image.id.toString())">
                               }
                             </div>
                           </div>
@@ -106,7 +106,7 @@
           <div class="product-right product-form-box product-page-details">
             <app-product-content [product]="product" [option]="option" (selectedVariant)="selectedVariant($event)" [owlCar]="owlCar"></app-product-content>
 
-            @if(product.cross_sell_products && product.cross_sell_products.length){
+            @if(product?.cross_sell_products?.length){
               <app-product-bundle [product]="product"></app-product-bundle>
             }
           </div>

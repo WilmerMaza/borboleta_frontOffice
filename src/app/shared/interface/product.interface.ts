@@ -16,6 +16,8 @@ export interface Product {
     highlightedName: string;
     categories_ids: number[];
     id: number;
+    _id?: string; // MongoDB ObjectId
+    numeric_id?: number; // ID numérico para el backend
     name: string;
     slug: string;
     brand_id: number | null;

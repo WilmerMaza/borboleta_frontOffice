@@ -46,7 +46,7 @@
       }
       <div class="cart_media" [class.empty-cart]="!(cartItem$ | async)?.length">
         <ul class="cart_product">
-          @for(item of cartItem$ | async; track item.id + '_' + (item.variation ? item.variation.id : item.product.id); let i = $index){
+          @for(item of cartItem$ | async; track item.id + '_' + (item.variation ? item.variation.id : (item.product?.id || item.product_id || 0)); let i = $index){
             <li>
               <div class="media">
                 <a href="javascript:void(0)">
@@ -72,7 +72,7 @@
                         <app-button
                           [type]="'button'"
                           [class]="'btn quantity-left-minus'"
-                          [id]="'add-to-cart'+item.product.id"
+                          [id]="'add-to-cart'+(item.product?.id || item.product_id || item.id)"
                           (click)="updateQuantity(item, -1)"
                           [spinner]="false">
                           @if(item.quantity > 1){
@@ -88,7 +88,7 @@
                         <app-button
                           [type]="'button'"
                           [class]="'btn quantity-right-plus'"
-                          [id]="'qty-left-minus'+item.product.id"
+                          [id]="'qty-left-minus'+(item.product?.id || item.product_id || item.id)"
                           (click)="updateQuantity(item, 1)"
                           [spinner]="false">
                           <i class="ri-add-line"></i>
@@ -100,7 +100,7 @@
                     @if(item?.variation){
                       <app-button
                         [class]="'edit-button close_button'"
-                        [id]="'cart_item_edit_btn'+item.product.id"
+                        [id]="'cart_item_edit_btn'+(item.product?.id || item.product_id || item.id)"
                         [spinner]="false"
                         [iconClass]="'ri-pencil-line'"
                         (click)="openVariationModal(item)">
@@ -108,7 +108,7 @@
                     }
                     <app-button
                       [class]="'delete-button close_button'"
-                      [id]="'cart_item_delete_btn'+item.product.id"
+                      [id]="'cart_item_delete_btn'+(item.product?.id || item.product_id || item.id)"
                       [spinner]="false"
                       [iconClass]="'ri-delete-bin-line'"
                       (click)="delete(item.id)">

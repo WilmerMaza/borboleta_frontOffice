@@ -32,13 +32,17 @@ export class CartComponent {
     items: [{ label: 'Cart', active: true }]
   }
 
-  constructor(private store: Store) {}
+  constructor(private store: Store) {
+    this.cartItem$.subscribe(items => {
+      console.log('🛒 [cart.component.ts] Items recibidos en el carrito:', items);
+    });
+  }
 
   updateQuantity(item: Cart, qty: number) {
     const params: CartAddOrUpdate = {
       id: item?.id,
       product: item?.product,
-      product_id: item?.product?.id,
+      product_id: item?.product?.numeric_id || item?.product?.id,
       variation: item?.variation,
       variation_id: item?.variation_id ? item?.variation_id : null,
       quantity: qty
