@@ -53,12 +53,13 @@ export class ThemeOptionState{
   getThemeOptions(ctx: StateContext<ThemeOptionStateModel>){
     return this.themeOptionService.getThemeOption().pipe(
       tap({
-        next: (result: any) => {
+        next: ({data}: any) => {
+        
           const state = ctx.getState();
           ctx.setState({
             ...state,
-            theme_option: result.options
-          })
+            theme_option: data.options,
+          });
         },
         error: (err) => {
           throw new Error(err?.error?.message);

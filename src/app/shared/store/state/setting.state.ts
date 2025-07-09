@@ -43,9 +43,6 @@ export class SettingState {
         next: (result) => {
           const state = ctx.getState();
 
-          // Imprimir el contenido de la configuración recibida
-          console.log('SETTING RESULT:', result);
-          console.log('SETTING VALUES:', result.values);
 
           if(!state.selectedCurrency && result?.values?.general){
             state.selectedCurrency = result?.values?.general.default_currency;

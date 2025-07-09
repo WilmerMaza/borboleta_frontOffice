@@ -107,18 +107,17 @@ export class CategoryState{
   getCategories(ctx: StateContext<CategoryStateModel>, action: GetCategories) {
     return this.categoryService.getCategories(action.payload).pipe(
       tap({
-        next: result => { 
+        next: ({ data, pagination: { total } }: any) => {
           ctx.patchState({
             category: {
-              data: result.data || [],
-              total: result?.total || 0,
-        
-            }
+              data: data || [],
+              total: total || 0,
+            },
           });
         },
-        error: err => { 
-          console.error('Error loading categories:', err);
-        }
+        error: (err) => {
+          console.error("Error loading categories:", err);
+        },
       })
     );
   }
@@ -127,19 +126,19 @@ export class CategoryState{
   getCategory(ctx: StateContext<CategoryStateModel>, action: GetCategory) {
     return this.categoryService.getCategories(action.payload).pipe(
       tap({
-        next: result => {
-          if(result && result.data) {
+        next: ({ data, pagination: { total } }: any) => {
+          if (data) {
             ctx.patchState({
               category: {
-                data: result.data,
-                total: result?.total ? result?.total : result.data.length
-              }
+                data: data,
+                total: total ?? data.length,
+              },
             });
           }
         },
-        error: err => {
+        error: (err) => {
           throw new Error(err?.error?.message);
-        }
+        },
       })
     );
   }
@@ -148,19 +147,19 @@ export class CategoryState{
   GetFooterCategories(ctx: StateContext<CategoryStateModel>, action: GetFooterCategories) {
     return this.categoryService.getCategories(action.payload).pipe(
       tap({
-        next: result => {
-          if(result && result.data) {
+        next: ({ data, pagination: { total } }: any) => {
+          if (data) {
             ctx.patchState({
               footerCategory: {
-                data: result.data,
-                total: result?.total ? result?.total : result.data.length
-              }
+                data: data,
+                total: total ?? data.length,
+              },
             });
           }
         },
-        error: err => {
+        error: (err) => {
           throw new Error(err?.error?.message);
-        }
+        },
       })
     );
   }
@@ -169,19 +168,19 @@ export class CategoryState{
   GetHeaderCategories(ctx: StateContext<CategoryStateModel>, action: GetHeaderCategories) {
     return this.categoryService.getCategories(action.payload).pipe(
       tap({
-        next: result => {
-          if(result && result.data) {
+        next: ({ data, pagination: { total } }: any) => {
+          if (data) {
             ctx.patchState({
               headerCategory: {
-                data: result.data,
-                total: result?.total ? result?.total : result.data.length
-              }
+                data: data,
+                total: total ?? data.length,
+              },
             });
           }
         },
-        error: err => {
+        error: (err) => {
           throw new Error(err?.error?.message);
-        }
+        },
       })
     );
   }
