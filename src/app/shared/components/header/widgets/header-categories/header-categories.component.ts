@@ -17,19 +17,24 @@ export class HeaderCategoriesComponent {
 
   headerCategory$: Observable<CategoryModel> = inject(Store).select(CategoryState.headerCategory);
 
-  @Input() categoryIds?: (string | number)[];
+  @Input() categoryIds: number[];
 
   public categories: Category[];
 
   constructor(private store: Store){}
 
   ngOnInit(){
-    this.store.dispatch(new GetHeaderCategories());
+    this.store.dispatch(new GetHeaderCategories({
+      status: 1,
+      ids: this.categoryIds?.join(',')
+    }))
 
-    this.headerCategory$.subscribe((res) => {
-      if(res && res.data){
-        this.categories = res.data.filter(category => category.status === true);
-      }
-    })
+    if(this.categoryIds && this.categoryIds.length) {
+      this.headerCategory$.subscribe((res) => {
+        if(res){
+          this.categories = res.data.filter(category => this.categoryIds?.includes(category.id))
+        }
+      })
+    }
   }
 }
