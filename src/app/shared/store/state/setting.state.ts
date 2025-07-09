@@ -43,6 +43,7 @@ export class SettingState {
         next: (result) => {
           const state = ctx.getState();
 
+
           if(!state.selectedCurrency && result?.values?.general){
             state.selectedCurrency = result?.values?.general.default_currency;
           }

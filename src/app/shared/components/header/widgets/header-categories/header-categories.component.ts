@@ -30,11 +30,13 @@ export class HeaderCategoriesComponent {
     }))
 
     if(this.categoryIds && this.categoryIds.length) {
-      this.headerCategory$.subscribe((res) => {
-        if(res){
-          this.categories = res.data.filter(category => this.categoryIds?.includes(category.id))
+      this.headerCategory$.subscribe(({ data }: any) => {
+        if (data && data.length) {
+          this.categories = data.filter((category: any) =>
+            this.categoryIds?.includes(category.numeric_id)
+          );
         }
-      })
+      });
     }
   }
 }
