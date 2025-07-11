@@ -14,6 +14,7 @@ import { horizontalProductSlider, productSlider } from '../../../../shared/data/
 import { TranslateModule } from '@ngx-translate/core';
 
 
+
 @Component({
     selector: 'app-theme-product',
     imports: [CommonModule, ProductBoxComponent, CarouselModule, NoDataComponent, TranslateModule],
@@ -35,12 +36,15 @@ export class ThemeProductComponent {
 
   product$: Observable<Product[]> = inject(Store).select(ProductState.productByIds);
 
-  constructor(public productService: ProductService) {}
+  constructor(public productService: ProductService, private store: Store) {}
 
   ngOnChanges() {
+ 
+    
     if (Array.isArray(this.productIds) && this.productIds.length) {
-      this.product$.subscribe(products => {
-        this.products = products.filter(product => this.productIds?.includes(product.id));
+
+      this.store.select(state => state.product.productByIds).subscribe((products: any[]) => {
+        this.products = products.filter(product => this.productIds?.includes(product.numeric_id));
       });
     }
   }

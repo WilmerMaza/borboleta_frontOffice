@@ -1,106 +1,108 @@
 <!-- Home Section Start -->
 <section class="p-0">
-    <div class="home-slider">
-      <app-theme-home-slider [banners]="data?.content?.home_banner"></app-theme-home-slider>
-    </div>
-  </section>
-  <!-- Home Section End -->
-  <app-theme-title [title]="data?.content?.products_list" [type]="'basic'"></app-theme-title>
-  <!-- Banner Section Start -->
-  <section class="pb-0 ratio2_1 banner-section">
-    <div class="container">
-      <div class="row g-sm-4 g-3">
-        @if(data?.content?.offer_banner?.banner_1?.status){
-        <div [ngClass]="data?.content?.offer_banner?.banner_2?.status ? 'col-6' : 'col-md-12'">
-          <div class="position-relative">
-            <app-image-link [image]="data?.content?.offer_banner?.banner_1"
-              [placeholder]="'assets/images/placeholder/two_column_banner.png'" [bgImage]="true"></app-image-link>
-            <div class="banner-skeleton">
-              <div class="skeleton-content">
-                <p class="card-text placeholder-glow row g-lg-3 g-0">
-                  <span class="col-lg-7 col-9">
-                    <span class="placeholder"></span>
-                  </span>
-                  <span class="col-lg-9 col-12">
-                    <span class="placeholder"></span>
-                  </span>
-                </p>
-              </div>
+  <div class="home-slider">
+    <app-theme-home-slider [banners]="data?.content?.home_banner"></app-theme-home-slider>
+  </div>
+</section>
+<!-- Home Section End -->
+<app-theme-title [title]="data?.content?.products_list" [type]="'basic'"></app-theme-title>
+<!-- Banner Section Start -->
+<section class="pb-0 ratio2_1 banner-section">
+  <div class="container">
+    <div class="row g-sm-4 g-3">
+      @if(data?.content?.offer_banner?.banner_1?.status){
+      <div [ngClass]="data?.content?.offer_banner?.banner_2?.status ? 'col-6' : 'col-md-12'">
+        <div class="position-relative">
+          <app-image-link [image]="data?.content?.offer_banner?.banner_1"
+            [placeholder]="'assets/images/placeholder/two_column_banner.png'" [bgImage]="true"></app-image-link>
+          <div class="banner-skeleton">
+            <div class="skeleton-content">
+              <p class="card-text placeholder-glow row g-lg-3 g-0">
+                <span class="col-lg-7 col-9">
+                  <span class="placeholder"></span>
+                </span>
+                <span class="col-lg-9 col-12">
+                  <span class="placeholder"></span>
+                </span>
+              </p>
             </div>
           </div>
         </div>
-        }
-        @if(data?.content?.offer_banner?.banner_2?.status){
-        <div [ngClass]="data?.content?.offer_banner?.banner_1?.status ? 'col-6' : 'col-md-12'">
-          <div class="position-relative">
-            <app-image-link [image]="data?.content?.offer_banner?.banner_2"
-              [placeholder]="'assets/images/placeholder/two_column_banner.png'" [bgImage]="true"></app-image-link>
-            <div class="banner-skeleton">
-              <div class="skeleton-content">
-                <p class="card-text placeholder-glow row g-lg-3 g-0">
-                  <span class="col-lg-7 col-9">
-                    <span class="placeholder"></span>
-                  </span>
-                  <span class="col-lg-9 col-12">
-                    <span class="placeholder"></span>
-                  </span>
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-        }
       </div>
+      }
+      @if(data?.content?.offer_banner?.banner_2?.status){
+      <div [ngClass]="data?.content?.offer_banner?.banner_1?.status ? 'col-6' : 'col-md-12'">
+        <div class="position-relative">
+          <app-image-link [image]="data?.content?.offer_banner?.banner_2"
+            [placeholder]="'assets/images/placeholder/two_column_banner.png'" [bgImage]="true"></app-image-link>
+          <div class="banner-skeleton">
+            <div class="skeleton-content">
+              <p class="card-text placeholder-glow row g-lg-3 g-0">
+                <span class="col-lg-7 col-9">
+                  <span class="placeholder"></span>
+                </span>
+                <span class="col-lg-9 col-12">
+                  <span class="placeholder"></span>
+                </span>
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+      }
     </div>
-  </section>
-  <!-- Banner Section End -->
+  </div>
+</section>
+<!-- Banner Section End -->
+
+<!-- Product slider Start -->
+@if(data?.content?.products_list?.status && data?.content?.products_list?.product_ids){
   
-  <!-- Product slider Start -->
-  @if(data?.content?.products_list?.status && data?.content?.products_list?.product_ids){
-    
-  <app-theme-title [title]="data?.content?.products_list" [type]="'basic'"></app-theme-title>
-  <section class="section-b-space pt-0">
-    <div class="container">
-      <app-theme-product [productIds]="data?.content?.products_list?.product_ids || []" [style]="'vertical'"
-        [slider]="true"></app-theme-product>
-    </div>
-  </section>
-  }
-  <!-- Product slider end -->
-  
-  <!-- Full Banner Start -->
-  @if(data?.content?.banner?.status){
+
+
+<app-theme-title [title]="data?.content?.products_list" [type]="'basic'"></app-theme-title>
+<section class="section-b-space pt-0">
+  <div class="container">
+    <app-theme-product [productIds]="data?.content?.products_list?.product_ids || []" [style]="'vertical'"
+      [slider]="true"></app-theme-product>
+  </div>
+</section>
+}
+<!-- Product slider end -->
+
+<!-- Full Banner Start -->
+@if(data?.content?.banner?.status){
+<section class="p-0 banner-sale">
+  <app-image-link [image]="data?.content?.banner" [placeholder]="'assets/images/full_column_banner.png'"
+    [bgImage]="false"></app-image-link>
+</section>
+}
+<!-- Full Banner End -->
+
+<!-- Tab product Start-->
+@if(data?.content?.category_product?.status && data?.content?.category_product?.category_ids){
+<app-theme-title [title]="data?.content?.category_product" [type]="'basic'"></app-theme-title>
+<section class="section-b-space category-tab-section pt-0">
+  <div class="container">
+    <app-theme-product-tab-section [categoryIds]="data?.content?.category_product?.category_ids" [style]="'vertical'">
+    </app-theme-product-tab-section>
+  </div>
+</section>
+}
+
+@if(data?.content?.banner_piepagina?.status){
   <section class="p-0 banner-sale">
-    <app-image-link [image]="data?.content?.banner" [placeholder]="'assets/images/full_column_banner.png'"
+    <app-image-link [image]="data?.content?.banner_piepagina" [placeholder]="'assets/images/full_column_banner.png'"
       [bgImage]="false"></app-image-link>
   </section>
   }
-  <!-- Full Banner End -->
-  
-  <!-- Tab product Start-->
-  @if(data?.content?.category_product?.status && data?.content?.category_product?.category_ids){
-  <app-theme-title [title]="data?.content?.category_product" [type]="'basic'"></app-theme-title>
-  <section class="section-b-space category-tab-section pt-0">
-    <div class="container">
-      <app-theme-product-tab-section [categoryIds]="data?.content?.category_product?.category_ids" [style]="'vertical'">
-      </app-theme-product-tab-section>
-    </div>
-  </section>
-  }
+<!-- Tab product End-->
 
-  @if(data?.content?.banner_piepagina?.status){
-    <section class="p-0 banner-sale">
-      <app-image-link [image]="data?.content?.banner_piepagina" [placeholder]="'assets/images/full_column_banner.png'"
-        [bgImage]="false"></app-image-link>
-    </section>
-    }
-  <!-- Tab product End-->
-  
-  <!-- Service Start -->
- 
-  <!-- Service End -->
-  
+<!-- Service Start -->
 
-  <!-- Brand Section Start -->
+<!-- Service End -->
 
-  <!-- Brand Section End -->
+
+<!-- Brand Section Start -->
+
+<!-- Brand Section End -->
