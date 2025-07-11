@@ -1,4 +1,3 @@
-
 import { Injectable } from "@angular/core";
 import { Router } from "@angular/router";
 import { Action, Selector, State, StateContext, Store } from "@ngxs/store";
@@ -112,104 +111,81 @@ export class ProductState{
   getProducts(ctx: StateContext<ProductStateModel>, action: GetProducts) {
     this.productService.skeletonLoader = true;
     return this.productService.getProducts(action.payload).pipe(
-
       tap({
         next: (result: ProductModel) => {
           let products = result.data || [];
-          if(action?.payload) {
-            // Note:- For Internal filter purpose only, once you apply filter logic on server side then you can remove  it as per your requirement.
-            // Note:- we have covered only few filters as demo purpose
-            products = result.data.filter(product =>
-              (action?.payload?.['store_slug'] && product?.store?.slug == action?.payload?.['store_slug']) ||
-              (
-                action?.payload?.['category'] && product?.categories?.length &&
-                product?.categories?.some(category => action?.payload?.['category']?.split(',')?.includes(category.slug))
-              )
-            )
-
-            products = products.length ? products : result.data;
-
-            if(action?.payload?.['sortBy']) {
-              if(action?.payload?.['sortBy'] === 'asc') {
-                products = products.sort((a, b) => {
-                  if (a.id < b.id) {
-                    return -1;
-                  } else if (a.id > b.id) {
-                    return 1;
-                  }
-                  return 0;
-                })
-              } else if(action?.payload?.['sortBy'] === 'desc') {
-                products = products.sort((a, b) => {
-                  if (a.id > b.id) {
-                    return -1;
-                  } else if (a.id < b.id) {
-                    return 1;
-                  }
-                  return 0;
-                })
-              } else if (action?.payload?.['sortBy'] === 'a-z') {
-                products = products.sort((a, b) => {
-                  if (a.name < b.name) {
-                    return -1;
-                  } else if (a.name > b.name) {
-                    return 1;
-                  }
-                  return 0;
-                })
-              } else if (action?.payload?.['sortBy'] === 'z-a') {
-                products = products.sort((a, b) => {
-                  if (a.name > b.name) {
-                    return -1;
-                  } else if (a.name < b.name) {
-                    return 1;
-                  }
-                  return 0;
-                })
-              } else if (action?.payload?.['sortBy'] === 'low-high') {
-                products = products.sort((a, b) => {
-                  if (a.sale_price < b.sale_price) {
-                    return -1;
-                  } else if (a.price > b.price) {
-                    return 1;
-                  }
-                  return 0;
-                })
-              } else if (action?.payload?.['sortBy'] === 'high-low') {
-                products = products.sort((a, b) => {
-                  if (a.sale_price > b.sale_price) {
-                    return -1;
-                  } else if (a.price < b.price) {
-                    return 1;
-                  }
-                  return 0;
-                })
-              }
-            } else if(!action?.payload?.['ids']) {
-              products = products.sort((a, b) => {
-                if (a.id < b.id) {
-                  return -1;
-                } else if (a.id > b.id) {
-                  return 1;
-                }
-                return 0;
-              })
-            }
-
-            if(action?.payload?.['search']) {
-              products = products.filter(product => product.name.toLowerCase().includes(action?.payload?.['search'].toLowerCase()))
-            }
-
-            if(action?.payload?.['brand']){
-              products = products.filter(product => product?.brand?.slug === action?.payload?.['brand'])
-
-            }
-          }
+          
+          console.log('Datos originales del backend:', products);
+          
+          // Mapear los datos para convertir _id a id y ajustar la estructura
+          products = products.map((product: any) => {
+            console.log('Producto original:', product.name, 'Price:', product.price, 'Sale_price:', product.sale_price);
+            
+            const price = product.price ? parseFloat(product.price) : 0;
+            const discount = product.discount ? parseFloat(product.discount) : 0;
+            const sale_price = discount > 0 ? price - (price * discount / 100) : price;
+            
+            console.log('Producto procesado:', product.name, 'Price:', price, 'Sale_price:', sale_price);
+            
+            return {
+              ...product,
+              id: parseInt(product._id) || product.id || 0,
+              price: price, // MRP/Precio original
+              sale_price: sale_price, // Precio de venta (calculado con descuento)
+              discount: discount,
+              is_sale_enable: product.is_sale_enable || false,
+              stock_status: product.stock_status || 'in_stock',
+              quantity: product.quantity ? parseFloat(product.quantity) : 0,
+              stock: product.stock ? parseFloat(product.stock) : 0,
+              status: product.status !== undefined ? product.status : true,
+              categories: product.categories || [],
+              attributes: product.attributes || [],
+              variations: product.variations ? product.variations.map((variation: any) => {
+                const varPrice = variation.price ? parseFloat(variation.price) : 0;
+                const varDiscount = variation.discount ? parseFloat(variation.discount) : discount;
+                const varSalePrice = varDiscount > 0 ? varPrice - (varPrice * varDiscount / 100) : varPrice;
+                
+                return {
+                  ...variation,
+                  id: parseInt(variation._id) || variation.id || 0,
+                  price: varPrice,
+                  sale_price: varSalePrice,
+                  discount: varDiscount,
+                  quantity: variation.quantity ? parseFloat(variation.quantity) : 0,
+                  status: variation.status !== undefined ? variation.status : true,
+                  stock_status: variation.stock_status || 'in_stock',
+                  attribute_values: variation.attribute_values || []
+                };
+              }) : [],
+              related_products: product.related_products || [],
+              cross_sell_products: product.cross_sell_products || [],
+              product_galleries: product.product_galleries || [],
+              reviews: product.reviews || [],
+              reviews_count: product.reviews_count || 0,
+              rating_count: product.rating_count || 0,
+              is_featured: product.is_featured || false,
+              is_trending: product.is_trending || false,
+              is_approved: product.is_approved !== undefined ? product.is_approved : false,
+              wholesales: product.wholesales || [],
+              wholesale_price_type: product.wholesale_price_type || null,
+              is_external: product.is_external || false,
+              external_url: product.external_url || null,
+              external_button_text: product.external_button_text || null,
+              social_share: product.social_share !== undefined ? product.social_share : true,
+              is_wishlist: false,
+              is_return: product.is_return || false,
+              is_free_shipping: product.is_free_shipping || false,
+              safe_checkout: product.safe_checkout !== undefined ? product.safe_checkout : true,
+              secure_checkout: product.secure_checkout !== undefined ? product.secure_checkout : true,
+              encourage_order: product.encourage_order !== undefined ? product.encourage_order : true,
+              encourage_view: product.encourage_view !== undefined ? product.encourage_view : true
+            };
+          });
 
           ctx.patchState({
             product: {
               data: products,
-              total: products.length ? products.length : result.data.length
+              total: products.length
             }
           });
         },
@@ -217,6 +193,7 @@ export class ProductState{
           this.productService.skeletonLoader = false;
         },
         error: err => {
+          this.productService.skeletonLoader = false;
           throw new Error(err?.error?.message);
         }
       })
@@ -228,11 +205,83 @@ export class ProductState{
     return this.productService.getProducts(action.payload).pipe(
       tap({
         next: (result: ProductModel) => {
+          let products = result.data || [];
+          
+          console.log('=== PRODUCTOS POR IDs ===');
+          console.log('Datos originales del backend (productByIds):', products);
+          
+
+          products = products.map((product: any) => {
+            console.log('Producto original (productByIds):', product.name, 'Price:', product.price, 'Sale_price:', product.sale_price, 'Discount:', product.discount);
+            
+            const price = product.price ? parseFloat(product.price) : 0;
+            const discount = product.discount ? parseFloat(product.discount) : 0;
+            const sale_price = discount > 0 ? price - (price * discount / 100) : price;
+            
+            console.log('Producto procesado (productByIds):', product.name, 'Price:', price, 'Sale_price:', sale_price, 'Discount:', discount);
+            
+            return {
+              ...product,
+              id: parseInt(product._id) || product.id || 0,
+              price: price, // MRP/Precio original
+              sale_price: sale_price, // Precio de venta (calculado con descuento)
+              discount: discount,
+              is_sale_enable: product.is_sale_enable || false,
+              stock_status: product.stock_status || 'in_stock',
+              quantity: product.quantity ? parseFloat(product.quantity) : 0,
+              stock: product.stock ? parseFloat(product.stock) : 0,
+              status: product.status !== undefined ? product.status : true,
+              categories: product.categories || [],
+              attributes: product.attributes || [],
+              variations: product.variations ? product.variations.map((variation: any) => {
+                const varPrice = variation.price ? parseFloat(variation.price) : 0;
+                const varDiscount = variation.discount ? parseFloat(variation.discount) : discount;
+                const varSalePrice = varDiscount > 0 ? varPrice - (varPrice * varDiscount / 100) : varPrice;
+                
+                return {
+                  ...variation,
+                  id: parseInt(variation._id) || variation.id || 0,
+                  price: varPrice,
+                  sale_price: varSalePrice,
+                  discount: varDiscount,
+                  quantity: variation.quantity ? parseFloat(variation.quantity) : 0,
+                  status: variation.status !== undefined ? variation.status : true,
+                  stock_status: variation.stock_status || 'in_stock',
+                  attribute_values: variation.attribute_values || []
+                };
+              }) : [],
+              related_products: product.related_products || [],
+              cross_sell_products: product.cross_sell_products || [],
+              product_galleries: product.product_galleries || [],
+              reviews: product.reviews || [],
+              reviews_count: product.reviews_count || 0,
+              rating_count: product.rating_count || 0,
+              is_featured: product.is_featured || false,
+              is_trending: product.is_trending || false,
+              is_approved: product.is_approved !== undefined ? product.is_approved : false,
+              wholesales: product.wholesales || [],
+              wholesale_price_type: product.wholesale_price_type || null,
+              is_external: product.is_external || false,
+              external_url: product.external_url || null,
+              external_button_text: product.external_button_text || null,
+              social_share: product.social_share !== undefined ? product.social_share : true,
+              is_wishlist: false,
+              is_return: product.is_return || false,
+              is_free_shipping: product.is_free_shipping || false,
+              safe_checkout: product.safe_checkout !== undefined ? product.safe_checkout : true,
+              secure_checkout: product.secure_checkout !== undefined ? product.secure_checkout : true,
+              encourage_order: product.encourage_order !== undefined ? product.encourage_order : true,
+              encourage_view: product.encourage_view !== undefined ? product.encourage_view : true
+            };
+          });
+
           const state = ctx.getState();
           ctx.patchState({
             ...state,
-            productByIds: result.data
+            productByIds: products
           });
+          
+          console.log('Productos finales (productByIds):', products);
         },
         error: err => {
           throw new Error(err?.error?.message);
@@ -244,33 +293,83 @@ export class ProductState{
   @Action(GetProductBySlug)
   getProductBySlug(ctx: StateContext<ProductStateModel>, { slug }: GetProductBySlug) {
     this.themeOptionService.preloader = true;
-    return this.productService.getProducts().pipe(
-
+    return this.productService.getProductBySlug(slug).pipe(
       tap({
-        next: results => {
-          if(results && results.data) {
-            const result = results.data.find(product => product.slug == slug)!;
+        next: (result: any) => {
+          // Extraer los datos del producto de la respuesta
+          const productData = result.data || result;
+          
+          if(productData) {
+            // Asegurar que los valores sean números válidos
+            const price = productData.price !== null && productData.price !== undefined ? parseFloat(productData.price) : 0;
+            const discount = productData.discount !== null && productData.discount !== undefined ? parseFloat(productData.discount) : 0;
+            const sale_price = discount > 0 ? price - (price * discount / 100) : price;
+            
+            const product = {
+              ...productData,
+              id: productData._id || productData.id || 0,
+              price: price, // MRP/Precio original
+              sale_price: sale_price, // Precio de venta (calculado con descuento)
+              discount: discount,
+              is_sale_enable: productData.is_sale_enable || false,
+              stock_status: productData.stock_status || 'in_stock',
+              quantity: productData.quantity ? parseFloat(productData.quantity) : 0,
+              stock: productData.stock ? parseFloat(productData.stock) : 0,
+              status: productData.status !== undefined ? productData.status : true,
+              categories: productData.categories || [],
+              attributes: productData.attributes || [],
+              variations: productData.variations ? productData.variations.map((variation: any) => {
+                const varPrice = variation.price !== null && variation.price !== undefined ? parseFloat(variation.price) : 0;
+                const varDiscount = variation.discount !== null && variation.discount !== undefined ? parseFloat(variation.discount) : discount;
+                const varSalePrice = varDiscount > 0 ? varPrice - (varPrice * varDiscount / 100) : varPrice;
+                
+                return {
+                  ...variation,
+                  id: variation._id || variation.id || 0,
+                  price: varPrice,
+                  sale_price: varSalePrice,
+                  discount: varDiscount,
+                  quantity: variation.quantity ? parseFloat(variation.quantity) : 0,
+                  status: variation.status !== undefined ? variation.status : true,
+                  stock_status: variation.stock_status || 'in_stock',
+                  attribute_values: variation.attribute_values || []
+                };
+              }) : [],
+              related_products: productData.related_products || [],
+              cross_sell_products: productData.cross_sell_products || [],
+              product_galleries: productData.product_galleries || [],
+              reviews: productData.reviews || [],
+              reviews_count: productData.reviews_count || 0,
+              rating_count: productData.rating_count || 0,
+              is_featured: productData.is_featured || false,
+              is_trending: productData.is_trending || false,
+              is_approved: productData.is_approved !== undefined ? productData.is_approved : false,
+              wholesales: productData.wholesales || [],
+              wholesale_price_type: productData.wholesale_price_type || null,
+              is_external: productData.is_external || false,
+              external_url: productData.external_url || null,
+              external_button_text: productData.external_button_text || null,
+              social_share: productData.social_share !== undefined ? productData.social_share : true,
+              is_wishlist: false,
+              is_return: productData.is_return || false,
+              is_free_shipping: productData.is_free_shipping || false,
+              safe_checkout: productData.safe_checkout !== undefined ? productData.safe_checkout : true,
+              secure_checkout: productData.secure_checkout !== undefined ? productData.secure_checkout : true,
+              encourage_order: productData.encourage_order !== undefined ? productData.encourage_order : true,
+              encourage_view: productData.encourage_view !== undefined ? productData.encourage_view : true
+            };
 
-            result.related_products = result.related_products && result.related_products.length ? result.related_products : [];
-            result.cross_sell_products = result.cross_sell_products && result.cross_sell_products.length ? result.cross_sell_products : [];
-
-            const ids = [...result.related_products, ...result.cross_sell_products];
-            const categoryIds = [...result?.categories?.map(category => category.id)];
-            this.store.dispatch(new GetRelatedProducts({ids: ids?.join(','), category_ids: categoryIds?.join(','), status: 1}));
-
-            const state = ctx.getState();
             ctx.patchState({
-              ...state,
-              selectedProduct: result
+              selectedProduct: product
             });
           }
         },
+        error: err => {
+          this.themeOptionService.preloader = false;
+          throw new Error(err?.error?.message);
+        },
         complete: () => {
           this.themeOptionService.preloader = false;
-        },
-        error: err => {
-          this.router.navigate(['/404']);
-          throw new Error(err?.error?.message);
         }
       })
     );
@@ -307,7 +406,7 @@ export class ProductState{
           const state = ctx.getState();
 
           result.data.map(product => {
-            product['categories_ids']= product?.categories?.map(category => category.id)
+            product['categories_ids']= product?.categories && Array.isArray(product.categories) ? product.categories.map(category => category.id) : []
           })
 
           let products = result.data.filter(product => product?.categories_ids?.includes(action.payload!['category_id']));
@@ -425,7 +524,7 @@ export class ProductState{
           const state = ctx.getState();
 
           result.data.map(product => {
-            product['categories_ids']= product.categories.map(category => category.id)
+            product['categories_ids']= product.categories && Array.isArray(product.categories) ? product.categories.map(category => category.id) : []
           })
 
           let filteredProducts = result.data.filter(product =>
