@@ -94,9 +94,9 @@ export class ThemeState{
     // this.themeOptionService.preloader = true;
     return this.themeService.getHomePage(action?.slug).pipe(
       tap({
-        next: (result) => {
+        next: ({data}:any) => {
           ctx.patchState({
-            homePage: result
+            homePage: data
           });
         },
         error: (err) => {

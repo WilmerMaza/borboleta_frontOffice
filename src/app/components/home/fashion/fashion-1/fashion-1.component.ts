@@ -19,7 +19,7 @@ import { ThemeOptionService } from '../../../../shared/services/theme-option.ser
 
 import { GetBrands } from '../../../../shared/store/action/brand.action';
 import { GetCategories } from '../../../../shared/store/action/category.action';
-import { GetProducts } from '../../../../shared/store/action/product.action';
+import { GetProductByIds } from '../../../../shared/store/action/product.action';
 
 @Component({
     selector: 'app-fashion-1',
@@ -44,51 +44,18 @@ export class Fashion1Component {
     }
 
   ngOnInit() {
-    console.log('=== DEBUG ngOnInit ===');
-    console.log('this.data:', this.data);
-    console.log('this.slug:', this.slug);
-    console.log('this.data?.content?.products_list:', this.data?.content?.products_list);
-    console.log('this.data?.content?.products_ids:', this.data?.content?.products_ids);
-    console.log('¿Se ejecuta el componente?', 'SÍ');
-    
     if(this.data?.slug == this.slug) {
 
       // Get Products
       let getProducts$
-      console.log('=== DEBUG GetProducts ===');
-      console.log('this.data?.content?.products_list?.status:', this.data?.content?.products_list?.status);
-      
-      if(this.data?.content?.products_list?.status){
-        // Cargar productos dinámicamente sin IDs específicos
-        const params = {
+      if(this.data?.content?.products_ids?.length && this.data?.content?.products_list?.status){
+        getProducts$ = this.store.dispatch(new GetProductByIds({
           status: 1,
           approve: 1,
-          paginate: 10 // Cargar 10 productos
-        };
-        console.log('Cargando productos dinámicamente:', params);
-        getProducts$ = this.store.dispatch(new GetProducts(params)).pipe(
-          tap((result: any) => {
-            // Extraer los numeric_id de los productos obtenidos
-            if (result && result.product && result.product.data) {
-              const numericIds = result.product.data.map((product: any) => {
-                // Usar _id si existe, sino usar id, sino 0
-                return parseInt(product._id) || product.id || 0;
-              }).filter((id: number) => id > 0); // Filtrar IDs válidos
-              
-              console.log('Numeric IDs obtenidos dinámicamente:', numericIds);
-              
-              // Actualizar el array products_ids con los numeric_id obtenidos
-              if (this.data?.content) {
-                this.data.content.products_ids = numericIds;
-                console.log('products_ids actualizado:', this.data.content.products_ids);
-              }
-            }
-          })
-        );
-      } else { 
-        console.log('No se ejecuta GetProducts - condición no cumplida');
-        getProducts$ = of(null); 
-      }
+          ids: this.data?.content?.products_ids?.join(','),
+          paginate: this.data?.content?.products_ids?.length
+        }));
+      } else { getProducts$ = of(null); }
 
       // Get Category
       let getCategory$;
@@ -110,6 +77,5 @@ export class Fashion1Component {
 
 
     }
-    console.log('=== FIN DE ngOnInit ===');
   }
 }

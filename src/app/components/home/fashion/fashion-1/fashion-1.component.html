@@ -58,17 +58,7 @@
 <!-- Product slider Start -->
 @if(data?.content?.products_list?.status && data?.content?.products_list?.product_ids){
   
-<!-- DEBUG: Productos en template -->
-<div style="background: yellow; padding: 10px; margin: 10px;">
-  <strong>DEBUG TEMPLATE:</strong><br>
-  products_list.status: {{data?.content?.products_list?.status}}<br>
-  products_list.product_ids: {{data?.content?.products_list?.product_ids}}<br>
-  products_ids: {{data?.content?.products_ids}}<br>
-  Longitud product_ids: {{data?.content?.products_list?.product_ids?.length}}<br>
-  Longitud products_ids: {{data?.content?.products_ids?.length}}<br>
-  <strong>Datos completos:</strong><br>
-  <pre>{{data?.content?.products_list | json}}</pre>
-</div>
+
 
 <app-theme-title [title]="data?.content?.products_list" [type]="'basic'"></app-theme-title>
 <section class="section-b-space pt-0">

@@ -14,6 +14,7 @@ import { horizontalProductSlider, productSlider } from '../../../../shared/data/
 import { TranslateModule } from '@ngx-translate/core';
 
 
+
 @Component({
     selector: 'app-theme-product',
     imports: [CommonModule, ProductBoxComponent, CarouselModule, NoDataComponent, TranslateModule],
@@ -35,7 +36,7 @@ export class ThemeProductComponent {
 
   product$: Observable<Product[]> = inject(Store).select(ProductState.productByIds);
 
-  constructor(public productService: ProductService) {}
+  constructor(public productService: ProductService, private store: Store) {}
 
   ngOnChanges() {
     console.log('=== DEBUG ThemeProductComponent ngOnChanges ===');
@@ -44,27 +45,9 @@ export class ThemeProductComponent {
     console.log('Es array:', Array.isArray(this.productIds));
     
     if (Array.isArray(this.productIds) && this.productIds.length) {
-      this.product$.subscribe(products => {
-        console.log('Productos del estado:', products);
-        console.log('Productos filtrados por IDs:', this.productIds);
-        console.log('Tipos de IDs en productos:', products.map(p => ({ id: p.id, tipo: typeof p.id })));
-        
-        this.products = products.filter(product => {
-          const productAny = product as any;
-          const numericId = productAny.numeric_id;
-          
-          console.log('=== COMPARACIÓN DE IDs ===');
-          console.log('numeric_id del producto:', numericId);
-          console.log('productIds que llegan:', this.productIds);
-          console.log('Tipo de numeric_id:', typeof numericId);
-          console.log('Tipo de productIds:', typeof this.productIds);
-          
-          const matches = this.productIds?.includes(numericId);
-          console.log(`Producto ${numericId} (${product.name}): ${matches ? 'INCLUIDO' : 'EXCLUIDO'}`);
-          return matches;
-        });
-        
-        console.log('Productos finales filtrados:', this.products);
+      // Cambia la suscripción al store para usar productByIds
+      this.store.select(state => state.product.productByIds).subscribe((products: any[]) => {
+        this.products = products.filter(product => this.productIds?.includes(product.numeric_id));
       });
     }
   }
