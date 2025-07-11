@@ -115,17 +115,17 @@ export class ProductState{
         next: (result: ProductModel) => {
           let products = result.data || [];
           
-          console.log('Datos originales del backend:', products);
+          
           
           // Mapear los datos para convertir _id a id y ajustar la estructura
           products = products.map((product: any) => {
-            console.log('Producto original:', product.name, 'Price:', product.price, 'Sale_price:', product.sale_price);
+           
             
             const price = product.price ? parseFloat(product.price) : 0;
             const discount = product.discount ? parseFloat(product.discount) : 0;
             const sale_price = discount > 0 ? price - (price * discount / 100) : price;
             
-            console.log('Producto procesado:', product.name, 'Price:', price, 'Sale_price:', sale_price);
+      
             
             return {
               ...product,
@@ -207,18 +207,16 @@ export class ProductState{
         next: (result: ProductModel) => {
           let products = result.data || [];
           
-          console.log('=== PRODUCTOS POR IDs ===');
-          console.log('Datos originales del backend (productByIds):', products);
+      
           
 
           products = products.map((product: any) => {
-            console.log('Producto original (productByIds):', product.name, 'Price:', product.price, 'Sale_price:', product.sale_price, 'Discount:', product.discount);
-            
+          
             const price = product.price ? parseFloat(product.price) : 0;
             const discount = product.discount ? parseFloat(product.discount) : 0;
             const sale_price = discount > 0 ? price - (price * discount / 100) : price;
             
-            console.log('Producto procesado (productByIds):', product.name, 'Price:', price, 'Sale_price:', sale_price, 'Discount:', discount);
+
             
             return {
               ...product,
@@ -281,7 +279,7 @@ export class ProductState{
             productByIds: products
           });
           
-          console.log('Productos finales (productByIds):', products);
+       
         },
         error: err => {
           throw new Error(err?.error?.message);

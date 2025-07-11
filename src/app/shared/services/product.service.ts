@@ -18,14 +18,12 @@ export class ProductService {
   constructor(private http: HttpClient) {}
 
   getProducts(payload?: Params): Observable<ProductModel> {
-    console.log('=== PRODUCT SERVICE ===');
-    console.log('Payload enviado:', payload);
-    console.log('URL:', `${environment.URLS}/products`);
+  
     
     return this.http.get<ProductModel>(`${environment.URLS}/products`, { params: payload }).pipe(
       timeout(10000), // 10 segundos timeout
       catchError(error => {
-        console.log('Error en getProducts:', error);
+        
         return of({ data: [], total: 0, page: 1, limit: 10 } as ProductModel);
       })
     );
@@ -42,7 +40,7 @@ export class ProductService {
 
   getProductBySlug(slug: string): Observable<Product> {
     return this.http.get<Product>(`${environment.URLS}/products/slug/${slug}`).pipe(
-      timeout(8000), // 8 segundos timeout
+      timeout(8000),
       catchError(error => {
         return of({} as Product);
       })
@@ -51,7 +49,7 @@ export class ProductService {
 
   getProductBySearchList(payload?: Params): Observable<any> {
     return this.http.get<any>(`${environment.URLS}/products`, { params: payload }).pipe(
-      timeout(10000), // 10 segundos timeout
+      timeout(10000), 
       catchError(error => {
         return of({ data: [], total: 0, page: 1, limit: 10 });
       })

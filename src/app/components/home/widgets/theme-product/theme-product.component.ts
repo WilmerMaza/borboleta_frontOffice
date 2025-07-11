@@ -39,13 +39,10 @@ export class ThemeProductComponent {
   constructor(public productService: ProductService, private store: Store) {}
 
   ngOnChanges() {
-    console.log('=== DEBUG ThemeProductComponent ngOnChanges ===');
-    console.log('this.productIds:', this.productIds);
-    console.log('Tipo de productIds:', typeof this.productIds);
-    console.log('Es array:', Array.isArray(this.productIds));
+ 
     
     if (Array.isArray(this.productIds) && this.productIds.length) {
-      // Cambia la suscripción al store para usar productByIds
+
       this.store.select(state => state.product.productByIds).subscribe((products: any[]) => {
         this.products = products.filter(product => this.productIds?.includes(product.numeric_id));
       });
