@@ -48,3 +48,42 @@ export class ClearCart {
   static readonly type = "[Cart] Clear";
   constructor() {}
 }
+
+// ===== ACCIONES DEL SERVIDOR =====
+
+export class GetCartFromServer {
+  static readonly type = "[Cart] Get From Server";
+  constructor(public payload: { user_id: number }) {}
+}
+
+export class AddToCartServer {
+  static readonly type = "[Cart] Add To Server";
+  constructor(public payload: { 
+    user_id: number; 
+    product_id: number; 
+    quantity: number; 
+    variation_id?: number 
+  }) {}
+}
+
+export class UpdateCartItemServer {
+  static readonly type = "[Cart] Update Item Server";
+  constructor(public payload: { 
+    user_id: number; 
+    id: string; 
+    quantity: number 
+  }) {}
+}
+
+export class RemoveFromCartServer {
+  static readonly type = "[Cart] Remove From Server";
+  constructor(public payload: { 
+    user_id: number; 
+    id: string 
+  }) {}
+}
+
+export class ClearCartServer {
+  static readonly type = "[Cart] Clear Server";
+  constructor(public payload: { user_id: number }) {}
+}

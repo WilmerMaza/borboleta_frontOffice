@@ -6,7 +6,8 @@ import { CartService } from "../../services/cart.service";
 import { NotificationService } from "../../services/notification.service";
 import {
   AddToCart, AddToCartLocalStorage, ClearCart, CloseStickyCart, DeleteCart,
-  GetCartItems, ReplaceCart, SyncCart, ToggleSidebarCart, UpdateCart
+  GetCartItems, ReplaceCart, SyncCart, ToggleSidebarCart, UpdateCart,
+  GetCartFromServer, AddToCartServer, UpdateCartItemServer, RemoveFromCartServer, ClearCartServer
 } from "../action/cart.action";
 
 export interface CartStateModel {
@@ -366,5 +367,114 @@ export class CartState {
         total: 0
       });
     }
+  }
+
+  // ===== ACCIONES DEL SERVIDOR =====
+
+  @Action(GetCartFromServer)
+  getCartFromServer(ctx: StateContext<CartStateModel>, action: GetCartFromServer) {
+    console.log('🔄 getCartFromServer - user_id:', action.payload.user_id);
+    return this.cartService.getCart(action.payload.user_id).pipe(
+      tap({
+        next: (response: any) => {
+          console.log('🔄 getCartFromServer - response:', response);
+          
+          const cartItems: Cart[] = response.items.map((item: any) => ({
+            id: item.id,
+            product_id: item.product_id,
+            variation_id: item.variation_id,
+            quantity: item.quantity,
+            sub_total: item.sub_total,
+            product: item.product,
+            variation: item.variation || {} as any,
+            wholesale_price: item.wholesale_price
+          }));
+
+          const total = cartItems.reduce((sum, item) => sum + item.sub_total, 0);
+
+          console.log('🔄 getCartFromServer - cartItems procesados:', cartItems);
+
+          ctx.patchState({
+            items: cartItems,
+            total: total
+          });
+        },
+        error: (error) => {
+          console.error('Error getting cart from server:', error);
+        }
+      })
+    );
+  }
+
+  @Action(AddToCartServer)
+  addToCartServer(ctx: StateContext<CartStateModel>, action: AddToCartServer) {
+    return this.cartService.addToCart(
+      action.payload.user_id,
+      action.payload.product_id,
+      action.payload.quantity,
+      action.payload.variation_id
+    ).pipe(
+      tap({
+        next: (response) => {
+          // Después de agregar, actualizar el carrito desde el servidor
+          ctx.dispatch(new GetCartFromServer({ user_id: action.payload.user_id }));
+        },
+        error: (error) => {
+          console.error('Error adding to cart server:', error);
+        }
+      })
+    );
+  }
+
+  @Action(UpdateCartItemServer)
+  updateCartItemServer(ctx: StateContext<CartStateModel>, action: UpdateCartItemServer) {
+    return this.cartService.updateCartItem(
+      action.payload.user_id,
+      action.payload.id,
+      action.payload.quantity
+    ).pipe(
+      tap({
+        next: (response) => {
+          // Después de actualizar, actualizar el carrito desde el servidor
+          ctx.dispatch(new GetCartFromServer({ user_id: action.payload.user_id }));
+        },
+        error: (error) => {
+          console.error('Error updating cart item server:', error);
+        }
+      })
+    );
+  }
+
+  @Action(RemoveFromCartServer)
+  removeFromCartServer(ctx: StateContext<CartStateModel>, action: RemoveFromCartServer) {
+    return this.cartService.removeFromCart(
+      action.payload.user_id,
+      action.payload.id
+    ).pipe(
+      tap({
+        next: (response) => {
+          // Después de eliminar, actualizar el carrito desde el servidor
+          ctx.dispatch(new GetCartFromServer({ user_id: action.payload.user_id }));
+        },
+        error: (error) => {
+          console.error('Error removing from cart server:', error);
+        }
+      })
+    );
+  }
+
+  @Action(ClearCartServer)
+  clearCartServer(ctx: StateContext<CartStateModel>, action: ClearCartServer) {
+    return this.cartService.clear(action.payload.user_id).pipe(
+      tap({
+        next: (response) => {
+          // Después de limpiar, actualizar el carrito desde el servidor
+          ctx.dispatch(new GetCartFromServer({ user_id: action.payload.user_id }));
+        },
+        error: (error) => {
+          console.error('Error clearing cart server:', error);
+        }
+      })
+    );
   }
 }

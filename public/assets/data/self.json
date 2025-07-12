@@ -1,7 +1,7 @@
 {
-    "id": 2,
-    "name": "john due",
-    "email": "john.customer@example.com",
+    "id": 23,
+    "name": "Usuario de Prueba",
+    "email": "test@borboleta.com",
     "country_code": "1",
     "phone": 0,
     "profile_image_id": null,
