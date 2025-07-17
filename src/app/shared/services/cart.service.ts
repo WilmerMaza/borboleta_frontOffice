@@ -14,7 +14,7 @@ export class CartService {
   constructor(private http: HttpClient) {}
 
   getCartItems(): Observable<CartModel> {
-    return this.http.get<CartModel>(`${environment.URL}/cart.json`);
+    return this.http.get<CartModel>(`${environment.URLS}/cart`);
   }
 
   updateQty() {

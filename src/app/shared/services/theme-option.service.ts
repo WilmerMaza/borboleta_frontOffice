@@ -19,6 +19,6 @@ export class ThemeOptionService {
   constructor(private http: HttpClient) { }
 
   getThemeOption(): Observable<any>{
-    return this.http.get<any>(`${environment.URL}/themeOptions.json`)
+    return this.http.get<any>(`${environment.URLS}/settings`);
   }
 }

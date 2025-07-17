@@ -16,6 +16,6 @@ export class ThemeService {
   }
 
   getHomePage(slug?: string): Observable<any> {
-    return this.http.get(`${environment.URL}/home/${slug}.json`);
+    return this.http.get(`${environment.URLS}/setting-theme/slug/${slug}`);
   }
 }

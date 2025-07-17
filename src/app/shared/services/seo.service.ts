@@ -27,7 +27,7 @@ export class SeoService {
   setting$: Observable<Values> = inject(Store).select(SettingState.setting) as Observable<Values>;
   themeOption$: Observable<Option> = inject(Store).select(ThemeOptionState.themeOptions) as Observable<Option>;
   product$: Observable<Product> = inject(Store).select(ProductState.selectedProduct) as Observable<Product>;
-  blog$: Observable<Blog> = inject(Store).select(BlogState.selectedBlog) as Observable<Blog>;
+  // blog$: Observable<Blog> = inject(Store).select(BlogState.selectedBlog) as Observable<Blog>;
   brand$: Observable<Brand> = inject(Store).select(BrandState.selectedBrand) as Observable<Brand>;
   page$: Observable<Page> = inject(Store).select(PageState.selectedPage) as Observable<Page>;
   category$: Observable<Category> = inject(Store).select(CategoryState.selectedCategory) as Observable<Category>;
@@ -76,7 +76,7 @@ export class SeoService {
   fetchData() {
     this.setting$.subscribe(val => this.setting = val);
     this.product$.subscribe(product => this.product = product);
-    this.blog$.subscribe(blog => this.blog = blog);
+    // this.blog$.subscribe(blog => this.blog = blog);
     this.page$.subscribe(page => this.page = page);
     this.brand$.subscribe(brand => this.brand = brand);
     this.category$.subscribe(blog => this.category = blog);
