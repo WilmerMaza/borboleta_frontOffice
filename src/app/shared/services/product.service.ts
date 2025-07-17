@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Params } from '../interface/core.interface';
-import { Observable } from 'rxjs';
+import { Observable, timeout, catchError, of } from 'rxjs';
 import { Product, ProductModel } from '../interface/product.interface';
 import { environment } from '../../../environments/environment.development';
 
@@ -24,7 +24,12 @@ export class ProductService {
   }
 
   getProductBySlug(slug: string): Observable<Product> {
-    return this.http.get<Product>(`${environment.URL}/product/slug/${slug}`);
+    return this.http.get<Product>(`${environment.URLS}/products/slug/${slug}`).pipe(
+      timeout(8000),
+      catchError(error => {
+        return of({} as Product);
+      })
+    );
   }
 
   getProductBySearchList(payload?: Params): Observable<any> {

@@ -13,6 +13,7 @@ export class ThemeService {
 
   getThemes(): Observable<ThemesModel> {
     return this.http.get<ThemesModel>(`${environment.URL}/theme.json`);
+
   }
 
   getHomePage(slug?: string): Observable<any> {
