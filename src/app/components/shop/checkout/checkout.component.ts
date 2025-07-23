@@ -350,7 +350,113 @@ export class CheckoutComponent {
       if(this.cpnRef && !this.cpnRef.nativeElement.value) {
         this.form.controls['coupon'].reset();
       }
-      this.store.dispatch(new PlaceOrder(this.form.value));
+
+      // Obtén el usuario y el carrito
+      const account = JSON.parse(localStorage.getItem('account') || '{}');
+      const userId = account.user?.id;
+      const cart = JSON.parse(localStorage.getItem('cart') || '{}');
+      const cartItems = cart.items || [];
+
+      // Obtén las direcciones completas (ajusta según cómo las guardes)
+      const addresses = JSON.parse(localStorage.getItem('addresses') || '[]');
+      let billingAddress = addresses.find((a: any) => a.id == this.form.value.billing_address_id);
+      let shippingAddress = addresses.find((a: any) => a.id == this.form.value.shipping_address_id);
+
+      // Si no se encuentra la dirección completa, la armamos desde el formulario
+      if (!billingAddress && this.form.value.billing_address) {
+        billingAddress = {
+          id: this.form.value.billing_address_id,
+          city: this.form.value.billing_address.city,
+          phone: this.form.value.billing_address.phone,
+          state: {
+            id: this.form.value.billing_address.state_id,
+            name: '', // Si tienes el nombre, agrégalo
+            country_id: this.form.value.billing_address.country_id
+          },
+          title: this.form.value.billing_address.title,
+          street: this.form.value.billing_address.street,
+          country: {
+            id: this.form.value.billing_address.country_id,
+            name: '' // Si tienes el nombre, agrégalo
+          },
+          pincode: this.form.value.billing_address.pincode,
+          user_id: userId,
+          state_id: this.form.value.billing_address.state_id,
+          country_id: this.form.value.billing_address.country_id,
+          is_default: 0,
+          country_code: this.form.value.billing_address.country_code
+        };
+      }
+      if (!shippingAddress && this.form.value.shipping_address) {
+        shippingAddress = {
+          id: this.form.value.shipping_address_id,
+          city: this.form.value.shipping_address.city,
+          phone: this.form.value.shipping_address.phone,
+          state: {
+            id: this.form.value.shipping_address.state_id,
+            name: '',
+            country_id: this.form.value.shipping_address.country_id
+          },
+          title: this.form.value.shipping_address.title,
+          street: this.form.value.shipping_address.street,
+          country: {
+            id: this.form.value.shipping_address.country_id,
+            name: ''
+          },
+          pincode: this.form.value.shipping_address.pincode,
+          user_id: userId,
+          state_id: this.form.value.shipping_address.state_id,
+          country_id: this.form.value.shipping_address.country_id,
+          is_default: 0,
+          country_code: this.form.value.shipping_address.country_code
+        };
+      }
+
+      // Mapea los productos con objeto pivot
+      const products = cartItems.map((item: any) => ({
+        id: item.id, // id numérico del carrito
+        name: item.product?.name ?? '',
+        pivot: {
+          quantity: item.quantity,
+          single_price: item.product?.sale_price ?? item.product?.price ?? 0,
+          subtotal: item.sub_total ?? (item.product?.sale_price ?? item.product?.price ?? 0) * item.quantity,
+          product_id: Number(item.id), // Asegura que sea número
+          product_type: item.product?.product_type ?? 'physical',
+          variation: item.variation ?? null,
+          variation_id: item.variation_id ?? null,
+        }
+      }));
+
+      // Calcula los totales
+      const amount = products.reduce((acc: any, prod: { pivot: { subtotal: any; }; }) => acc + prod.pivot.subtotal, 0);
+      const tax_total = 0; // Si tienes el cálculo, ponlo aquí
+      const shipping_total = 0; // Si tienes el cálculo, ponlo aquí
+      const total = amount + tax_total + shipping_total;
+
+      // Arma el payload
+      const payload = {
+        consumer_id: userId,
+        tax_total: tax_total,
+        shipping_total: shipping_total,
+        points_amount: this.form.value.points_amount,
+        wallet_balance: this.form.value.wallet_balance,
+        amount: amount,
+        total: total,
+        is_digital_only: 0, // O 1 si solo hay productos digitales
+        coupon_total_discount: 0, // Si tienes descuento por cupón
+        payment_method: this.form.value.payment_method,
+        billing_address: billingAddress,
+        shipping_address: shippingAddress,
+        products: products,
+        delivery_description: this.form.value.delivery_description,
+        delivery_interval: this.form.value.delivery_interval,
+        coupon_id: this.form.value.coupon,
+        shipping_address_id: this.form.value.shipping_address_id, // <-- Añade esto
+        billing_address_id: this.form.value.billing_address_id,    // <-- Y esto
+        created_at: new Date().toISOString()
+      };
+      console.log('Payload enviado a PlaceOrder:', payload);
+      this.store.dispatch(new PlaceOrder(payload));
     }
   }
 

@@ -1,6 +1,6 @@
 import { Injectable } from "@angular/core";
 import { Router } from "@angular/router";
-import { Action, Selector, State, StateContext } from "@ngxs/store";
+import { Action, Selector, State, StateContext, Store } from "@ngxs/store";
 import { tap } from "rxjs";
 
 import { Order, OrderCheckout } from "../../interface/order.interface";
@@ -33,9 +33,12 @@ export class OrderStateModel {
 @Injectable()
 export class OrderState {
 
-  constructor(private notificationService: NotificationService,
+  constructor(
+    private notificationService: NotificationService,
     private router: Router,
-    private orderService: OrderService) {}
+    private orderService: OrderService,
+    private store: Store
+  ) {}
 
   @Selector()
   static order(state: OrderStateModel) {
@@ -100,21 +103,45 @@ export class OrderState {
   checkout(ctx: StateContext<OrderStateModel>, action: Checkout) {
     const state = ctx.getState();
 
-    // It Just Static Values as per cart default value (When you are using api then you need calculate as per your requirement)
+    // Obtener valores del estado actual del store
+    const currentState = this.store.selectSnapshot(state => state);
+    const user = currentState.account?.user;
+    const coupon = currentState.coupon?.coupon;
+    const cartItems = currentState.cart?.items || [];
+    
+    // Calcular subtotal usando los productos reales del carrito
+    const sub_total = cartItems.reduce((acc: number, item: any) => acc + Number(item.sub_total || 0), 0);
+    
+    // Calcular impuestos (ejemplo: 5% del subtotal)
+    const tax_total = sub_total * 0.05;
+    
+    // Calcular envío (ejemplo: gratis si el subtotal es mayor a X, sino $5)
+    const shipping_total = sub_total > 50 ? 0 : 5;
+    
+    // Obtener descuento del cupón aplicado
+    const coupon_total_discount = coupon?.discount || 0;
+    
+    // Obtener puntos y wallet del usuario
+    const points_amount = action.payload?.points_amount ? Number(user?.point?.balance || 0) : 0;
+    const wallet_balance = action.payload?.wallet_balance ? Number(user?.wallet?.balance || 0) : 0;
+    const points = Number(user?.point?.balance || 0);
+
+    const total = sub_total + tax_total + shipping_total - coupon_total_discount - points_amount - wallet_balance;
+
     const order = {
-      total : {
-        convert_point_amount: 65.66,
-        convert_wallet_balance: 8.47,
-        coupon_total_discount: 10,
-        points: 1970,
-        points_amount: 65.66,
-        shipping_total: 0,
-        sub_total: 39.81,
-        tax_total: 1.99,
-        total: 41.80,
-        wallet_balance: 8.47,
+      total: {
+        convert_point_amount: points_amount,
+        convert_wallet_balance: wallet_balance,
+        coupon_total_discount: coupon_total_discount,
+        points: points,
+        points_amount: points_amount,
+        shipping_total: shipping_total,
+        sub_total: sub_total,
+        tax_total: tax_total,
+        total: total,
+        wallet_balance: wallet_balance,
       }
-    }
+    };
 
     ctx.patchState({
       ...state,
@@ -124,7 +151,18 @@ export class OrderState {
 
   @Action(PlaceOrder)
   placeOrder(ctx: StateContext<OrderStateModel>, action: PlaceOrder) {
-    // Place order Logic Here
+    return this.orderService.createOrder(action.payload).pipe(
+      tap({
+        next: (order) => {
+          this.notificationService.showSuccess('¡Pedido realizado con éxito!');
+          this.router.navigate(['/account/order']);
+        },
+        error: (err) => {
+          this.notificationService.showError('Error al realizar el pedido');
+          throw new Error(err?.error?.message);
+        }
+      })
+    );
   }
 
   @Action(RePayment)

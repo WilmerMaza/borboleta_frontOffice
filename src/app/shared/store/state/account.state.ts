@@ -65,7 +65,18 @@ export class AccountState{
 
   @Action(CreateAddress)
   createAddress(ctx: StateContext<AccountStateModel>, action: CreateAddress) {
-    // Create Address Logic Here
+    const state = ctx.getState();
+    const user = state.user;
+    if (user) {
+      // Si no hay array de direcciones, inicialízalo
+      if (!user.address) user.address = [];
+      // Asignar un id incremental si no viene del payload
+      const newId = user.address.length > 0 ? Math.max(...user.address.map(a => a.id || 0)) + 1 : 1;
+      const newAddress = { ...action.payload, id: action.payload.id || newId };
+      user.address = [...user.address, newAddress];
+      ctx.patchState({ user: { ...user, address: user.address } });
+      this.notificationService.showSuccess('Dirección agregada correctamente');
+    }
   }
 
   @Action(UpdateAddress)

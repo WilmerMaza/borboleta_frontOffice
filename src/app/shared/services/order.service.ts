@@ -15,15 +15,19 @@ export class OrderService {
   constructor(private http: HttpClient) {}
 
   getOrders(payload?: Params): Observable<OrderModel> {
-    return this.http.get<OrderModel>(`${environment.URL}/order.json`, { params: payload });
+    return this.http.get<OrderModel>(`${environment.URLS}/orders`, { params: payload });
   }
 
   viewOrder(id: number): Observable<Order> {
-    return this.http.get<Order>(`${environment.URL}/order/${id}`);
+    return this.http.get<Order>(`${environment.URLS}/order/${id}`);
   }
 
   orderTracking(payload: { order_number: string, email_or_phone: string }): Observable<Order> {
     return this.http.get<Order>(`${environment.URL}/trackOrder`, { params: payload });
+  }
+
+  createOrder(payload?: Params): Observable<Order> {
+    return this.http.post<Order>(`${environment.URLS}/orders`, payload);
   }
 
 }
