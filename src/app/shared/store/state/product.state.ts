@@ -111,6 +111,7 @@ export class ProductState{
   @Action(GetProducts)
   getProducts(ctx: StateContext<ProductStateModel>, action: GetProducts) {
     this.productService.skeletonLoader = true;
+
     return this.productService.getProducts(action.payload).pipe(
 
       tap({
