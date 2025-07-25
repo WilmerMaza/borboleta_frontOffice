@@ -121,8 +121,8 @@
     <div class="row g-4">
       <div
         [ngClass]="data?.content?.product_list_2?.right_panel?.status ? 'col-xl-9 col-lg-8 col-md-12' : 'col-xl-12 col-lg-8 col-md-12'">
-        <div class="theme-tab">
-          <div class="tab-content-cls ratio_asos">
+        <div class="theme-tab">   
+          <div class="tab-content-cls ratio_asos"> 
             <app-theme-product [productIds]="data?.content?.product_list_2?.products?.product_item?.product_ids || []"
               [style]="'vertical'" [slider]="true">
             </app-theme-product>

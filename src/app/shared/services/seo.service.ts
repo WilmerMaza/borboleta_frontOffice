@@ -76,7 +76,7 @@ export class SeoService {
   fetchData() {
     this.setting$.subscribe(val => this.setting = val);
     this.product$.subscribe(product => this.product = product);
-    this.blog$.subscribe(blog => this.blog = blog);
+    // this.blog$.subscribe(blog => this.blog = blog);
     this.page$.subscribe(page => this.page = page);
     this.brand$.subscribe(brand => this.brand = brand);
     this.category$.subscribe(blog => this.category = blog);

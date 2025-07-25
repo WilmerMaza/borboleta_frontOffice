@@ -8,10 +8,11 @@ import { homeBannerSlider } from '../../../../shared/data/owl-carousel';
 import { ImageLinkComponent } from '../../../../shared/components/widgets/image-link/image-link.component';
 import { Banners } from '../../../../shared/interface/theme.interface';
 import { environment } from '../../../../../environments/environment';
+import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
     selector: 'app-theme-home-slider',
-    imports: [CommonModule, RouterModule, CarouselModule, ImageLinkComponent],
+    imports: [CommonModule, RouterModule, CarouselModule, ImageLinkComponent,TranslateModule],
     templateUrl: './theme-home-slider.component.html',
     styleUrl: './theme-home-slider.component.scss'
 })

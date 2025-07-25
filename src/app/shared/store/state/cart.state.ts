@@ -68,9 +68,9 @@ export class CartState {
 
   @Action(GetCartItems)
   getCartItems(ctx: StateContext<CartStateModel>) {
-    // if (!this.store.selectSnapshot(state => state.auth && state.auth.access_token)) {
-    //   return;
-    // }
+    if (!this.store.selectSnapshot(state => state.auth && state.auth.access_token)) {
+      return;
+    }
     return this.cartService.getCartItems().pipe(
       tap({
         next: result => {

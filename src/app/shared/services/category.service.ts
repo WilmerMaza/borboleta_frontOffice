@@ -15,10 +15,12 @@ export class CategoryService {
   constructor(private http: HttpClient) {}
 
   getCategories(payload?: Params): Observable<CategoryModel> {
-    return this.http.get<CategoryModel>(`${environment.URL}/category.json`, { params: payload });
+    return this.http.get<CategoryModel>(`${environment.URLS}/categories`, {
+      params: payload,
+    });
   }
     
   getCategoryBySlug(slug: string): Observable<Category> {
-    return this.http.get<Category>(`${environment.URL}/category/slug/${slug}`);
+    return this.http.get<Category>(`${environment.URLS}/categories/slug/${slug}`);
   }
 }

@@ -12,7 +12,9 @@ export class SettingService {
   constructor(private http: HttpClient) {}
 
   getSettingOption(): Observable<Setting> {
-    return this.http.get<Setting>(`${environment.URL}/settings.json`);
+    return this.http.get<Setting>(
+      `${environment.URLS}/settings?name=settings`
+    );
   }
 
 }

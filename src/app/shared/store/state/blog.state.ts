@@ -36,7 +36,7 @@ export class BlogState{
 
   @Selector()
   static blog(state: BlogStateModel) {
-    return state.blog;
+    return state?.blog;
   }
 
   @Selector()

@@ -36,7 +36,7 @@ export class ThemeBlogComponent {
   public skeletonItems = Array.from({ length: 5 }, (_, index) => index);
   public StorageURL = environment.storageURL;
 
-  constructor(public blogService: BlogService){}
+  blogService = inject(BlogService);
 
   ngOnChanges() {
     if (Array.isArray(this.blogIds)) {

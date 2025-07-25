@@ -1,23 +1,14 @@
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { Component, Inject, Input, PLATFORM_ID } from '@angular/core';
 import { Store } from '@ngxs/store';
-import { forkJoin, of } from 'rxjs';
-
+import { of } from 'rxjs';
 import { ImageLinkComponent } from '../../../../shared/components/widgets/image-link/image-link.component';
-import { ThemeBlogComponent } from '../../widgets/theme-blog/theme-blog.component';
-import { ThemeBrandComponent } from '../../widgets/theme-brand/theme-brand.component';
 import { ThemeHomeSliderComponent } from '../../widgets/theme-home-slider/theme-home-slider.component';
 import { ThemeProductTabSectionComponent } from '../../widgets/theme-product-tab-section/theme-product-tab-section.component';
 import { ThemeProductComponent } from '../../widgets/theme-product/theme-product.component';
-import { ThemeServicesComponent } from '../../widgets/theme-services/theme-services.component';
-import { ThemeSocialMediaComponent } from '../../widgets/theme-social-media/theme-social-media.component';
 import { ThemeTitleComponent } from '../../widgets/theme-title/theme-title.component';
-
 import { FashionOne } from '../../../../shared/interface/theme.interface';
-
 import { ThemeOptionService } from '../../../../shared/services/theme-option.service';
-
-import { GetBlogs } from '../../../../shared/store/action/blog.action';
 import { GetBrands } from '../../../../shared/store/action/brand.action';
 import { GetCategories } from '../../../../shared/store/action/category.action';
 import { GetProductByIds } from '../../../../shared/store/action/product.action';
@@ -26,9 +17,8 @@ import { GetProductByIds } from '../../../../shared/store/action/product.action'
     selector: 'app-fashion-1',
     providers: [Store],
     imports: [CommonModule, ThemeHomeSliderComponent, 
-        ThemeTitleComponent, ThemeProductComponent, ThemeProductTabSectionComponent, ThemeServicesComponent,
-        ThemeBlogComponent, ThemeBlogComponent, ThemeSocialMediaComponent,
-        ThemeBrandComponent, ImageLinkComponent],
+        ThemeTitleComponent, ThemeProductComponent, ThemeProductTabSectionComponent, 
+         ImageLinkComponent],
     templateUrl: './fashion-1.component.html',
     styleUrl: './fashion-1.component.scss'
 })
@@ -77,26 +67,7 @@ export class Fashion1Component {
         }));
       } else { getBrands$ = of(null); }
 
-      // Get Blog
-      let getBlog$;
-      if(this.data?.content?.featured_blogs?.blog_ids?.length && this.data?.content?.featured_blogs?.status){
-        getBlog$ = this.store.dispatch(new GetBlogs({
-          status: 1,
-          ids: this.data?.content?.featured_blogs?.blog_ids?.join(',')
-        }));
-      } else { getBlog$ = of(null); }
 
-      // Skeleton Loader
-      if (this.platformId) {
-        document.body.classList.add('skeleton-body');
-
-        forkJoin([getProducts$, getCategory$, getBrands$, getBlog$]).subscribe({
-          complete: () => {
-            document.body.classList.remove('skeleton-body');
-            this.themeOptionService.preloader = false;
-          }
-        });
-      }
     }
   }
 }

@@ -10,7 +10,7 @@
         </div>
         <a [routerLink]="['/product/', product.slug]">
           <span class="product-name">
-            {{ product.name }}
+            {{ product.name | translate  }}
           </span>
         </a>
         <small class="timeAgo">{{ min }} {{ 'minutes_ago' | translate }}</small>

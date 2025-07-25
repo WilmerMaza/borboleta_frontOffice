@@ -6,10 +6,11 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { Product } from '../../../interface/product.interface';
 import { ProductState } from '../../../store/state/product.state';
+import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
     selector: 'app-button',
-    imports: [CommonModule, RouterModule],
+    imports: [CommonModule, RouterModule,TranslateModule],
     templateUrl: './button.component.html',
     styleUrl: './button.component.scss'
 })

@@ -7,58 +7,65 @@ import { ClickOutsideDirective } from '../../../../directive/outside.directive';
 import { isPlatformBrowser } from '@angular/common';
 
 @Component({
-    selector: 'app-language',
-    imports: [ButtonComponent, ClickOutsideDirective],
-    templateUrl: './language.component.html',
-    styleUrl: './language.component.scss'
+  selector: "app-language",
+  imports: [ButtonComponent, ClickOutsideDirective],
+  templateUrl: "./language.component.html",
+  styleUrl: "./language.component.scss",
 })
 export class LanguageComponent {
-
   public active: boolean = false;
   public languages: languages[] = [
     {
-      language: 'English',
-      code: 'en',
-      icon: 'us'
+      language: "English",
+      code: "en",
+      icon: "us",
     },
     {
-      language: 'Français',
-      code: 'fr',
-      icon: 'fr'
+      language: "Français",
+      code: "fr",
+      icon: "fr",
+    },
+    {
+      language: "Español",
+      code: "es",
+      icon: "es",
     }, // Add More Language
-  ]
+  ];
 
   public selectedLanguage: languages = {
-    language: 'English',
-    code: 'en',
-    icon: 'us'
-  }
+    language: "Español",
+    code: "es",
+    icon: "es",
+  };
 
-  constructor(private translate: TranslateService, @Inject(PLATFORM_ID) private platformId: Object) {}
+  constructor(
+    private translate: TranslateService,
+    @Inject(PLATFORM_ID) private platformId: Object
+  ) {}
 
   ngOnInit() {
-    if(isPlatformBrowser(this.platformId)){
+    if (isPlatformBrowser(this.platformId)) {
       let language = localStorage.getItem("language");
-  
-      if(language == null){
+
+      if (language == null) {
         localStorage.setItem("language", JSON.stringify(this.selectedLanguage));
         this.translate.use(this.selectedLanguage.code);
-      }else{
+      } else {
         this.selectedLanguage = JSON.parse(language);
         this.translate.use(this.selectedLanguage.code);
       }
     }
   }
 
-  openDropDown(){
+  openDropDown() {
     this.active = !this.active;
   }
 
-  hideDropdown(){
+  hideDropdown() {
     this.active = false;
   }
 
-  selectLanguage(language: languages){
+  selectLanguage(language: languages) {
     this.active = false;
     this.translate.use(language.code);
     this.selectedLanguage = language;
