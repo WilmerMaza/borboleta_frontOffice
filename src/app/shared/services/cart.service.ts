@@ -1,8 +1,6 @@
-import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable, Subject } from 'rxjs';
-import { CartAddOrUpdate, CartModel } from '../interface/cart.interface';
-import { environment } from '../../../environments/environment.development';
+import { Observable, Subject, of } from 'rxjs';
+import { CartModel } from '../interface/cart.interface';
 
 @Injectable({
   providedIn: 'root'
@@ -11,10 +9,27 @@ export class CartService {
 
   private subjectQty = new Subject<boolean>();
 
-  constructor(private http: HttpClient) {}
+  constructor() {}
 
   getCartItems(): Observable<CartModel> {
-    return this.http.get<CartModel>(`${environment.URL}/cart.json`);
+    // Consultar localStorage en lugar del backend
+    if (typeof window !== 'undefined') {
+      try {
+        const cartData = localStorage.getItem('cart');
+        if (cartData) {
+          const cart = JSON.parse(cartData);
+          return of(cart);
+        }
+      } catch (error) {
+        console.error('Error loading cart from localStorage:', error);
+      }
+    }
+    // Retornar carrito vacío si no hay datos
+    return of({
+      items: [],
+      total: 0,
+      is_digital_only: false
+    });
   }
 
   updateQty() {

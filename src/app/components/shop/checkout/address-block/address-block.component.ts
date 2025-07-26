@@ -19,15 +19,20 @@ export class AddressBlockComponent {
   constructor() { }
 
   ngOnChanges() {
+    console.log('AddressBlockComponent ngOnChanges() - Addresses:', this.addresses);
+    console.log('AddressBlockComponent ngOnChanges() - Type:', this.type);
     // Automatically emit the selectAddress event for the first item if it's available
     if (this.addresses && this.addresses.length > 0) {
       const firstAddressId = this.addresses[0].id;
+      console.log('AddressBlockComponent ngOnChanges() - Emitting first address ID:', firstAddressId);
       this.selectAddress.emit(firstAddressId);
     }
   }
 
   set(event: Event) {
-    this.selectAddress.emit(Number((<HTMLInputElement>event.target)?.value));
+    const selectedId = Number((<HTMLInputElement>event.target)?.value);
+    console.log('AddressBlockComponent set() - Selected address ID:', selectedId);
+    this.selectAddress.emit(selectedId);
   }
 
 }

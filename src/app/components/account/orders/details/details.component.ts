@@ -42,34 +42,26 @@ export class DetailsComponent {
     this.store.dispatch(new GetOrderStatus());
   }
 
-  ngOnInit() {
-    this.isLogin = !!this.store.selectSnapshot(state => state.auth && state.auth.access_token)
-    this.route.params
-      .pipe(
-        switchMap(params => {
-            if(!params['id']) return of();
-            return this.store
-                      .dispatch(new ViewOrder(params['id']))
-                      .pipe(mergeMap(() => this.store.select(OrderState.selectedOrder)))
-          }
-        ),
-        takeUntil(this.destroy$)
-      )
-      .subscribe(order => {
-        this.order = order!;
-        if(this.order && this.order?.order_status_activities){
-          this.order?.order_status_activities?.map(actStatus => {
-              this.orderStatus$.subscribe(res => {
-                res.data.map(status => {
-                  if(actStatus.status == status.name){
-                    let convertDate = this.datePipe.transform(actStatus?.changed_at, 'dd MMM yyyy hh:mm:a')!
-                    status['activities_date'] = convertDate;
-                  }
-                })
-            })
-          })
-        }
-      });
+  ngOnInit(): void {
+    this.route.params.subscribe(params => {
+      const orderId = params['id'];
+      console.log('DetailsComponent ngOnInit() - Order ID from params:', orderId);
+      console.log('DetailsComponent ngOnInit() - Order ID type:', typeof orderId);
+      
+      // Convertir a number si es necesario
+      const orderIdNumber = Number(orderId);
+      console.log('DetailsComponent ngOnInit() - Order ID converted to number:', orderIdNumber);
+      
+      this.store.dispatch(new ViewOrder(orderIdNumber));
+    });
+
+    // Suscribirse al selectedOrder del store
+    this.store.select(OrderState.selectedOrder).subscribe(order => {
+      console.log('DetailsComponent - Selected order received:', order);
+      if (order) {
+        this.order = order;
+      }
+    });
   }
 
   openPayModal(order: Order){
