@@ -13,6 +13,7 @@ import { ButtonComponent } from '../../../shared/components/widgets/button/butto
 import { TranslateModule } from '@ngx-translate/core';
 import { NoDataComponent } from '../../../shared/components/widgets/no-data/no-data.component';
 
+
 @Component({
     selector: 'app-cart',
     imports: [CommonModule, RouterModule, CurrencySymbolPipe,
@@ -34,15 +35,26 @@ export class CartComponent {
 
   constructor(private store: Store) {}
 
-  updateQuantity(item: Cart, qty: number) {
+  updateQuantity(item: Cart, qtyChange: number) {
+    const newQuantity = item.quantity + qtyChange;
+    console.log('UpdateQuantity - Current qty:', item.quantity, 'Change:', qtyChange, 'New qty:', newQuantity);
+    
+    // Si la nueva cantidad es 0 o menor, eliminar el producto
+    if (newQuantity <= 0) {
+      console.log('Eliminando producto con ID:', item.id);
+      this.delete(item.id!);
+      return;
+    }
+    
     const params: CartAddOrUpdate = {
       id: item?.id,
       product: item?.product,
       product_id: item?.product?.id,
       variation: item?.variation,
       variation_id: item?.variation_id ? item?.variation_id : null,
-      quantity: qty
+      quantity: newQuantity
     }
+    console.log('Actualizando cantidad con params:', params);
     this.store.dispatch(new UpdateCart(params));
   }
 

@@ -35,17 +35,7 @@ export class OrderService {
   }
 
   viewOrder(id: string): Observable<OrderModel> {
-    console.log('OrderService viewOrder() - Making HTTP request to:', `${environment.URLS}/orders/${id}`);
-    return this.http.get<OrderModel>(`${environment.URLS}/orders/${id}`).pipe(
-      tap({
-        next: (result) => {
-          console.log('OrderService viewOrder() - Raw response from backend:', result);
-        },
-        error: (err) => {
-          console.error('OrderService viewOrder() - Error from backend:', err);
-        }
-      })
-    );
+    return this.http.get<OrderModel>(`${environment.URLS}/orders/${id}`);
   }
 
   orderTracking(payload: { order_number: string, email_or_phone: string }): Observable<Order> {
@@ -53,18 +43,7 @@ export class OrderService {
   }
 
   createOrder(payload: CheckoutPayload): Observable<any> {
-    console.log('OrderService createOrder() - Sending payload to backend:', payload);
-    console.log('OrderService createOrder() - Products in payload:', payload.products);
-    return this.http.post<any>(`${environment.URLS}/orders`, payload).pipe(
-      tap({
-        next: (result) => {
-          console.log('OrderService createOrder() - Backend response:', result);
-        },
-        error: (err) => {
-          console.error('OrderService createOrder() - Backend error:', err);
-        }
-      })
-    );
+    return this.http.post<any>(`${environment.URLS}/orders`, payload);
   }
 
 }

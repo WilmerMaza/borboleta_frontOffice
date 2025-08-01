@@ -221,11 +221,22 @@ export class CartState {
     const state = ctx.getState();
     const cart = [...state.items];
     const index = cart.findIndex(item => item.id === action.payload.id);
+    
     if (index !== -1) {
+      // Si la cantidad es 0 o negativa, eliminar el producto
+      if (action.payload.quantity <= 0) {
+        this.deleteFromLocalStorage(ctx, action.payload.id!);
+        return;
+      }
+      
+      // Usar el precio correcto del producto que ya está en el carrito
+      const price = cart[index]?.variation ? cart[index]?.variation?.sale_price : 
+                   (cart[index]?.wholesale_price || cart[index]?.product?.sale_price || 0);
+      
       cart[index] = {
         ...cart[index],
         quantity: action.payload.quantity,
-        sub_total: (action.payload.product?.sale_price || 0) * action.payload.quantity
+        sub_total: price * action.payload.quantity
       };
     }
     const total = cart.reduce((prev, curr) => prev + Number(curr.sub_total), 0);
@@ -254,16 +265,15 @@ export class CartState {
       cart[index].variation.selected_variation = cart[index]?.variation?.attribute_values?.map(values => values.value)?.join('/')
     }
 
-    cart[index].quantity = 0;
-
     const productQty = cart[index]?.variation ? cart[index]?.variation?.quantity : cart[index]?.product?.quantity;
+    const newQuantity = cart[index]?.quantity + action?.payload.quantity;
 
-    if (productQty < cart[index]?.quantity + action?.payload.quantity) {
+    if (newQuantity > 0 && productQty < newQuantity) {
       this.notificationService.showError(`You can not add more items than available. In stock ${productQty} items.`);
       return false;
     }
 
-    cart[index].quantity = cart[index]?.quantity + action?.payload.quantity;
+    cart[index].quantity = newQuantity;
     cart[index].sub_total = cart[index]?.quantity * (cart[index]?.variation ? cart[index]?.variation?.sale_price : cart[index].product.sale_price);
 
     if(cart[index].product?.wholesales?.length) {
@@ -289,14 +299,16 @@ export class CartState {
       return of();
     }
 
-    let total = state.items.reduce((prev, curr: Cart) => {
+    let total = cart.reduce((prev, curr: Cart) => {
       return (prev + Number(curr.sub_total));
     }, 0);
 
     ctx.patchState({
-      ...state,
+      items: cart,
       is_digital_only: cart.map(item => item.product && item?.product?.product_type).every(item => item == 'digital'),
-      total: total
+      total: total,
+      stickyCartOpen: false,
+      sidebarCartOpen: false
     });
 
     // Sincronizar con localStorage manualmente

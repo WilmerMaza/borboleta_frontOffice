@@ -249,15 +249,15 @@ export class CheckoutComponent {
       if (cartData) {
         const cart = JSON.parse(cartData);
         
-        // Verificar que el carrito tenga la estructura correcta
+      
         if (cart && cart.items && Array.isArray(cart.items) && cart.items.length > 0) {
-          // Verificar que cada item tenga los datos necesarios
+    
           const validItems = cart.items.filter((item: any) => 
             item && item.product && item.product_id && item.quantity && item.sub_total
           );
           
           if (validItems.length > 0) {
-            // Convertir los items del localStorage al formato esperado por SyncCart
+          
             const syncItems = validItems.map((item: any) => ({
               id: null,
               product: item.product,
