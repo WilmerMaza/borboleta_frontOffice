@@ -84,14 +84,22 @@ export class CartComponent {
     this.store.dispatch(new ToggleSidebarCart(value));
   }
 
-  updateQuantity(item: Cart, qty: number) {
+  updateQuantity(item: Cart, qtyChange: number) {
+    const newQuantity = item.quantity + qtyChange;
+    
+    // Si la nueva cantidad es 0 o menor, eliminar el producto
+    if (newQuantity <= 0) {
+      this.delete(item.id!);
+      return;
+    }
+    
     const params: CartAddOrUpdate = {
       id: item?.id,
       product_id: item?.product?.id,
       product: item?.product ? item?.product : null,
       variation_id: item?.variation_id ? item?.variation_id : null,
       variation: item?.variation ? item?.variation : null,
-      quantity: qty
+      quantity: newQuantity
     }
     this.store.dispatch(new UpdateCart(params));
     this.cartService.updateQty();
