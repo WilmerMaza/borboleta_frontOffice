@@ -518,6 +518,10 @@ export class CheckoutComponent {
       // Siempre obtener el carrito desde localStorage para la orden
       const cart = this.isBrowser ? JSON.parse(localStorage.getItem('cart') || '{}') : {};
       const cartItems = cart.items || [];
+      
+
+      
+    
 
       // Obtener las direcciones completas del localStorage
       const addresses = this.isBrowser ? JSON.parse(localStorage.getItem('addresses') || '[]') : [];
@@ -525,14 +529,29 @@ export class CheckoutComponent {
       let shippingAddress = addresses.find((a: any) => a.id == this.form.value.shipping_address_id);
 
       // Mapea los productos con el formato correcto para OrderProduct
-      const products = cartItems.map((item: any) => ({
-        product_id: item.product_id || item.product?.id,
-        variation_id: item.variation_id || null,
-        quantity: item.quantity,
-        price: item.product?.price || 0,
-        sale_price: item.product?.sale_price || 0,
-        sub_total: item.sub_total || 0
-      }));
+      const products = cartItems.map((item: any) => {
+      
+        
+        // Tomar el nombre del producto desde los datos locales del carrito
+        const productName= item.product?.name || 'Producto sin nombre';
+        const variationName = item.variation?.name || null;
+        
+  
+        
+        return {
+          product_id: item.product_id || item.product?.id,
+          variation_id: item.variation_id || null,
+          quantity: item.quantity,
+          // Enviar el nombre del producto al backend en el formato correcto
+          name: productName,
+          price: item.product?.price || 0,
+          sale_price: item.variation?.sale_price || item.product?.sale_price || 0,
+          discount: item.product?.discount || 0,
+          sub_total: item.sub_total || 0
+        };
+      });
+      
+
 
       // Calcula los totales usando los datos del localStorage
       const amount = cartItems.reduce((acc: number, item: any) => {
@@ -543,7 +562,7 @@ export class CheckoutComponent {
       const shipping_total = 0; // Si tienes el cálculo, ponlo aquí
       const total = amount + tax_total + shipping_total;
       
-      // Arma el payload
+      // Arma el payload en el formato que espera el backend
       const payload = {
         consumer_id: userId,
         tax_total: tax_total,
@@ -565,6 +584,8 @@ export class CheckoutComponent {
         billing_address_id: this.form.value.billing_address_id,
         created_at: new Date().toISOString()
       };
+      
+
       
       this.store.dispatch(new PlaceOrder(payload));
     }

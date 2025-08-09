@@ -15,22 +15,7 @@ export class OrderService {
   constructor(private http: HttpClient) {}
 
   getOrders(payload: any): Observable<OrderModel> {
-    console.log('OrderService getOrders() - Making HTTP request to:', `${environment.URLS}/orders`);
-    console.log('OrderService getOrders() - With payload:', payload);
-    return this.http.get<OrderModel>(`${environment.URLS}/orders`, { params: payload }).pipe(
-      tap({
-        next: (result) => {
-          console.log('OrderService getOrders() - Raw response from backend:', result);
-          if (result.data && result.data.length > 0) {
-            console.log('OrderService getOrders() - First order from backend:', result.data[0]);
-            console.log('OrderService getOrders() - First order keys from backend:', Object.keys(result.data[0]));
-          }
-        },
-        error: (err) => {
-          console.error('OrderService getOrders() - Error from backend:', err);
-        }
-      })
-    );
+    return this.http.get<OrderModel>(`${environment.URLS}/orders`, { params: payload });
   }
 
   viewOrder(id: string): Observable<OrderModel> {
