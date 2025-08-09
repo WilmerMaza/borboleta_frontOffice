@@ -8,11 +8,12 @@ import {
   AddToCart, AddToCartLocalStorage, ClearCart, CloseStickyCart, DeleteCart,
   GetCartItems, ReplaceCart, SyncCart, ToggleSidebarCart, UpdateCart
 } from "../action/cart.action";
+import { Variation } from "../../interface/product.interface";
 
 export interface CartStateModel {
   items: Cart[];
   total: number;
-  is_digital_only: boolean | number | null;
+  is_digital_only: boolean;
   stickyCartOpen: boolean;
   sidebarCartOpen: boolean;
 }
@@ -22,7 +23,7 @@ export interface CartStateModel {
   defaults: {
     items: [],
     total: 0,
-    is_digital_only: null,
+    is_digital_only: false,
     stickyCartOpen: false,
     sidebarCartOpen: false
   },
@@ -31,10 +32,11 @@ export interface CartStateModel {
 @Injectable()
 export class CartState {
 
-  constructor(private cartService: CartService,
+  constructor(
+    private cartService: CartService,
     private notificationService: NotificationService,
-    private store: Store) {
-  }
+    private store: Store
+  ) {}
 
   ngxsOnInit(ctx: StateContext<CartStateModel>) {
     ctx.dispatch(new ToggleSidebarCart(false));
@@ -68,30 +70,32 @@ export class CartState {
 
   @Action(GetCartItems)
   getCartItems(ctx: StateContext<CartStateModel>) {
-    if (!this.store.selectSnapshot(state => state.auth && state.auth.access_token)) {
-      return;
-    }
-    return this.cartService.getCartItems().pipe(
-      tap({
-        next: result => {
-          // Set Selected Variant
-          result.items.filter((item: Cart) => {
-            if(item?.variation) {
-              item.variation.selected_variation = item?.variation?.attribute_values?.map(values => values.value)?.join('/');
-            }
+    // Siempre cargar desde localStorage, sin importar el estado de autenticación
+    this.loadFromLocalStorage(ctx);
+  }
+
+  // Método helper para cargar desde localStorage
+  private loadFromLocalStorage(ctx: StateContext<CartStateModel>) {
+    if (typeof window !== 'undefined') {
+      try {
+        const cartData = localStorage.getItem('cart');
+        if (cartData) {
+          const cart = JSON.parse(cartData);
+          ctx.patchState({
+            items: cart.items || [],
+            total: cart.total || 0,
+            is_digital_only: cart.is_digital_only || false
           });
-          ctx.patchState(result);
-        },
-        error: err => {
-          throw new Error(err?.error?.message);
         }
-      })
-    );
+      } catch (error) {
+        localStorage.removeItem('cart');
+      }
+    }
   }
 
   @Action(AddToCart)
   add(ctx: StateContext<CartStateModel>, action: AddToCart) {
-     if (action.payload.id) {
+    if (action.payload.id) {
       return this.store.dispatch(new UpdateCart(action.payload));
     }
 
@@ -187,6 +191,9 @@ export class CartState {
 
     ctx.patchState(output);
 
+    // Sincronizar con localStorage manualmente
+    this.syncToLocalStorage(output.items, output.total, output.is_digital_only);
+
     setTimeout(() => {
       this.store.dispatch(new CloseStickyCart());
     }, 1500);
@@ -194,28 +201,67 @@ export class CartState {
 
   @Action(UpdateCart)
   update(ctx: StateContext<CartStateModel>, action: UpdateCart) {
+    return this.updateLocalStorage(ctx, action);
+  }
+
+  // Método helper para actualizar localStorage
+  private updateLocalStorage(ctx: StateContext<CartStateModel>, action: UpdateCart) {
+    const state = ctx.getState();
+    const cart = [...state.items];
+    const index = cart.findIndex(item => item.id === action.payload.id);
+    
+    if (index !== -1) {
+      // Si la cantidad es 0 o negativa, eliminar el producto
+      if (action.payload.quantity <= 0) {
+        this.deleteFromLocalStorage(ctx, action.payload.id!);
+        return;
+      }
+      
+      // Usar el precio correcto del producto que ya está en el carrito
+      const price = cart[index]?.variation ? cart[index]?.variation?.sale_price : 
+                   (cart[index]?.wholesale_price || cart[index]?.product?.sale_price || 0);
+      
+      cart[index] = {
+        ...cart[index],
+        quantity: action.payload.quantity,
+        sub_total: price * action.payload.quantity
+      };
+    }
+    const total = cart.reduce((prev, curr) => prev + Number(curr.sub_total), 0);
+    ctx.patchState({
+      items: cart,
+      total: total
+    });
+
+    // Sincronizar con localStorage manualmente
+    this.syncToLocalStorage(cart, total, cart.map(item => item.product && item?.product?.product_type).every(item => item == 'digital'));
+  }
+
+  @Action(ReplaceCart)
+  replace(ctx: StateContext<CartStateModel>, action: ReplaceCart) {
+
     const state = ctx.getState();
     const cart = [...state.items];
     const index = cart.findIndex(item => Number(item.id) === Number(action.payload.id));
 
+    // Update Cart If cart id same but variant id is different
     if(cart[index]?.variation && action.payload.variation_id &&
       Number(cart[index].id) === Number(action.payload.id) &&
       Number(cart[index]?.variation_id) != Number(action.payload.variation_id)) {
-
-        return this.store.dispatch(new ReplaceCart(action.payload));
+      cart[index].variation = action.payload.variation!;
+      cart[index].variation_id = action.payload.variation_id;
+      cart[index].variation.selected_variation = cart[index]?.variation?.attribute_values?.map(values => values.value)?.join('/')
     }
 
     const productQty = cart[index]?.variation ? cart[index]?.variation?.quantity : cart[index]?.product?.quantity;
+    const newQuantity = cart[index]?.quantity + action?.payload.quantity;
 
-    if (productQty < cart[index]?.quantity + action?.payload.quantity) {
+    if (newQuantity > 0 && productQty < newQuantity) {
       this.notificationService.showError(`You can not add more items than available. In stock ${productQty} items.`);
       return false;
     }
 
-    if(cart[index]?.variation) {
-      cart[index].variation.selected_variation = cart[index]?.variation?.attribute_values?.map(values => values.value)?.join('/');
-    }
-    cart[index].quantity = cart[index]?.quantity + action?.payload.quantity;
+    cart[index].quantity = newQuantity;
     cart[index].sub_total = cart[index]?.quantity * (cart[index]?.variation ? cart[index]?.variation?.sale_price : cart[index].product.sale_price);
 
     if(cart[index].product?.wholesales?.length) {
@@ -241,98 +287,78 @@ export class CartState {
       return of();
     }
 
-    let total = state.items.reduce((prev, curr: Cart) => {
-      return (prev + Number(curr.sub_total));
-    }, 0);
-
-    ctx.patchState({
-      ...state,
-      is_digital_only: cart.map(item => item.product && item?.product?.product_type).every(item => item == 'digital'),
-      total: total
-    });
-
-    if (!this.store.selectSnapshot(state => state.auth && state.auth.access_token)) {
-      return;
-    }
-    // return this.cartService.updateCart(action.payload).pipe(
-    //   tap({
-    //     error: err => {
-    //       throw new Error(err?.error?.message);
-    //     }
-    //   })
-    // );
-  }
-
-  @Action(ReplaceCart)
-  replace(ctx: StateContext<CartStateModel>, action: ReplaceCart) {
-
-    const state = ctx.getState();
-    const cart = [...state.items];
-    const index = cart.findIndex(item => Number(item.id) === Number(action.payload.id));
-
-    // Update Cart If cart id same but variant id is different
-    if(cart[index]?.variation && action.payload.variation_id &&
-      Number(cart[index].id) === Number(action.payload.id) &&
-      Number(cart[index]?.variation_id) != Number(action.payload.variation_id)) {
-      cart[index].variation = action.payload.variation!;
-      cart[index].variation_id = action.payload.variation_id;
-      cart[index].variation.selected_variation = cart[index]?.variation?.attribute_values?.map(values => values.value)?.join('/')
-    }
-
-    cart[index].quantity = 0;
-
-    const productQty = cart[index]?.variation ? cart[index]?.variation?.quantity : cart[index]?.product?.quantity;
-
-    if (productQty < cart[index]?.quantity + action?.payload.quantity) {
-      this.notificationService.showError(`You can not add more items than available. In stock ${productQty} items.`);
-      return false;
-    }
-
-    cart[index].quantity = cart[index]?.quantity + action?.payload.quantity;
-    cart[index].sub_total = cart[index]?.quantity * (cart[index]?.variation ? cart[index]?.variation?.sale_price : cart[index].product.sale_price);
-
-    if (cart[index].quantity < 1) {
-      this.store.dispatch(new DeleteCart(action.payload.id!));
-      return of();
-    }
-
-    let total = state.items.reduce((prev, curr: Cart) => {
-      return (prev + Number(curr.sub_total));
-    }, 0);
-
-    ctx.patchState({
-      ...state,
-      total: total
-    });
-
-    if (!this.store.selectSnapshot(state => state.auth && state.auth.access_token)) {
-      return;
-    }
-  }
-
-  @Action(DeleteCart)
-  delete(ctx: StateContext<CartStateModel>, { id }: DeleteCart) {
-    const state = ctx.getState();
-
-    let cart = state.items.filter(value => value.id !== id);
     let total = cart.reduce((prev, curr: Cart) => {
       return (prev + Number(curr.sub_total));
     }, 0);
 
     ctx.patchState({
       items: cart,
-      is_digital_only: state.items.map(item => item.product && item?.product?.product_type).every(item => item == 'digital'),
+      is_digital_only: cart.map(item => item.product && item?.product?.product_type).every(item => item == 'digital'),
+      total: total,
+      stickyCartOpen: false,
+      sidebarCartOpen: false
+    });
+
+    // Sincronizar con localStorage manualmente
+    this.syncToLocalStorage(cart, total, cart.map(item => item.product && item?.product?.product_type).every(item => item == 'digital'));
+  }
+
+  @Action(DeleteCart)
+  delete(ctx: StateContext<CartStateModel>, { id }: DeleteCart) {
+    return this.deleteFromLocalStorage(ctx, id);
+  }
+
+  // Método helper para eliminar de localStorage
+  private deleteFromLocalStorage(ctx: StateContext<CartStateModel>, id: number) {
+    const state = ctx.getState();
+    const cart = state.items.filter(item => item.id !== id);
+    const total = cart.reduce((prev, curr) => prev + Number(curr.sub_total), 0);
+    ctx.patchState({
+      items: cart,
       total: total
     });
 
-    if (!this.store.selectSnapshot(state => state.auth && state.auth.access_token)) {
-      return;
-    }
+    // Sincronizar con localStorage manualmente
+    this.syncToLocalStorage(cart, total, cart.map(item => item.product && item?.product?.product_type).every(item => item == 'digital'));
   }
 
   @Action(SyncCart)
   syncCart(ctx: StateContext<CartStateModel>, action: SyncCart) {
-    // SyncCart logic here
+    
+    // Procesar cada item del carrito para sincronizar
+    const syncedItems: Cart[] = action.payload.map(item => {
+      // Crear un objeto Cart válido
+      const cartItem: Cart = {
+        id: Number(Math.floor(Math.random() * 10000).toString().padStart(4, '0')),
+        quantity: item.quantity,
+        sub_total: item.variation ? item.variation.sale_price * item.quantity : (item.product?.sale_price || 0) * item.quantity,
+        product: item.product!,
+        product_id: item.product_id,
+        wholesale_price: null,
+        variation: item.variation || {} as Variation, // Usar un objeto vacío como fallback
+        variation_id: item.variation_id || null
+      };
+      return cartItem;
+    });
+
+    // Calcular total
+    const total = syncedItems.reduce((prev, curr: Cart) => {
+      return (prev + Number(curr.sub_total));
+    }, 0);
+
+    const isDigitalOnly = syncedItems.map(item => item.product && item?.product?.product_type).every(item => item == 'digital');
+
+    // Actualizar estado
+    ctx.patchState({
+      items: syncedItems,
+      total: total,
+      is_digital_only: isDigitalOnly,
+      stickyCartOpen: false,
+      sidebarCartOpen: false
+    });
+
+    // Sincronizar con localStorage manualmente
+    this.syncToLocalStorage(syncedItems, total, isDigitalOnly);
   }
 
   @Action(CloseStickyCart)
@@ -355,16 +381,29 @@ export class CartState {
 
   @Action(ClearCart)
   clearCart(ctx: StateContext<CartStateModel>) {
-    if (!this.store.selectSnapshot(state => state.auth && state.auth.access_token)) {
-      return ctx.patchState({
-        items: [],
-        total: 0
-      });
-    } else {
-      return ctx.patchState({
-        items: [],
-        total: 0
-      });
+    return this.clearLocalStorage(ctx);
+  }
+
+  // Método helper para limpiar localStorage
+  private clearLocalStorage(ctx: StateContext<CartStateModel>) {
+    const newState = {
+      items: [],
+      total: 0
+    };
+    ctx.patchState(newState);
+    // Sincronizar con localStorage manualmente
+    this.syncToLocalStorage([], 0, false);
+  }
+
+  // Función helper para sincronizar con localStorage
+  private syncToLocalStorage(items: Cart[], total: number, isDigitalOnly: boolean) {
+    if (typeof window !== 'undefined') {
+      const cartData = {
+        items: items,
+        total: total,
+        is_digital_only: isDigitalOnly
+      };
+      localStorage.setItem('cart', JSON.stringify(cartData));
     }
   }
 }

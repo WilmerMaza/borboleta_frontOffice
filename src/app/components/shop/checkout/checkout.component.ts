@@ -21,7 +21,7 @@ import { OrderCheckout } from '../../../shared/interface/order.interface';
 import { DeliveryBlock, Values } from '../../../shared/interface/setting.interface';
 import { CurrencySymbolPipe } from '../../../shared/pipe/currency.pipe';
 import { CartService } from '../../../shared/services/cart.service';
-import { ClearCart } from '../../../shared/store/action/cart.action';
+import { ClearCart, SyncCart } from '../../../shared/store/action/cart.action';
 import { GetCoupons } from '../../../shared/store/action/coupon.action';
 import { Checkout, PlaceOrder } from '../../../shared/store/action/order.action';
 import { GetSettingOption } from '../../../shared/store/action/setting.action';
@@ -36,6 +36,7 @@ import { StateState } from '../../../shared/store/state/state.state';
 import { AddressBlockComponent } from './address-block/address-block.component';
 import { DeliveryBlockComponent } from './delivery-block/delivery-block.component';
 import { PaymentBlockComponent } from './payment-block/payment-block.component';
+import { GetCartItems } from '../../../shared/store/action/cart.action';
 
 @Component({
     selector: 'app-checkout',
@@ -82,10 +83,16 @@ export class CheckoutComponent {
     private formBuilder: FormBuilder,
     public cartService: CartService,
     private modal: NgbModal,
-    @Inject(PLATFORM_ID) platformId: object) {
+    @Inject(PLATFORM_ID) private platformId: Object
+  ) {
     this.isBrowser = isPlatformBrowser(platformId);
     this.store.dispatch(new GetSettingOption());
-    this.store.dispatch(new GetCoupons({ status: 1 }))
+    this.store.dispatch(new GetCoupons({ status: 1 }));
+    
+    // Cargar el carrito si el usuario está autenticado
+    if (this.store.selectSnapshot(state => state.auth && state.auth.access_token)) {
+      this.store.dispatch(new GetCartItems());
+    }
 
     this.form = this.formBuilder.group({
       products: this.formBuilder.array([], [Validators.required]),
@@ -213,8 +220,116 @@ export class CheckoutComponent {
     return this.form.get("products") as FormArray;
   }
 
-  ngOnInit() {
-    this.checkout$.subscribe(data => this.checkoutTotal = data);
+  // Función helper para obtener el user_id del localStorage
+  private getUserIdFromLocalStorage(): number {
+    if (!this.isBrowser) return 0;
+    
+    try {
+      const account = JSON.parse(localStorage.getItem('account') || '{}');
+      const userId = account.user?.id || 0;
+      return userId;
+    } catch (error) {
+      return 0;
+    }
+  }
+
+  // Función helper para cargar y sincronizar el carrito desde localStorage
+  private loadCartFromLocalStorage() {
+    if (!this.isBrowser) return;
+    
+    // Si el usuario está autenticado, cargar desde el backend pero también sincronizar localStorage
+    if (this.store.selectSnapshot(state => state.auth && state.auth.access_token)) {
+      this.store.dispatch(new GetCartItems());
+      return;
+    }
+    
+    // Si no está autenticado, cargar desde localStorage
+    try {
+      const cartData = localStorage.getItem('cart');
+      if (cartData) {
+        const cart = JSON.parse(cartData);
+        
+      
+        if (cart && cart.items && Array.isArray(cart.items) && cart.items.length > 0) {
+    
+          const validItems = cart.items.filter((item: any) => 
+            item && item.product && item.product_id && item.quantity && item.sub_total
+          );
+          
+          if (validItems.length > 0) {
+          
+            const syncItems = validItems.map((item: any) => ({
+              id: null,
+              product: item.product,
+              product_id: item.product_id,
+              variation: item.variation || null,
+              variation_id: item.variation_id || null,
+              quantity: item.quantity
+            }));
+            
+            this.store.dispatch(new SyncCart(syncItems));
+          } else {
+            localStorage.removeItem('cart');
+          }
+        } else {
+          localStorage.removeItem('cart');
+        }
+      }
+    } catch (error) {
+      // Limpiar localStorage si hay error de parsing
+      localStorage.removeItem('cart');
+    }
+  }
+
+  ngOnInit(): void {
+    this.loadCartFromLocalStorage();
+    this.loadUserData();
+    this.loadSavedAddresses();
+    this.setupFormSubscriptions();
+  }
+
+  private loadUserData(): void {
+    this.user$.subscribe(user => {
+      if (this.isBrowser && user?.address?.length) {
+        const savedShippingAddress = localStorage.getItem('selected_shipping_address');
+        const savedBillingAddress = localStorage.getItem('selected_billing_address');
+        
+        if (savedShippingAddress) {
+          const shippingAddress = JSON.parse(savedShippingAddress);
+          this.form.controls['shipping_address_id'].setValue(shippingAddress.id);
+        }
+        
+        if (savedBillingAddress) {
+          const billingAddress = JSON.parse(savedBillingAddress);
+          this.form.controls['billing_address_id'].setValue(billingAddress.id);
+        }
+      }
+    });
+  }
+
+  private loadSavedAddresses(): void {
+    // Cargar direcciones guardadas en localStorage si existen
+    if (this.isBrowser) {
+      const savedShippingAddress = localStorage.getItem('selected_shipping_address');
+      const savedBillingAddress = localStorage.getItem('selected_billing_address');
+      
+      if (savedShippingAddress) {
+        const shippingAddress = JSON.parse(savedShippingAddress);
+        this.form.controls['shipping_address_id'].setValue(shippingAddress.id);
+      }
+      
+      if (savedBillingAddress) {
+        const billingAddress = JSON.parse(savedBillingAddress);
+        this.form.controls['billing_address_id'].setValue(billingAddress.id);
+      }
+    }
+  }
+
+  private setupFormSubscriptions(): void {
+    this.checkout$.subscribe(data => {
+      this.checkoutTotal = data;
+    });
+    
     this.products();
   }
 
@@ -228,13 +343,23 @@ export class CheckoutComponent {
             variation_id: new FormControl(item?.variation_id ? item?.variation_id : ''),
             quantity: new FormControl(item?.quantity),
           })
-      ));
+        ));
     });
   }
 
   selectShippingAddress(id: number) {
     if(id) {
       this.form.controls['shipping_address_id'].setValue(Number(id));
+      
+      // Guardar la dirección seleccionada en localStorage
+      if (this.isBrowser) {
+        const user = this.store.selectSnapshot(state => state.account?.user);
+        const selectedAddress = user?.address?.find((addr: any) => addr.id === id);
+        if (selectedAddress) {
+          localStorage.setItem('selected_shipping_address', JSON.stringify(selectedAddress));
+        }
+      }
+      
       this.checkout();
     }
   }
@@ -242,6 +367,16 @@ export class CheckoutComponent {
   selectBillingAddress(id: number) {
     if(id) {
       this.form.controls['billing_address_id'].setValue(Number(id));
+      
+      // Guardar la dirección seleccionada en localStorage
+      if (this.isBrowser) {
+        const user = this.store.selectSnapshot(state => state.account?.user);
+        const selectedAddress = user?.address?.find((addr: any) => addr.id === id);
+        if (selectedAddress) {
+          localStorage.setItem('selected_billing_address', JSON.stringify(selectedAddress));
+        }
+      }
+      
       this.checkout();
     }
   }
@@ -306,20 +441,21 @@ export class CheckoutComponent {
   }
 
   billingCountryChange(data: Select2UpdateEvent) {
-    if(data && data?.value) {
+    if (data && data?.value) {
       this.billingStates$ = this.store
-          .select(StateState.states)
-          .pipe(map(filterFn => filterFn(+data?.value)));
-      if(this.form.get('billing_address.same_shipping')?.value) {
-        setTimeout(() => {
-          this.form.get('billing_address.state_id')?.setValue(this.form.get('shipping_address.state_id')?.value);
-        }, 200);
+        .select(StateState.states)
+        .pipe(map(filterFn => filterFn(+data?.value)));
+  
+      if (this.form.get('billing_address.same_shipping')?.value) {
+        this.form.get('billing_address.state_id')
+          ?.setValue(this.form.get('shipping_address.state_id')?.value || '');
       }
     } else {
       this.form.get('billing_address.state_id')?.setValue('');
       this.billingStates$ = of();
     }
   }
+  
 
   checkout() {
     // If has coupon error while checkout
@@ -329,9 +465,33 @@ export class CheckoutComponent {
       this.form.controls['coupon'].reset();
     }
 
-    if(this.form.valid) {
+    // Verificar si hay productos en el carrito
+    const hasProducts = this.productControl.length > 0;
+
+    // Permitir checkout si hay productos, incluso si el formulario no está completamente válido
+    if(hasProducts) {
       this.loading = true;
-      this.store.dispatch(new Checkout(this.form.value)).subscribe({
+      
+      // Obtener user_id del localStorage
+      const userId = this.getUserIdFromLocalStorage();
+      
+      // Crear un payload mínimo con los datos disponibles
+      const checkoutPayload = {
+        consumer_id: userId,
+        products: this.form.value.products || [],
+        shipping_address_id: this.form.value.shipping_address_id || null,
+        billing_address_id: this.form.value.billing_address_id || null,
+        points_amount: this.form.value.points_amount || false,
+        wallet_balance: this.form.value.wallet_balance || false,
+        coupon: this.form.value.coupon || null,
+        delivery_description: this.form.value.delivery_description || '',
+        delivery_interval: this.form.value.delivery_interval || '',
+        payment_method: this.form.value.payment_method || ''
+      };
+      
+      this.store.dispatch(new Checkout(checkoutPayload)).subscribe({
+        next: (result) => {
+        },
         error: (err) => {
           this.loading = false;
           throw new Error(err);
@@ -341,7 +501,8 @@ export class CheckoutComponent {
         }
       });
     } else {
-      const invalidFields = Object?.keys(this.form?.controls).filter(key => this.form.controls[key].invalid);
+      if(!this.form.valid) {
+      }
     }
   }
 
@@ -350,7 +511,62 @@ export class CheckoutComponent {
       if(this.cpnRef && !this.cpnRef.nativeElement.value) {
         this.form.controls['coupon'].reset();
       }
-      this.store.dispatch(new PlaceOrder(this.form.value));
+
+      // Obtener el usuario del localStorage
+      const userId = this.getUserIdFromLocalStorage();
+      
+      // Siempre obtener el carrito desde localStorage para la orden
+      const cart = this.isBrowser ? JSON.parse(localStorage.getItem('cart') || '{}') : {};
+      const cartItems = cart.items || [];
+
+      // Obtener las direcciones completas del localStorage
+      const addresses = this.isBrowser ? JSON.parse(localStorage.getItem('addresses') || '[]') : [];
+      let billingAddress = addresses.find((a: any) => a.id == this.form.value.billing_address_id);
+      let shippingAddress = addresses.find((a: any) => a.id == this.form.value.shipping_address_id);
+
+      // Mapea los productos con el formato correcto para OrderProduct
+      const products = cartItems.map((item: any) => ({
+        product_id: item.product_id || item.product?.id,
+        variation_id: item.variation_id || null,
+        quantity: item.quantity,
+        price: item.product?.price || 0,
+        sale_price: item.product?.sale_price || 0,
+        sub_total: item.sub_total || 0
+      }));
+
+      // Calcula los totales usando los datos del localStorage
+      const amount = cartItems.reduce((acc: number, item: any) => {
+        const itemSubTotal = Number(item.sub_total || 0);
+        return acc + itemSubTotal;
+      }, 0);
+      const tax_total = 0; // Si tienes el cálculo, ponlo aquí
+      const shipping_total = 0; // Si tienes el cálculo, ponlo aquí
+      const total = amount + tax_total + shipping_total;
+      
+      // Arma el payload
+      const payload = {
+        consumer_id: userId,
+        tax_total: tax_total,
+        shipping_total: shipping_total,
+        points_amount: this.form.value.points_amount,
+        wallet_balance: this.form.value.wallet_balance,
+        amount: this.checkoutTotal?.total?.sub_total || amount,
+        total: this.checkoutTotal?.total?.total || total,
+        is_digital_only: 0, // O 1 si solo hay productos digitales
+        coupon_total_discount: 0, // Si tienes descuento por cupón
+        payment_method: this.form.value.payment_method,
+        billing_address: billingAddress,
+        shipping_address: shippingAddress,
+        products: products,
+        delivery_description: this.form.value.delivery_description,
+        delivery_interval: this.form.value.delivery_interval,
+        coupon_id: this.form.value.coupon,
+        shipping_address_id: this.form.value.shipping_address_id,
+        billing_address_id: this.form.value.billing_address_id,
+        created_at: new Date().toISOString()
+      };
+      
+      this.store.dispatch(new PlaceOrder(payload));
     }
   }
 
@@ -372,8 +588,8 @@ export class CheckoutComponent {
 
   ngOnDestroy() {
     if(this.isBrowser) {
-      this.store.dispatch(new ClearCart());
+      
       this.form.reset();
     }
   }
-}
+} 
