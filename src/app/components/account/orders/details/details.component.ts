@@ -56,16 +56,49 @@ export class DetailsComponent {
         takeUntil(this.destroy$)
       )
       .subscribe(order => {
+        console.log('📦 === ORDEN RECIBIDA EN DETALLES === 📦');
+        console.log('🎯 Orden completa:', order);
+        console.log('🆔 ID de la orden:', order?.id);
+        console.log('🔢 Número de orden:', order?.order_number);
+        console.log('💰 Amount:', order?.amount);
+        console.log('📊 Subtotal:', (order as any)?.subtotal);
+        console.log('💵 Total amount:', (order as any)?.total_amount);
+        console.log('💵 Total:', order?.total);
+        console.log('🏷️ Tax amount:', (order as any)?.tax_amount);
+        console.log('🏷️ Tax total:', order?.tax_total);
+        console.log('🚚 Shipping total:', order?.shipping_total);
+        console.log('💳 Payment method:', order?.payment_method);
+        console.log('📋 Payment status:', order?.payment_status);
+        console.log('📦 Productos:', order?.products);
+        
+        if (order?.products && order.products.length > 0) {
+          console.log('🛍️ === DETALLES DE PRODUCTOS === 🛍️');
+          order.products.forEach((product, index) => {
+            console.log(`  Producto ${index + 1}:`);
+            console.log(`    - ID: ${product.id}`);
+            console.log(`    - Nombre: ${product.name}`);
+            console.log(`    - Pivot:`, product.pivot);
+            if (product.pivot) {
+              console.log(`      - Cantidad: ${product.pivot.quantity}`);
+              console.log(`      - Precio unitario: ${product.pivot.single_price}`);
+              console.log(`      - Subtotal: ${product.pivot.subtotal}`);
+            }
+          });
+          console.log('🛍️ === FIN DETALLES PRODUCTOS === 🛍️');
+        }
+        
+        console.log('📦 === FIN ORDEN RECIBIDA === 📦');
+        
         this.order = order!;
         if(this.order && this.order?.order_status_activities){
           this.order?.order_status_activities?.map(actStatus => {
-              this.orderStatus$.subscribe(res => {
-                res.data.map(status => {
-                  if(actStatus.status == status.name){
-                    let convertDate = this.datePipe.transform(actStatus?.changed_at, 'dd MMM yyyy hh:mm:a')!
-                    status['activities_date'] = convertDate;
-                  }
-                })
+            this.orderStatus$.subscribe(res => {
+              res.data.map(status => {
+                if(actStatus.status == status.name){
+                  let convertDate = this.datePipe.transform(actStatus?.changed_at, 'dd MMM yyyy hh:mm:a')!
+                  status['activities_date'] = convertDate;
+                }
+              })
             })
           })
         }

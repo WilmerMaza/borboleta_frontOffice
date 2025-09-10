@@ -39,6 +39,8 @@ export class CartState {
   ) {}
 
   ngxsOnInit(ctx: StateContext<CartStateModel>) {
+    // Cargar el carrito desde localStorage al inicializar
+    this.loadFromLocalStorage(ctx);
     ctx.dispatch(new ToggleSidebarCart(false));
     ctx.dispatch(new CloseStickyCart());
   }

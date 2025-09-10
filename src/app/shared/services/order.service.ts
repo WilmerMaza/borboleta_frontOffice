@@ -15,7 +15,28 @@ export class OrderService {
   constructor(private http: HttpClient) {}
 
   getOrders(payload: any): Observable<OrderModel> {
-    return this.http.get<OrderModel>(`${environment.URLS}/orders`, { params: payload });
+    console.log('📦 === OBTENIENDO PEDIDOS === 📦');
+    console.log('📋 Parámetros:', payload);
+    console.log('🌐 URL:', `${environment.URLS}/orders`);
+    
+    // El backend necesita user_id en los parámetros para filtrar
+    // ya que el token JWT no contiene user_id
+    const params = {
+      ...payload,
+      user_id: 123 // ID temporal - el backend debe usar este para filtrar
+    };
+    
+    console.log('📤 Parámetros finales:', params);
+    console.log('ℹ️ El backend debe filtrar por user_id:', params.user_id);
+    console.log('⚠️ NOTA: El token JWT no contiene user_id, usando parámetro');
+    
+    return this.http.get<OrderModel>(`${environment.URLS}/orders`, { 
+      params: params,
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      }
+    });
   }
 
   viewOrder(id: string): Observable<OrderModel> {
