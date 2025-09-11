@@ -37,26 +37,52 @@ export class AuthInterceptor implements HttpInterceptor {
       // End the interceptor chain if in maintenance mode
     }
 
-    const token = this.store.selectSnapshot(state => state.auth.access_token);
-    if (token) {
+    const token = this.store.selectSnapshot(state => state.auth?.access_token);
+    
+    // Only add token if it exists and is valid
+    if (token && token !== '' && token !== null) {
       req = req.clone({
         setHeaders: {
           Authorization: `Bearer ${token}`,
         },
       });
+    } else {
+      // No valid token, don't make the request for protected routes
+      if (this.isProtectedRoute(req.url)) {
+        this.ngZone.run(() => {
+          this.router.navigate(['/account/login']);
+        });
+        return throwError(() => new Error('No valid token for protected route'));
+      }
     }
 
     return next.handle(req).pipe(
       catchError((error: HttpErrorResponse) => {
         if (error.status === 401) {
+          // Token expired or invalid, clear auth state
           this.notificationService.notification = false;
           this.store.dispatch(new AuthClear());
           this.authService.isLogin = true;
-
+          
+          // Redirect to login if not already there
+          if (!this.router.url.includes('/account/login')) {
+            this.ngZone.run(() => {
+              this.router.navigate(['/account/login']);
+            });
+          }
         }
         return throwError(() => error);
       })
     );
+  }
 
+  private isProtectedRoute(url: string): boolean {
+    const protectedRoutes = [
+      '/api/users/profile',
+      '/api/orders',
+      '/api/users/addresses'
+    ];
+    
+    return protectedRoutes.some(route => url.includes(route));
   }
 }
