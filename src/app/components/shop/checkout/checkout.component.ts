@@ -37,6 +37,7 @@ import { AddressBlockComponent } from './address-block/address-block.component';
 import { DeliveryBlockComponent } from './delivery-block/delivery-block.component';
 import { PaymentBlockComponent } from './payment-block/payment-block.component';
 import { GetCartItems } from '../../../shared/store/action/cart.action';
+import { GetAddresses } from '../../../shared/store/action/account.action';
 
 @Component({
     selector: 'app-checkout',
@@ -77,6 +78,7 @@ export class CheckoutComponent {
   public billingStates$: Observable<Select2Data>;
   public codes = countryCodes;
   public isBrowser: boolean;
+  cartItemsFromLocal: Cart[];
 
   constructor(
     private store: Store,
@@ -89,9 +91,10 @@ export class CheckoutComponent {
     this.store.dispatch(new GetSettingOption());
     this.store.dispatch(new GetCoupons({ status: 1 }));
     
-    // Cargar el carrito si el usuario está autenticado
+    // Cargar el carrito y direcciones si el usuario está autenticado
     if (this.store.selectSnapshot(state => state.auth && state.auth.access_token)) {
       this.store.dispatch(new GetCartItems());
+      this.store.dispatch(new GetAddresses()); // Cargar direcciones del usuario
     }
 
     this.form = this.formBuilder.group({
@@ -220,6 +223,12 @@ export class CheckoutComponent {
     return this.form.get("products") as FormArray;
   }
 
+  getCartItemsForDisplay(): Cart[] {
+    // Si hay items en el store, usarlos; sino, usar los del localStorage
+    const storeItems = this.store.selectSnapshot(state => state.cart?.items) || [];
+    return storeItems.length > 0 ? storeItems : this.cartItemsFromLocal;
+  }
+
   // Función helper para obtener el user_id del localStorage
   private getUserIdFromLocalStorage(): number {
     if (!this.isBrowser) return 0;
@@ -237,42 +246,14 @@ export class CheckoutComponent {
   private loadCartFromLocalStorage() {
     if (!this.isBrowser) return;
     
-    // Si el usuario está autenticado, cargar desde el backend pero también sincronizar localStorage
-    if (this.store.selectSnapshot(state => state.auth && state.auth.access_token)) {
-      this.store.dispatch(new GetCartItems());
-      return;
-    }
-    
-    // Si no está autenticado, cargar desde localStorage
+    // Siempre cargar el carrito desde localStorage, independientemente del estado de autenticación
     try {
       const cartData = localStorage.getItem('cart');
       if (cartData) {
         const cart = JSON.parse(cartData);
-        
-      
         if (cart && cart.items && Array.isArray(cart.items) && cart.items.length > 0) {
-    
-          const validItems = cart.items.filter((item: any) => 
-            item && item.product && item.product_id && item.quantity && item.sub_total
-          );
-          
-          if (validItems.length > 0) {
-          
-            const syncItems = validItems.map((item: any) => ({
-              id: null,
-              product: item.product,
-              product_id: item.product_id,
-              variation: item.variation || null,
-              variation_id: item.variation_id || null,
-              quantity: item.quantity
-            }));
-            
-            this.store.dispatch(new SyncCart(syncItems));
-          } else {
-            localStorage.removeItem('cart');
-          }
-        } else {
-          localStorage.removeItem('cart');
+          // Cargar el carrito en el store
+          this.store.dispatch(new GetCartItems());
         }
       }
     } catch (error) {
@@ -286,6 +267,14 @@ export class CheckoutComponent {
     this.loadUserData();
     this.loadSavedAddresses();
     this.setupFormSubscriptions();
+    this.loadCartItemsFromLocal();
+  }
+
+  private loadCartItemsFromLocal() {
+    if (this.isBrowser) {
+      const cart = JSON.parse(localStorage.getItem('cart') || '{}');
+      this.cartItemsFromLocal = cart.items || [];
+    }
   }
 
   private loadUserData(): void {
@@ -524,48 +513,130 @@ export class CheckoutComponent {
       let billingAddress = addresses.find((a: any) => a.id == this.form.value.billing_address_id);
       let shippingAddress = addresses.find((a: any) => a.id == this.form.value.shipping_address_id);
 
-      // Mapea los productos con el formato correcto para OrderProduct
-      const products = cartItems.map((item: any) => ({
-        product_id: item.product_id || item.product?.id,
-        variation_id: item.variation_id || null,
-        quantity: item.quantity,
-        price: item.product?.price || 0,
-        sale_price: item.product?.sale_price || 0,
-        sub_total: item.sub_total || 0
-      }));
+      // Mapea los productos con toda la información desde el carrito local
+      const products = cartItems.map((item: any) => {
+        // Incluir toda la información del producto desde el carrito local
+        const productData = {
+          // IDs básicos
+          product_id: item.product_id || item.product?.id,
+          variation_id: item.variation_id || null,
+          quantity: item.quantity,
+          
+          // Información completa del producto desde el carrito local
+          product: {
+            id: item.product?.id,
+            name: item.product?.name,
+            slug: item.product?.slug,
+            sku: item.product?.sku,
+            description: item.product?.description,
+            short_description: item.product?.short_description,
+            product_type: item.product?.product_type,
+            price: item.product?.price,
+            sale_price: item.product?.sale_price,
+            discount: item.product?.discount,
+            weight: item.product?.weight,
+            unit: item.product?.unit,
+            stock_status: item.product?.stock_status,
+            stock: item.product?.stock,
+            brand_id: item.product?.brand_id,
+            tax_id: item.product?.tax_id,
+            store_id: item.product?.store_id,
+            is_featured: item.product?.is_featured,
+            is_trending: item.product?.is_trending,
+            is_return: item.product?.is_return,
+            is_sale_enable: item.product?.is_sale_enable,
+            safe_checkout: item.product?.safe_checkout,
+            secure_checkout: item.product?.secure_checkout,
+            social_share: item.product?.social_share,
+            encourage_order: item.product?.encourage_order,
+            encourage_view: item.product?.encourage_view,
+            is_free_shipping: item.product?.is_free_shipping,
+            status: item.product?.status,
+            created_at: item.product?.created_at,
+            updated_at: item.product?.updated_at
+          },
+          
+          // Información de variación si existe
+          variation: item.variation ? {
+            id: item.variation.id,
+            name: item.variation.name,
+            sku: item.variation.sku,
+            price: item.variation.price,
+            sale_price: item.variation.sale_price,
+            quantity: item.variation.quantity,
+            stock_status: item.variation.stock_status
+          } : null,
+          
+          // Precios tomados directamente del carrito local
+          single_price: item.sub_total / item.quantity, // Precio unitario calculado desde el subtotal del carrito
+          subtotal: item.sub_total, // Subtotal exacto del carrito local
+          wholesale_price: item.wholesale_price || null
+        };
+        
+        console.log('🛍️ === PRODUCTO COMPLETO DESDE CARRITO LOCAL === 🛍️');
+        console.log('📦 Item original del carrito:', item);
+        console.log('🎯 Producto mapeado completo:', productData);
+        console.log('🏷️ Nombre del producto:', productData.product.name);
+        console.log('💰 Precio unitario (calculado desde carrito):', productData.single_price);
+        console.log('📊 Subtotal (desde carrito local):', productData.subtotal);
+        console.log('🔢 Cantidad:', productData.quantity);
+        console.log('🧮 Verificación: precio × cantidad =', productData.single_price * productData.quantity);
+        console.log('🏪 Tipo de producto:', productData.product.product_type);
+        console.log('📦 SKU:', productData.product.sku);
+        console.log('🛍️ === FIN PRODUCTO COMPLETO === 🛍️');
+        
+        return productData;
+      });
+      
+      console.log('📋 === LISTA COMPLETA DE PRODUCTOS === 📋');
+      console.log('🛒 Productos mapeados:', products);
+      console.log('📊 Cantidad total de productos:', products.length);
+      console.log('📋 === FIN LISTA PRODUCTOS === 📋');
+
 
       // Calcula los totales usando los datos del localStorage
       const amount = cartItems.reduce((acc: number, item: any) => {
         const itemSubTotal = Number(item.sub_total || 0);
         return acc + itemSubTotal;
       }, 0);
-      const tax_total = 0; // Si tienes el cálculo, ponlo aquí
+      const tax_total = amount * 0.05; // Calcular impuesto como 5% del subtotal
       const shipping_total = 0; // Si tienes el cálculo, ponlo aquí
       const total = amount + tax_total + shipping_total;
       
       // Arma el payload
       const payload = {
         consumer_id: userId,
+        products: products, // Usar 'products' para coincidir con la interfaz
+        shipping_address_id: this.form.value.shipping_address_id || 0,
+        billing_address_id: this.form.value.billing_address_id || 0,
+        coupon: this.form.value.coupon || null,
+        points_amount: this.form.value.points_amount || false,
+        wallet_balance: this.form.value.wallet_balance || false,
+        delivery_description: this.form.value.delivery_description || '',
+        delivery_interval: this.form.value.delivery_interval || '',
+        payment_method: this.form.value.payment_method || '',
         tax_total: tax_total,
         shipping_total: shipping_total,
-        points_amount: this.form.value.points_amount,
-        wallet_balance: this.form.value.wallet_balance,
-        amount: this.checkoutTotal?.total?.sub_total || amount,
-        total: this.checkoutTotal?.total?.total || total,
-        is_digital_only: 0, // O 1 si solo hay productos digitales
-        coupon_total_discount: 0, // Si tienes descuento por cupón
-        payment_method: this.form.value.payment_method,
-        billing_address: billingAddress,
-        shipping_address: shippingAddress,
-        products: products,
-        delivery_description: this.form.value.delivery_description,
-        delivery_interval: this.form.value.delivery_interval,
-        coupon_id: this.form.value.coupon,
-        shipping_address_id: this.form.value.shipping_address_id,
-        billing_address_id: this.form.value.billing_address_id,
-        created_at: new Date().toISOString()
+        total: total
       };
       
+      console.log('🚀 === PAYLOAD COMPLETO DE LA ORDEN === 🚀');
+      console.log('📦 Payload completo:', payload);
+      console.log('👤 Consumer ID:', payload.consumer_id);
+      console.log('🏠 Shipping Address ID:', payload.shipping_address_id);
+      console.log('📮 Billing Address ID:', payload.billing_address_id);
+      console.log('🎫 Cupón:', payload.coupon);
+      console.log('💳 Puntos aplicados:', payload.points_amount);
+      console.log('💰 Wallet aplicado:', payload.wallet_balance);
+      console.log('📝 Descripción de entrega:', payload.delivery_description);
+      console.log('⏰ Intervalo de entrega:', payload.delivery_interval);
+      console.log('💳 Método de pago:', payload.payment_method);
+      console.log('💰 Tax total:', payload.tax_total);
+      console.log('🚚 Shipping total:', payload.shipping_total);
+      console.log('💵 Total final:', payload.total);
+      console.log('🚀 === FIN PAYLOAD ORDEN === 🚀');
+
+
       this.store.dispatch(new PlaceOrder(payload));
     }
   }

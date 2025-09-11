@@ -56,8 +56,8 @@ export class LoginComponent {
     private modalService: NgbModal,
     private router: Router){
       this.loginForm = this.formBuilder.group({
-        email: new FormControl('john.customer@example.com', [Validators.required, Validators.email]),
-        password: new FormControl('123456789', Validators.required),
+        email: new FormControl('test@test.com', [Validators.required, Validators.email]),
+        password: new FormControl('password123', Validators.required),
       })
     }
 

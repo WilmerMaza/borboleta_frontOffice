@@ -17,10 +17,6 @@ export class GlobalErrorHandlerInterceptor implements HttpInterceptor {
     return next.handle(request).pipe(
       catchError((error: HttpErrorResponse) => {
         // Handle HTTP errors here
-        console.error('HTTP Error:', error.error);
-
-        // You can perform additional error handling tasks here,
-        // such as logging the error, displaying a notification, etc.
         const errorMessage = this.errorService.getClientErrorMessage(error.error);
         this.logger.logError(errorMessage);
         this.notifier.showError(errorMessage);

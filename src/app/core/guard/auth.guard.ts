@@ -31,22 +31,18 @@ export class AuthGuard{
     // Store the attempted URL for redirecting after login
     this.authService.redirectUrl = state.url;
 
-    // Redirect to the login page
-   this.access_token$.subscribe((token) => {
-      if(!token) {
-        this.authService.isLogin = true;
-        this.is_redirect = false
-      } else {
-        this.is_redirect = true
-      }
-    })
+    // Check if user is authenticated
+    const token = this.store.selectSnapshot(state => state.auth?.access_token);
+    
+    if (!token || token === '' || token === null) {
+      // No token, redirect to login
+      this.authService.isLogin = true;
+      this.router.navigate(['/account/login']);
+      return false;
+    }
 
-    this.store.dispatch(new GetUserDetails()).subscribe({
-      complete: () => {
-        return true;
-      }
-    });
-
+    // Token exists, verify it's still valid by getting user details
+    this.store.dispatch(new GetUserDetails());
     return true;
   }
 
