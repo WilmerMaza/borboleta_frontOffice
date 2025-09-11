@@ -6,6 +6,11 @@ export class GetUserDetails {
   constructor() {}
 }
 
+export class GetAddresses {
+  static readonly type = "[Account] Addresses Get";
+  constructor() {}
+}
+
 export class UpdateUserProfile {
   static readonly type = "[Account] User Update";
   constructor(public payload: any) {}
