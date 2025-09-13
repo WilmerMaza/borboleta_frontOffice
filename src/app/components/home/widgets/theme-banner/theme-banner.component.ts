@@ -2,10 +2,11 @@ import { CommonModule } from '@angular/common';
 import { Component, Input } from '@angular/core';
 
 import { ImageLinkComponent } from '../../../../shared/components/widgets/image-link/image-link.component';
+import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
     selector: 'app-theme-banner',
-    imports: [CommonModule, ImageLinkComponent],
+    imports: [CommonModule, ImageLinkComponent, TranslateModule],
     templateUrl: './theme-banner.component.html',
     styleUrl: './theme-banner.component.scss'
 })

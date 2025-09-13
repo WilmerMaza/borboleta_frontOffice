@@ -2,7 +2,8 @@ import { Injectable } from "@angular/core";
 import { Router } from "@angular/router";
 import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
 import { Action, Selector, State, StateContext, Store } from "@ngxs/store";
-import { tap } from "rxjs";
+import { tap, catchError } from "rxjs";
+import { throwError } from "rxjs";
 import { AuthService } from "../../services/auth.service";
 import { NotificationService } from "../../services/notification.service";
 import { AccountClear, GetUserDetails } from "../action/account.action";
@@ -70,18 +71,78 @@ export class AuthState {
 
   @Action(Register)
   register(ctx: StateContext<AuthStateModel>, action: Register) {
-    // Register Logic Here
+    console.log('📝 === PROCESANDO REGISTRO === 📝');
+    console.log('📦 Datos del registro:', action.payload);
+    
+    return this.authService.register(action.payload).pipe(
+      tap({
+        next: (response) => {
+          console.log('✅ Registro exitoso:', response);
+          
+          // Actualizar el estado con los datos del usuario
+          ctx.patchState({
+            email: action.payload.email,
+            access_token: response.data?.access_token || response.access_token,
+            token: response.data?.token || response.token
+          });
+          
+          // Mostrar notificación de éxito
+          // this.notificationService.showSuccess('¡Registro exitoso!');
+          
+          // Redirigir al login o dashboard
+          // this.router.navigate(['/account/login']);
+        },
+        error: (error) => {
+          console.error('❌ Error en el registro:', error);
+          
+          // Mostrar notificación de error
+          // this.notificationService.showError('Error en el registro');
+        }
+      })
+    );
   }
 
   @Action(Login)
   login(ctx: StateContext<AuthStateModel>, action: Login) {
-    // Login Logic Here
-    ctx.patchState({
-      email: 'john.customer@example.com',
-      token: '',
-      access_token: '115|laravel_sanctum_mp1jyyMyKeE4qVsD1bKrnSycnmInkFXXIrxKv49w49d2a2c5'
-    })
-    this.store.dispatch(new GetUserDetails());
+    console.log('🔐 === PROCESANDO LOGIN === 🔐');
+    console.log('📦 Datos del login:', action.payload);
+    
+    return this.authService.login(action.payload).pipe(
+      tap((response) => {
+        console.log('✅ Login exitoso:', response);
+        
+        // Actualizar el estado con los datos del usuario
+        ctx.patchState({
+          email: response.data?.user?.email || action.payload.email,
+          access_token: response.data?.access_token || response.access_token,
+          token: response.data?.token || response.token,
+          permissions: response.data?.user?.permissions || []
+        });
+        
+        console.log('✅ Estado actualizado con:', {
+          email: response.data?.user?.email,
+          access_token: response.data?.access_token,
+          token_type: response.data?.token_type
+        });
+        
+        // Obtener detalles completos del usuario desde el endpoint de perfil
+        this.store.dispatch(new GetUserDetails());
+      }),
+      catchError((error) => {
+        console.error('❌ Error en el login:', error);
+        console.error('📊 Detalles del error:', {
+          status: error.status,
+          statusText: error.statusText,
+          message: error.message,
+          error: error.error
+        });
+        
+        // Mostrar notificación de error
+        // this.notificationService.showError('Error en el login');
+        
+        return throwError(() => error);
+      })
+    );
   }
 
   @Action(LoginWithNumber)

@@ -4,7 +4,7 @@ import { tap } from "rxjs";
 import { AccountUser, AccountUserUpdatePassword } from "../../interface/account.interface";
 import { AccountService } from "../../services/account.service";
 import { NotificationService } from "../../services/notification.service";
-import { AccountClear, CreateAddress, DeleteAddress, GetUserDetails, UpdateAddress, UpdateUserPassword, UpdateUserProfile } from "../action/account.action";
+import { AccountClear, CreateAddress, DeleteAddress, GetAddresses, GetUserDetails, UpdateAddress, UpdateUserPassword, UpdateUserProfile } from "../action/account.action";
 
 export class AccountStateModel {
   user: AccountUser | null;
@@ -41,13 +41,39 @@ export class AccountState{
     return this.accountService.getUserDetails().pipe(
       tap({
         next: result => {
-          ctx.patchState({
-            user: result,
-            permissions: result.permission,
-          });
+          if (result?.success && result?.data?.user) {
+            ctx.patchState({
+              user: result.data.user,
+              permissions: result.data.user.permissions || [],
+            });
+          }
         },
         error: err => {
-          throw new Error(err?.error?.message);
+          throw new Error(err?.error?.message || 'Error al obtener perfil del usuario');
+        }
+      })
+    );
+  }
+
+  @Action(GetAddresses)
+  getAddresses(ctx: StateContext<AccountStateModel>) {
+    return this.accountService.getAddresses().pipe(
+      tap({
+        next: result => {
+          if (result?.success && result?.data?.addresses) {
+            const currentUser = ctx.getState().user;
+            if (currentUser) {
+              ctx.patchState({
+                user: {
+                  ...currentUser,
+                  address: result.data.addresses
+                }
+              });
+            }
+          }
+        },
+        error: err => {
+          throw new Error(err?.error?.message || 'Error al obtener direcciones');
         }
       })
     );
@@ -65,17 +91,98 @@ export class AccountState{
 
   @Action(CreateAddress)
   createAddress(ctx: StateContext<AccountStateModel>, action: CreateAddress) {
-    // Create Address Logic Here
+    console.log('➕ === CREANDO DIRECCIÓN === ➕');
+    console.log('📦 Datos de la dirección:', action.payload);
+    
+    return this.accountService.createAddress(action.payload).pipe(
+      tap({
+        next: result => {
+          console.log('✅ Dirección creada exitosamente:', result);
+          
+          if (result?.success && result?.data?.address) {
+            const currentUser = ctx.getState().user;
+            if (currentUser) {
+              const updatedAddresses = [...(currentUser.address || []), result.data.address];
+              ctx.patchState({
+                user: {
+                  ...currentUser,
+                  address: updatedAddresses
+                }
+              });
+            }
+          }
+        },
+        error: err => {
+          console.error('❌ Error al crear dirección:', err);
+          throw new Error(err?.error?.message || 'Error al crear dirección');
+        }
+      })
+    );
   }
 
   @Action(UpdateAddress)
   updateAddress(ctx: StateContext<AccountStateModel>, action: UpdateAddress) {
-    // Update Address Logic Here
+    console.log('✏️ === ACTUALIZANDO DIRECCIÓN === ✏️');
+    console.log('📦 Datos de la dirección:', action.payload);
+    console.log('🆔 ID de la dirección:', action.id);
+    
+    return this.accountService.updateAddress(action.payload, action.id).pipe(
+      tap({
+        next: result => {
+          console.log('✅ Dirección actualizada exitosamente:', result);
+          
+          if (result?.success && result?.data?.address) {
+            const currentUser = ctx.getState().user;
+            if (currentUser) {
+              const updatedAddresses = currentUser.address?.map(addr => 
+                addr.id === action.id ? result.data.address : addr
+              ) || [];
+              ctx.patchState({
+                user: {
+                  ...currentUser,
+                  address: updatedAddresses
+                }
+              });
+            }
+          }
+        },
+        error: err => {
+          console.error('❌ Error al actualizar dirección:', err);
+          throw new Error(err?.error?.message || 'Error al actualizar dirección');
+        }
+      })
+    );
   }
 
   @Action(DeleteAddress)
   deleteAddress(ctx: StateContext<AccountStateModel>, action: DeleteAddress) {
-    // Delete Address Logic Here
+    console.log('🗑️ === ELIMINANDO DIRECCIÓN === 🗑️');
+    console.log('🆔 ID de la dirección:', action.id);
+    
+    return this.accountService.deleteAddress(action.id).pipe(
+      tap({
+        next: result => {
+          console.log('✅ Dirección eliminada exitosamente:', result);
+          
+          if (result?.success) {
+            const currentUser = ctx.getState().user;
+            if (currentUser) {
+              const updatedAddresses = currentUser.address?.filter(addr => addr.id !== action.id) || [];
+              ctx.patchState({
+                user: {
+                  ...currentUser,
+                  address: updatedAddresses
+                }
+              });
+            }
+          }
+        },
+        error: err => {
+          console.error('❌ Error al eliminar dirección:', err);
+          throw new Error(err?.error?.message || 'Error al eliminar dirección');
+        }
+      })
+    );
   }
 
 

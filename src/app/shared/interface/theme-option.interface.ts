@@ -105,9 +105,10 @@ export interface Footer {
    app_store_url: string;
    social_media_enable: number | boolean;
    facebook: string;
+  
    instagram: string;
-   twitter: string;
-   pinterest: string;
+   tiktok: string;
+   whatsApp: string;
 }
 
 
@@ -180,7 +181,7 @@ export interface Member {
    designation: string;
    description: string;
    instagram: string;
-   twitter: string;
+   Tiktok: string;
    pinterest: string;
    facebook: string;
 }

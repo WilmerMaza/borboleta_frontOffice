@@ -25,7 +25,7 @@ import { ThemeTitleComponent } from '../widgets/theme-title/theme-title.componen
     selector: 'app-watch',
     imports: [CommonModule, ThemeHomeSliderComponent, ThemeBrandComponent, ImageLinkComponent,
         CategoriesComponent, ThemeTitleComponent, ThemeProductTabSectionComponent,
-        ThemeProductComponent, ThemeBlogComponent, ThemeServicesComponent,
+        ThemeProductComponent, ThemeServicesComponent,
         ThemeSocialMediaComponent
     ],
     templateUrl: './watch.component.html',

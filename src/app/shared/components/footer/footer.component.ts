@@ -12,6 +12,7 @@ import { Option } from '../../../shared/interface/theme-option.interface';
 
 @Component({
     selector: 'app-footer',
+    standalone: true,
     imports: [CommonModule, FooterOneComponent, FooterTwoComponent,
         FooterThreeComponent, FooterFourComponent],
     templateUrl: './footer.component.html',

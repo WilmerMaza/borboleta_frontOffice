@@ -5,7 +5,7 @@
     </div>
   </section>
   <!-- Home Section End -->
-  
+  <app-theme-title [title]="data?.content?.products_list" [type]="'basic'"></app-theme-title>
   <!-- Banner Section Start -->
   <section class="pb-0 ratio2_1 banner-section">
     <div class="container">
@@ -57,6 +57,7 @@
   
   <!-- Product slider Start -->
   @if(data?.content?.products_list?.status && data?.content?.products_list?.product_ids){
+    
   <app-theme-title [title]="data?.content?.products_list" [type]="'basic'"></app-theme-title>
   <section class="section-b-space pt-0">
     <div class="container">
@@ -86,45 +87,20 @@
     </div>
   </section>
   }
+
+  @if(data?.content?.banner_piepagina?.status){
+    <section class="p-0 banner-sale">
+      <app-image-link [image]="data?.content?.banner_piepagina" [placeholder]="'assets/images/full_column_banner.png'"
+        [bgImage]="false"></app-image-link>
+    </section>
+    }
   <!-- Tab product End-->
   
   <!-- Service Start -->
-  @if(data?.content?.services){
-  <div class="container">
-    <section class="service border-section small-section">
-      <app-theme-services [services]="data?.content?.services?.banners || []"></app-theme-services>
-    </section>
-  </div>
-  }
+ 
   <!-- Service End -->
   
-  <!-- Blog Section Start -->
-  @if(data?.content?.featured_blogs?.status && data?.content?.featured_blogs?.blog_ids){
-  <div class="container">
-    <app-theme-title [title]="data?.content?.featured_blogs" [type]="'basic'"></app-theme-title>
-  </div>
-  
-  <section class="blog pt-0 ratio2_3">
-    <div class="container">
-      <app-theme-blog [blogIds]="data?.content?.featured_blogs?.blog_ids || []"></app-theme-blog>
-    </div>
-  </section>
-  }
-  <!-- Blog Section End -->
-  
-  <!-- Social Media Section Start -->
-  @if(data?.content?.social_media?.banners?.length && data?.content?.social_media?.status){
-  <section class="instagram ratio_square">
-    <app-theme-social-media [media]="data?.content?.social_media || []" [class]="'container-fluid'" [type]="'borderless'">
-    </app-theme-social-media>
-  </section>
-  }
-  <!-- Social Media Section End -->
-  
+
   <!-- Brand Section Start -->
-  @if(data?.content?.brand?.status){
-  <section class="section-b-space">
-    <app-theme-brand [brandIds]="data?.content?.brand?.brand_ids || []"></app-theme-brand>
-  </section>
-  }
+
   <!-- Brand Section End -->

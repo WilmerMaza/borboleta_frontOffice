@@ -5,7 +5,7 @@ import { Select, Store } from '@ngxs/store';
 import { Observable } from 'rxjs';
 import { CartState } from '../../../../../store/state/cart.state';
 import { ProductDetailsModalComponent } from '../../../modal/product-details-modal/product-details-modal.component';
-import { AddToCart, UpdateCart } from '../../../../../store/action/cart.action';
+import { AddToCart, UpdateCart, DeleteCart } from '../../../../../store/action/cart.action';
 import { ButtonComponent } from '../../../button/button.component';
 import { TranslateModule } from '@ngx-translate/core';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
@@ -62,14 +62,24 @@ export class CartButtonComponent {
     }
   }
 
-  updateQuantity(product: Product, qty: number) {
+  updateQuantity(product: Product, qtyChange: number) {
+    if (!this.cartItem) return;
+    
+    const newQuantity = this.cartItem.quantity + qtyChange;
+    
+    // Si la nueva cantidad es 0 o menor, eliminar el producto directamente
+    if (newQuantity <= 0) {
+      this.store.dispatch(new DeleteCart(this.cartItem.id!));
+      return;
+    }
+    
     const params: CartAddOrUpdate = {
-      id: this.cartItem ? this.cartItem.id : null,
+      id: this.cartItem.id,
       product: product,
       product_id: product?.id,
-      variation_id: this.cartItem ? this.cartItem?.variation_id : null,
-      variation: this.cartItem ? this.cartItem?.variation : null,
-      quantity: qty
+      variation_id: this.cartItem?.variation_id || null,
+      variation: this.cartItem?.variation || null,
+      quantity: newQuantity
     }
     this.store.dispatch(new UpdateCart(params));
   }

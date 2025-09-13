@@ -18,15 +18,19 @@ export class ProductService {
   constructor(private http: HttpClient) {}
 
   getProducts(payload?: Params): Observable<ProductModel> {
-    return this.http.get<ProductModel>(`${environment.URL}/product.json`, { params: payload });
+    return this.http.get<ProductModel>(`${environment.URLS}/products`, {
+      params: payload,
+    });
   }
 
   getProductBySlug(slug: string): Observable<Product> {
-    return this.http.get<Product>(`${environment.URL}/product/slug/${slug}`);
+    return this.http.get<Product>(`${environment.URLS}/products/slug/${slug}`);
   }
 
   getProductBySearchList(payload?: Params): Observable<any> {
-    return this.http.get<any>(`${environment.URL}/product.json`, { params: payload });
+    return this.http.get<any>(`${environment.URLS}/products`, {
+      params: payload,
+    });
   }
 
  

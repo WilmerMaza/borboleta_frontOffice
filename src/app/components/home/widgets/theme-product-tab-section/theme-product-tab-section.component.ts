@@ -20,11 +20,12 @@ import { SkeletonProductBoxComponent } from '../../../../shared/components/widge
 import { productSlider4 } from '../../../../shared/data/owl-carousel';
 import { ProductTabSection } from '../../../../shared/interface/theme.interface';
 import { ProductService } from '../../../../shared/services/product.service';
+import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
     selector: 'app-theme-product-tab-section',
     imports: [CommonModule, ProductBoxComponent, CarouselModule,
-              NoDataComponent, SkeletonProductBoxComponent],
+              NoDataComponent, SkeletonProductBoxComponent,TranslateModule],
     templateUrl: './theme-product-tab-section.component.html',
     styleUrl: './theme-product-tab-section.component.scss'
 })
@@ -59,7 +60,12 @@ export class ThemeProductTabSectionComponent {
     'category_id': '',
   };
 
-  constructor(private store: Store, public productService: ProductService) {}
+  constructor(private store: Store, public productService: ProductService) {
+  
+    
+
+
+  }
 
   ngOnChanges(){
     // Get Category
@@ -82,6 +88,8 @@ export class ThemeProductTabSectionComponent {
         }
       })
     }
+    
+
   }
 
   getCategoriesByIds(categories: Category[], ids: number[]): Category[] {
@@ -99,8 +107,9 @@ export class ThemeProductTabSectionComponent {
             }
         }
     });
-
+ 
     return matchedCategories;
+    
   }
 
   changeTab(value: Category){
@@ -109,11 +118,19 @@ export class ThemeProductTabSectionComponent {
     this.filter['category_id'] = value.id,
 
     this.store.dispatch(new GetCategoryProducts(this.filter));
+   
+
   }
 
   ngOnDestroy() {
     if (this.categorySubscription) {
       this.categorySubscription.unsubscribe();
     }
+ 
+
+  }
+
+   trackById(index: number, item: Category): number {
+    return item.id;
   }
 }

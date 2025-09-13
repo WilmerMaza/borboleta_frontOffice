@@ -83,9 +83,9 @@
           <img [src]="StorageURL+service.icon" [alt]="service.title">
           <div class="skeleton-img-box"></div>
           <div class="media-body">
-            <h4>{{ service.title }}</h4>
+            <h4>{{ service.title | translate }}</h4>
             <h4 class="skeleton-content-h4"></h4>
-            <p>{{ service.description }}</p>
+            <p>{{ service.description | translate }}</p>
             <p class="skeleton-content-p"></p>
           </div>
         </div>
