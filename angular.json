@@ -3,7 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "multikart-frontend": {
+    "borboleta-frontend": {
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {
@@ -27,7 +27,7 @@
                 ]
               }
             },
-            "outputPath": "dist/multikart-frontend",
+            "outputPath": "dist/borboleta-frontend",
             "index": "src/index.html",
             "browser": "src/main.ts",
             "polyfills": [
@@ -85,10 +85,10 @@
           "builder": "@angular-devkit/build-angular:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "multikart-frontend:build:production"
+              "buildTarget": "borboleta-frontend:build:production"
             },
             "development": {
-              "buildTarget": "multikart-frontend:build:development"
+              "buildTarget": "borboleta-frontend:build:development"
             }
           },
           "defaultConfiguration": "development"
