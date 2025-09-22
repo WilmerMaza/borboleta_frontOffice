@@ -26,7 +26,7 @@
       <div class="counter-box">
         <img src="assets/images/icon/dashboard/account3.png" class="img-fluid">
         <div>
-          <h3>{{ (user$ | async)?.orders_count ? (user$ | async)?.orders_count : 0 }}</h3>
+          <h3>{{ totalOrders }}</h3>
           <h5>{{ 'total_orders'| translate}}</h5>
         </div>
       </div>

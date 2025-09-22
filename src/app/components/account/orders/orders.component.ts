@@ -29,6 +29,22 @@ export class OrdersComponent {
 
   constructor(private store: Store) {
     this.store.dispatch(new GetOrders(this.filter));
+    
+    // Debug: verificar los datos de las órdenes
+    this.order$.subscribe(orders => {
+      if (orders?.data?.length > 0) {
+        console.log('📦 === ÓRDENES OBTENIDAS === 📦');
+        console.log('📋 Total de órdenes:', orders.data.length);
+        orders.data.forEach((order, index) => {
+          console.log(`📦 Orden ${index + 1}:`, {
+            order_number: order.order_number,
+            created_at: order.created_at,
+            total: order.total,
+            payment_status: order.payment_status
+          });
+        });
+      }
+    });
   }
 
   setPaginate(page: number) {

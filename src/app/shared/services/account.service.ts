@@ -25,6 +25,8 @@ export class AccountService {
 
   // Métodos para manejo de direcciones
   getAddresses(): Observable<any> {
+    console.log('🏠 === OBTENIENDO DIRECCIONES === 🏠');
+    console.log('🌐 URL:', `${environment.URLS}/users/addresses`);
     return this.http.get<any>(`${environment.URLS}/users/addresses`, {
       headers: {
         'Content-Type': 'application/json',

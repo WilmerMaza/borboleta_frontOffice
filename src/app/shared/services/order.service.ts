@@ -22,13 +22,27 @@ export class OrderService {
       user_id: 123 // ID temporal - el backend debe usar este para filtrar
     };
     
+    console.log('📦 === OBTENIENDO ÓRDENES === 📦');
+    console.log('🌐 URL:', `${environment.URLS}/orders`);
+    console.log('📋 Parámetros:', params);
+    
     return this.http.get<OrderModel>(`${environment.URLS}/orders`, { 
       params: params,
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json'
       }
-    });
+    }).pipe(
+      tap(result => {
+        console.log('📦 === RESPUESTA ÓRDENES === 📦');
+        console.log('📋 Resultado completo:', result);
+        if (result?.data?.length > 0) {
+          result.data.forEach((order, index) => {
+            console.log(`📦 Orden ${index + 1} - created_at:`, order.created_at);
+          });
+        }
+      })
+    );
   }
 
   viewOrder(id: string): Observable<OrderModel> {
