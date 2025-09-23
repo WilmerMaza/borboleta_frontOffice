@@ -56,12 +56,11 @@ export class DetailsComponent {
         takeUntil(this.destroy$)
       )
       .subscribe(order => {
-        // Calcular totales si están en 0 (temporal hasta que se corrija el backend)
-        if (order && (order.total === 0 || order.amount === 0)) {
+        if (order) {
+          // Siempre calcular los totales para asegurar que se muestren correctamente
           this.calculateOrderTotals(order);
+          this.order = order;
         }
-        
-        this.order = order!;
         if(this.order && this.order?.order_status_activities){
           this.order?.order_status_activities?.map(actStatus => {
             this.orderStatus$.subscribe(res => {
@@ -106,55 +105,52 @@ export class DetailsComponent {
    * @param order - La orden a calcular
    */
   private calculateOrderTotals(order: Order) {
-    // Obtener el estado del carrito desde el store
-    const cartState = this.store.selectSnapshot(state => state.cart);
+    console.log('🔧 === CALCULANDO TOTALES === 🔧');
+    console.log('📦 Orden recibida:', {
+      total: order.total,
+      amount: order.amount,
+      tax_total: order.tax_total,
+      shipping_total: order.shipping_total,
+      products_count: order.products?.length
+    });
     
-    if (cartState && cartState.items && cartState.items.length > 0) {
-      // Usar los datos del carrito local para calcular los totales
-      const cartTotal = cartState.total || 0;
-      const cartItems = cartState.items || [];
-      
-      // Actualizar los totales de la orden con los datos del carrito
-      order.amount = cartTotal;
-      order.total = cartTotal + (order.shipping_total || 0) + (order.tax_total || 0);
-      
-      // Actualizar los productos con los datos del carrito
-      if (order.products && order.products.length > 0) {
-        order.products.forEach((orderProduct, index) => {
-          const cartItem = cartItems.find((item: any) => item.product_id === orderProduct.id);
-          if (cartItem && orderProduct.pivot) {
-            // Usar los datos del carrito para actualizar el pivot
-            orderProduct.pivot.single_price = cartItem.sub_total / cartItem.quantity;
-            orderProduct.pivot.subtotal = cartItem.sub_total;
-            orderProduct.pivot.quantity = cartItem.quantity;
-            
-            // Actualizar el nombre del producto desde el carrito
-            if (cartItem.product && cartItem.product.name) {
-              orderProduct.name = cartItem.product.name;
-            }
-          }
-        });
-      }
-    } else {
-      // Fallback: usar los precios del producto si no hay carrito
-      let subtotal = 0;
-      if (order.products && order.products.length > 0) {
-        order.products.forEach(product => {
-          if (product.pivot) {
-            const price = product.sale_price || product.price || 0;
-            const quantity = product.pivot.quantity || 1;
-            const productSubtotal = price * quantity;
-            
-            product.pivot.single_price = price;
-            product.pivot.subtotal = productSubtotal;
-            
-            subtotal += productSubtotal;
-          }
-        });
+    if (order.products?.length > 0) {
+      // Calcular subtotal si amount está en 0
+      if (order.amount === 0) {
+        const subtotal = order.total - (order.tax_total || 0) - (order.shipping_total || 0);
+        order.amount = subtotal;
+        console.log('💰 Subtotal calculado:', subtotal);
       }
       
-      order.amount = subtotal;
-      order.total = subtotal + (order.shipping_total || 0) + (order.tax_total || 0);
+      // Actualizar precios de productos si están en 0
+      order.products.forEach((product, index) => {
+        if (product.pivot) {
+          if (product.pivot.single_price === 0 || product.pivot.subtotal === 0) {
+            const subtotal = order.amount || (order.total - (order.tax_total || 0) - (order.shipping_total || 0));
+            product.pivot.single_price = subtotal / product.pivot.quantity;
+            product.pivot.subtotal = subtotal;
+            console.log(`📦 Producto ${index + 1} actualizado:`, {
+              single_price: product.pivot.single_price,
+              subtotal: product.pivot.subtotal,
+              quantity: product.pivot.quantity
+            });
+          }
+        }
+      });
+    }
+    
+    // Actualizar nombre del producto desde el carrito si está vacío
+    const cartState = this.store.selectSnapshot(state => state.cart);
+    if (cartState?.items?.length > 0 && order.products?.length > 0) {
+      order.products.forEach(orderProduct => {
+        if (!orderProduct.name || orderProduct.name === '') {
+          const cartItem = cartState.items.find((item: any) => item.product_id === orderProduct.id);
+          if (cartItem?.product?.name) {
+            orderProduct.name = cartItem.product.name;
+            console.log('📝 Nombre actualizado desde carrito:', orderProduct.name);
+          }
+        }
+      });
     }
   }
 }

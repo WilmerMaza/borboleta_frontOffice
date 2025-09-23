@@ -60,8 +60,11 @@ export class AccountState{
     return this.accountService.getAddresses().pipe(
       tap({
         next: result => {
+          console.log('🏠 === RESPUESTA DIRECCIONES === 🏠');
+          console.log('📦 Resultado:', result);
           if (result?.success && result?.data?.addresses) {
             const currentUser = ctx.getState().user;
+            console.log('👤 Usuario actual:', currentUser);
             if (currentUser) {
               ctx.patchState({
                 user: {
@@ -69,10 +72,14 @@ export class AccountState{
                   address: result.data.addresses
                 }
               });
+              console.log('✅ Direcciones actualizadas en el estado');
             }
+          } else {
+            console.log('⚠️ No se encontraron direcciones o respuesta inválida');
           }
         },
         error: err => {
+          console.error('❌ Error al obtener direcciones:', err);
           throw new Error(err?.error?.message || 'Error al obtener direcciones');
         }
       })
