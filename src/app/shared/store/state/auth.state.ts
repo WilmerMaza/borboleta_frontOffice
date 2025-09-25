@@ -104,13 +104,11 @@ export class AuthState {
 
   @Action(Login)
   login(ctx: StateContext<AuthStateModel>, action: Login) {
-    console.log('🔐 === PROCESANDO LOGIN === 🔐');
-    console.log('📦 Datos del login:', action.payload);
+
     
     return this.authService.login(action.payload).pipe(
       tap((response) => {
-        console.log('✅ Login exitoso:', response);
-        
+    
         // Actualizar el estado con los datos del usuario
         ctx.patchState({
           email: response.data?.user?.email || action.payload.email,
@@ -119,24 +117,12 @@ export class AuthState {
           permissions: response.data?.user?.permissions || []
         });
         
-        console.log('✅ Estado actualizado con:', {
-          email: response.data?.user?.email,
-          access_token: response.data?.access_token,
-          token_type: response.data?.token_type
-        });
-        
         // Obtener detalles completos del usuario desde el endpoint de perfil
         this.store.dispatch(new GetUserDetails());
       }),
       catchError((error) => {
-        console.error('❌ Error en el login:', error);
-        console.error('📊 Detalles del error:', {
-          status: error.status,
-          statusText: error.statusText,
-          message: error.message,
-          error: error.error
-        });
-        
+  
+    
         // Mostrar notificación de error
         // this.notificationService.showError('Error en el login');
         
