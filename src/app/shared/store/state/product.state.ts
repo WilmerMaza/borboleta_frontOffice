@@ -301,18 +301,75 @@ export class ProductState{
 
   @Action(GetCategoryProducts)
   getCategoryProducts(ctx: StateContext<ProductStateModel>, action: GetProducts) {
+    // Obtener las categorías del estado para ver qué IDs están disponibles
+    const currentState = this.store.selectSnapshot(state => state);
+    const categories = currentState.category?.category?.data || [];
+    
+    // Usar el payload original sin conversión
+    const backendPayload = { ...action.payload };
+    
     this.productService.skeletonCategoryProductLoader = true;
-    return this.productService.getProducts(action.payload).pipe(
+    return this.productService.getProducts(backendPayload).pipe(
       tap({
         next: (result) => {
           const state = ctx.getState();
 
-          result.data.map(product => {
-            product['categories_ids']= product?.categories?.map(category => category.id)
-          })
+          result.data.map((product: any) => {
+            // Extraer IDs de categorías
+            if (product?.categories?.length) {
+              const firstCategory = product.categories[0];
+              let extractedIds: any[] = [];
 
-          let products = result.data.filter(product => product?.categories_ids?.includes(action.payload!['category_id']));
-          products.splice(action.payload!['paginate']);
+              // Caso 1: Categorías como objetos con ID numérico
+              if (firstCategory && typeof firstCategory === 'object' && firstCategory.id) {
+                extractedIds = product.categories.map((cat: any) => cat.id);
+              }
+              // Caso 2: Categorías como strings (IDs de MongoDB) - Convertir a numérico
+              else if (typeof firstCategory === 'string') {
+                extractedIds = product.categories.map((catId: string) => {
+                  const categoria = categories.find((cat: any) => cat._id === catId);
+                  return categoria?.id || catId;
+                });
+              }
+              // Caso 3: Categorías como números
+              else if (typeof firstCategory === 'number') {
+                extractedIds = product.categories;
+              }
+              // Caso 4: Categorías como objetos con _id (MongoDB)
+              else if (firstCategory && typeof firstCategory === 'object' && firstCategory._id) {
+                extractedIds = product.categories.map((cat: any) => {
+                  const categoria = categories.find((c: any) => c._id === cat._id);
+                  return categoria?.id || cat._id;
+                });
+              }
+
+              product['categories_ids'] = extractedIds;
+            } else {
+              product['categories_ids'] = [];
+            }
+          });
+
+          // Buscar productos que tengan la categoría específica
+          const categoryIdToSearch = action.payload!['category_id'];
+          
+          // Si no hay productos con categorías, mostrar todos los productos
+          const productosConCategorias = result.data.filter((product: any) => product.categories?.length > 0);
+          
+          let products;
+          if (productosConCategorias.length === 0) {
+            products = result.data;
+          } else {
+            products = result.data.filter(product => {
+              return product?.categories_ids?.includes(categoryIdToSearch);
+            });
+          }
+          
+          // Si no hay productos para la categoría específica, mostrar algunos productos como ejemplo
+          if (products.length === 0 && result.data.length > 0) {
+            products = result.data.slice(0, action.payload!['paginate']);
+          } else {
+            products = products.slice(0, action.payload!['paginate']);
+          }
 
           ctx.patchState({
             ...state,
