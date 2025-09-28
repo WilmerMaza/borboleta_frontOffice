@@ -38,6 +38,7 @@ import { DeliveryBlockComponent } from './delivery-block/delivery-block.componen
 import { PaymentBlockComponent } from './payment-block/payment-block.component';
 import { GetCartItems } from '../../../shared/store/action/cart.action';
 import { GetAddresses } from '../../../shared/store/action/account.action';
+import { AuthService } from '../../../shared/services/auth.service';
 
 @Component({
     selector: 'app-checkout',
@@ -85,6 +86,7 @@ export class CheckoutComponent {
     private formBuilder: FormBuilder,
     public cartService: CartService,
     private modal: NgbModal,
+    private authService: AuthService,
     @Inject(PLATFORM_ID) private platformId: Object
   ) {
     this.isBrowser = isPlatformBrowser(platformId);
@@ -496,6 +498,14 @@ export class CheckoutComponent {
   }
 
   placeorder() {
+    // Verificar si el usuario está autenticado
+    const isAuthenticated = this.store.selectSnapshot(state => state.auth && state.auth.access_token);
+    
+    if (!isAuthenticated) {
+      this.openModalLogin();
+      return;
+    }
+    
     if(this.form.valid) {
       if(this.cpnRef && !this.cpnRef.nativeElement.value) {
         this.form.controls['coupon'].reset();
@@ -655,6 +665,21 @@ export class CheckoutComponent {
 
   copyFunction(txt:string){
     navigator.clipboard.writeText(txt);
+  }
+
+  openModalLogin(){
+    // Activar el flag para mostrar el modal de login
+    this.authService.isLogin = true;
+  }
+
+  onPlaceOrderClick() {
+    this.placeorder();
+  }
+
+  isPlaceOrderEnabled(): boolean {
+    // El botón siempre está habilitado (no gris)
+    // La verificación de autenticación se hace en placeorder()
+    return true;
   }
 
   ngOnDestroy() {

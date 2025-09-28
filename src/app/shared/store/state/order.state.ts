@@ -9,6 +9,7 @@ import { NotificationService } from "../../services/notification.service";
 import { OrderService } from "../../services/order.service";
 
 import { Checkout, DownloadInvoice, GetOrders, OrderTracking, PlaceOrder, RePayment, ViewOrder } from "../action/order.action";
+import { ClearCart } from "../action/cart.action";
 
 export class OrderStateModel {
   order = {
@@ -155,6 +156,10 @@ export class OrderState {
       tap({
         next: (order) => {
           this.notificationService.showSuccess('¡Pedido realizado con éxito!');
+          
+          // Limpiar el carrito después de completar la orden
+          this.store.dispatch(new ClearCart());
+          
           this.router.navigate(['/account/order']);
         },
         error: (err) => {
