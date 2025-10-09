@@ -7,7 +7,17 @@ import { throwError } from "rxjs";
 import { AuthService } from "../../services/auth.service";
 import { NotificationService } from "../../services/notification.service";
 import { AccountClear, GetUserDetails } from "../action/account.action";
-import { AuthClear, ForgotPassword, Login, LoginWithNumber, Logout, Register, UpdatePassword, VerifyNumberOTP, VerifyOTP } from "../action/auth.action";
+import {
+  AuthClear,
+  ForgotPassword,
+  Login,
+  LoginWithNumber,
+  Logout,
+  Register,
+  UpdatePassword,
+  VerifyNumberOTP,
+  VerifyOTP,
+} from "../action/auth.action";
 import { ClearCart } from "../action/cart.action";
 import { AuthNumberLoginState } from "../../interface/auth.interface";
 
@@ -22,18 +32,21 @@ export interface AuthStateModel {
 @State<AuthStateModel>({
   name: "auth",
   defaults: {
-    email: '',
-    token: '',
+    email: "",
+    token: "",
     number: null,
-    access_token: '',
+    access_token: null,
     permissions: [],
   },
 })
 @Injectable()
 export class AuthState {
-
-  constructor(private store: Store, public router: Router,
-    private authService: AuthService) {}
+  constructor(
+    private store: Store,
+    public router: Router,
+    private authService: AuthService,
+    private notificationService: NotificationService
+  ) {}
 
   //   ngxsOnInit(ctx: StateContext<AuthStateModel>) {
   //   // Pre Fake Login (if you are using ap
@@ -71,61 +84,46 @@ export class AuthState {
 
   @Action(Register)
   register(ctx: StateContext<AuthStateModel>, action: Register) {
-    console.log('📝 === PROCESANDO REGISTRO === 📝');
-    console.log('📦 Datos del registro:', action.payload);
-    
     return this.authService.register(action.payload).pipe(
       tap({
         next: (response) => {
-          console.log('✅ Registro exitoso:', response);
-          
           // Actualizar el estado con los datos del usuario
           ctx.patchState({
             email: action.payload.email,
             access_token: response.data?.access_token || response.access_token,
-            token: response.data?.token || response.token
+            token: response.data?.token || response.token,
           });
-          
-          // Mostrar notificación de éxito
-          // this.notificationService.showSuccess('¡Registro exitoso!');
-          
-          // Redirigir al login o dashboard
-          // this.router.navigate(['/account/login']);
+
+          // Obtener detalles completos del usuario desde el endpoint de perfil
+          this.store.dispatch(new GetUserDetails());
         },
         error: (error) => {
-          console.error('❌ Error en el registro:', error);
-          
           // Mostrar notificación de error
-          // this.notificationService.showError('Error en el registro');
-        }
+          this.notificationService.showError("Error en el registro");
+        },
       })
     );
   }
 
   @Action(Login)
   login(ctx: StateContext<AuthStateModel>, action: Login) {
-
-    
     return this.authService.login(action.payload).pipe(
       tap((response) => {
-    
         // Actualizar el estado con los datos del usuario
         ctx.patchState({
           email: response.data?.user?.email || action.payload.email,
-          access_token: response.data?.access_token || response.access_token,
-          token: response.data?.token || response.token,
-          permissions: response.data?.user?.permissions || []
+          access_token: response.data?.access_token,
+          token: response.data?.token,
+          permissions: response.data?.user?.permissions || [],
         });
-        
+
         // Obtener detalles completos del usuario desde el endpoint de perfil
-        this.store.dispatch(new GetUserDetails());
+        // this.store.dispatch(new GetUserDetails());
       }),
       catchError((error) => {
-  
-    
         // Mostrar notificación de error
         // this.notificationService.showError('Error en el login');
-        
+
         return throwError(() => error);
       })
     );
@@ -153,7 +151,6 @@ export class AuthState {
     this.store.dispatch(new GetUserDetails());
   }
 
-
   @Action(UpdatePassword)
   updatePassword(ctx: StateContext<AuthStateModel>, action: UpdatePassword) {
     // Update Password Logic Here
@@ -163,14 +160,14 @@ export class AuthState {
   logout(ctx: StateContext<AuthStateModel>) {
     // Logout LOgic Here
     this.store.dispatch(new AuthClear());
-    this.router.navigate(['/']);
+    this.router.navigate(["/"]);
   }
 
   @Action(AuthClear)
-  authClear(ctx: StateContext<AuthStateModel>){
+  authClear(ctx: StateContext<AuthStateModel>) {
     ctx.patchState({
-      email: '',
-      token: '',
+      email: "",
+      token: "",
       access_token: null,
       permissions: [],
     });

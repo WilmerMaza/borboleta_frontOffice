@@ -1,59 +1,60 @@
-import { HttpErrorResponse, HttpHandler, HttpInterceptor, HttpRequest } from '@angular/common/http';
-import { inject, Injectable, NgZone } from '@angular/core';
-import { Router } from '@angular/router';
-import { Select, Store } from '@ngxs/store';
-import { Observable, of, throwError } from 'rxjs';
-import { catchError } from 'rxjs/operators';
-import { Values } from '../../shared/interface/setting.interface';
-import { NotificationService } from '../../shared/services/notification.service';
-import { AuthClear } from '../../shared/store/action/auth.action';
-import { SettingState } from '../../shared/store/state/setting.state';
-import { AuthService } from '../../shared/services/auth.service';
+import {
+  HttpErrorResponse,
+  HttpHandler,
+  HttpInterceptor,
+  HttpRequest,
+} from "@angular/common/http";
+import { inject, Injectable, NgZone } from "@angular/core";
+import { Router } from "@angular/router";
+import { Select, Store } from "@ngxs/store";
+import { Observable, of, throwError } from "rxjs";
+import { catchError } from "rxjs/operators";
+import { Values } from "../../shared/interface/setting.interface";
+import { NotificationService } from "../../shared/services/notification.service";
+import { AuthClear } from "../../shared/store/action/auth.action";
+import { SettingState } from "../../shared/store/state/setting.state";
+import { AuthService } from "../../shared/services/auth.service";
 
 @Injectable()
 export class AuthInterceptor implements HttpInterceptor {
-
-  setting$: Observable<Values> = inject(Store).select(SettingState.setting) as Observable<Values>;
+  setting$: Observable<Values> = inject(Store).select(
+    SettingState.setting
+  ) as Observable<Values>;
 
   public isMaintenanceModeOn: boolean = false;
 
-  constructor(private store: Store, private router: Router, private ngZone: NgZone,
-    private notificationService: NotificationService, public authService: AuthService) {
-    this.setting$.subscribe(setting => {
-      this.isMaintenanceModeOn = setting?.maintenance?.maintenance_mode!
+  constructor(
+    private store: Store,
+    private router: Router,
+    private ngZone: NgZone,
+    private notificationService: NotificationService,
+    public authService: AuthService
+  ) {
+    this.setting$.subscribe((setting) => {
+      this.isMaintenanceModeOn = setting?.maintenance?.maintenance_mode!;
     });
   }
 
-  intercept(
-    req: HttpRequest<any>,
-    next: HttpHandler
-  ): Observable<any> {
-
+  intercept(req: HttpRequest<any>, next: HttpHandler): Observable<any> {
     // If Maintenance Mode On
     if (this.isMaintenanceModeOn) {
       this.ngZone.run(() => {
-        this.router.navigate(['/maintenance']);
-      })
+        this.router.navigate(["/maintenance"]);
+      });
       // End the interceptor chain if in maintenance mode
     }
 
-    const token = this.store.selectSnapshot(state => state.auth?.access_token);
-    
+    const token = this.store.selectSnapshot(
+      (state) => state.auth?.access_token
+    );
+
     // Only add token if it exists and is valid
-    if (token && token !== '' && token !== null) {
+    if (token && token !== "" && token !== null) {
       req = req.clone({
         setHeaders: {
           Authorization: `Bearer ${token}`,
         },
       });
-    } else {
-      // No valid token, don't make the request for protected routes
-      if (this.isProtectedRoute(req.url)) {
-        this.ngZone.run(() => {
-          this.router.navigate(['/account/login']);
-        });
-        return throwError(() => new Error('No valid token for protected route'));
-      }
     }
 
     return next.handle(req).pipe(
@@ -63,26 +64,9 @@ export class AuthInterceptor implements HttpInterceptor {
           this.notificationService.notification = false;
           this.store.dispatch(new AuthClear());
           this.authService.isLogin = true;
-          
-          // Redirect to login if not already there
-          if (!this.router.url.includes('/account/login')) {
-            this.ngZone.run(() => {
-              this.router.navigate(['/account/login']);
-            });
-          }
         }
         return throwError(() => error);
       })
     );
-  }
-
-  private isProtectedRoute(url: string): boolean {
-    const protectedRoutes = [
-      '/api/users/profile',
-      '/api/orders',
-      '/api/users/addresses'
-    ];
-    
-    return protectedRoutes.some(route => url.includes(route));
   }
 }
