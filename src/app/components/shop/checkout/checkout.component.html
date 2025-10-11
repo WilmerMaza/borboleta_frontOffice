@@ -578,7 +578,9 @@
                             <app-button
                               [class]="'order-btn btn'"
                               [id]="'place_order'"
-                              [disabled]="form.valid && checkoutTotal ? false : true">
+                              [type]="'button'"
+                              [disabled]="false"
+                              (click)="onPlaceOrderClick()">
                               {{ 'place_order' | translate }}
                             </app-button>
                           </div>

@@ -71,17 +71,17 @@ export const appConfig: ApplicationConfig = {
     {
       provide: HTTP_INTERCEPTORS,
       useClass: AuthInterceptor,
-      multi: true
+      multi: true,
     },
     {
       provide: HTTP_INTERCEPTORS,
       useClass: GlobalErrorHandlerInterceptor,
-      multi: true
+      multi: true,
     },
     {
       provide: HTTP_INTERCEPTORS,
       useClass: LoaderInterceptor,
-      multi: true
+      multi: true,
     },
     // {
     //   provide: HTTP_INTERCEPTORS,
@@ -94,17 +94,18 @@ export const appConfig: ApplicationConfig = {
       CarouselModule,
       LoadingBarRouterModule,
       ToastrModule.forRoot({
-        positionClass: 'toast-top-center',
-        preventDuplicates: true
+        timeOut: 3000,
+        positionClass: "toast-top-center",
+        preventDuplicates: true,
       }),
       TranslateModule.forRoot({
-      loader: {
-        provide: TranslateLoader,
-        useFactory: HttpLoaderFactory,
-        deps: [HttpClient],
-      },
-      defaultLanguage: 'en'
-    }),
+        loader: {
+          provide: TranslateLoader,
+          useFactory: HttpLoaderFactory,
+          deps: [HttpClient],
+        },
+        defaultLanguage: "en",
+      }),
 
       NgxsModule.forRoot([
         AccountState,
@@ -138,26 +139,19 @@ export const appConfig: ApplicationConfig = {
         ThemeOptionState,
         ThemeState,
         WalletState,
-        WishlistState
+        WishlistState,
       ]),
       NgxsModule.forFeature([AuthState]),
-      RouterModule.forRoot(routes , {
-        anchorScrolling: 'enabled',
-        scrollPositionRestoration: 'enabled',
+      RouterModule.forRoot(routes, {
+        anchorScrolling: "enabled",
+        scrollPositionRestoration: "enabled",
       }),
       NgxsStoragePluginModule.forRoot({
-        keys: [
-          "auth",
-          'account',
-          "theme_option",
-          "theme",
-          "setting",
-          "cart"
-        ]
+        keys: ["auth", "account", "theme_option", "theme", "setting", "cart"],
       })
     ),
     provideHttpClient(withInterceptorsFromDi(), withFetch()),
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(routes),
-  ]
+  ],
 };

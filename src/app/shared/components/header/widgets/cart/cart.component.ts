@@ -39,8 +39,8 @@ export class CartComponent {
   public shippingFreeAmt: number = 0;
   public cartTotal: number = 0;
   public shippingCal: number = 0;
-  public confettiItems = Array.from({ length: 150 }, (_, index) => index);
-  public confetti: number = 0;
+  // public confettiItems = Array.from({ length: 150 }, (_, index) => index);
+  // public confetti: number = 0;
   public loader: boolean = false;
   public width: number;
 
@@ -57,14 +57,14 @@ export class CartComponent {
       this.shippingCal = (this.cartTotal * 100) / this.shippingFreeAmt;
       if(this.shippingCal > 100) {
         this.shippingCal = 100;
-        if(this.confetti == 0) {
-          this.confetti = 1;
-          setTimeout(() => {
-            this.confetti = 2;
-          }, 4500);
-        }
+        // if(this.confetti == 0) {
+        //   this.confetti = 1;
+        //   setTimeout(() => {
+        //     this.confetti = 2;
+        //   }, 4500);
+        // }
       } else {
-        this.confetti = 0;
+        // this.confetti = 0;
       }
     });
   }
