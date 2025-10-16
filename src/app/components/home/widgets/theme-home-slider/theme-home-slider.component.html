@@ -8,7 +8,7 @@
               <div class="slider-contain" id="block" style="width: 100%; position: relative;" data-vide-options="position: 0% 50%">
                 <div style="position: absolute; z-index: -1; inset: 0px; overflow: hidden; background-size: cover; background-color: transparent; background-repeat: no-repeat; background-position: 0% 50%; background-image: none;">
                   <video autoplay="" loop="" muted="" style="margin: auto; position: absolute; z-index: -1; top: 50%; left: 0%; transform: translate(0%, -50%); visibility: visible; opacity: 1; width: 1907px; height: auto;">
-                    <source [src]="StorageURL+banner.image_url" type="video/mp4">
+                    <source [src]="getVideoUrl(banner.image_url)" type="video/mp4">
                   </video>
                 </div>
               </div>
@@ -25,7 +25,7 @@
     @if(filteredBanners.length && filteredBanners[0].image_url && videoType.includes(filteredBanners[0].image_url.substring(filteredBanners[0].image_url.lastIndexOf('.') + 1))){
       <div class="slider-contain" id="block" style="width: 100%; position: relative;" data-vide-options="position: 0% 50%">
         <div style="position: absolute; z-index: -1; inset: 0px; overflow: hidden; background-size: cover; background-color: transparent; background-repeat: no-repeat; background-position: 0% 50%; background-image: none;"><video autoplay="" loop="" muted="" style="margin: auto; position: absolute; z-index: -1; top: 50%; left: 0%; transform: translate(0%, -50%); visibility: visible; opacity: 1; width: 1907px; height: auto;">
-            <source [src]="StorageURL+filteredBanners[0].image_url" type="video/mp4">
+            <source [src]="getVideoUrl(filteredBanners[0].image_url)" type="video/mp4">
           </video></div>
       </div>
     }@else {
