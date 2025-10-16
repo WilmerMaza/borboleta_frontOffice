@@ -46,4 +46,25 @@ export class ImageLinkComponent {
     return product ? product.slug : null;
   }
 
+  getImageUrl(imageUrl: string | null | undefined): string {
+    if (!imageUrl) return '';
+    
+    // Si la URL ya es completa (empieza con http:// o https://), devolverla tal cual
+    if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
+      return imageUrl;
+    }
+    
+    // Detectar URLs de Firebase Storage que pueden venir sin esquema
+    // Buscar patrones típicos de Firebase Storage: firebasestorage.googleapis.com o GoogleAccessId
+    if (imageUrl.includes('firebasestorage.googleapis.com') || 
+        imageUrl.includes('GoogleAccessId=') || 
+        imageUrl.includes('storage.googleapis.com')) {
+      // Si parece ser una URL de Firebase pero no tiene esquema, añadir https://
+      return 'https://' + imageUrl;
+    }
+    
+    // Si es una ruta relativa, concatenar con StorageURL
+    return this.StorageURL + (imageUrl.startsWith('/') ? imageUrl : '/' + imageUrl);
+  }
+
 }
