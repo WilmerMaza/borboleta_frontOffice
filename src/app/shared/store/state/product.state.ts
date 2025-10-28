@@ -120,81 +120,55 @@ export class ProductState{
           if(action?.payload) {
             // Note:- For Internal filter purpose only, once you apply filter logic on server side then you can remove  it as per your requirement.
             // Note:- we have covered only few filters as demo purpose
-            products = result.data.filter(product =>
-              (action?.payload?.['store_slug'] && product?.store?.slug == action?.payload?.['store_slug']) ||
-              (
-                action?.payload?.['category'] && product?.categories?.length &&
+            
+            // Filter by store slug
+            if(action?.payload?.['store_slug']) {
+              products = products.filter(product => product?.store?.slug == action?.payload?.['store_slug']);
+            }
+            
+            // Filter by category
+            if(action?.payload?.['category']) {
+              products = products.filter(product => 
+                product?.categories?.length &&
                 product?.categories?.some(category => action?.payload?.['category']?.split(',')?.includes(category.slug))
-              )
-            )
+              );
+            }
 
-            products = products.length ? products : result.data;
-
+            // Sorting
             if(action?.payload?.['sortBy']) {
-              if(action?.payload?.['sortBy'] === 'asc') {
-                products = products.sort((a, b) => {
-                  if (a.id < b.id) {
-                    return -1;
-                  } else if (a.id > b.id) {
-                    return 1;
-                  }
-                  return 0;
-                })
-              } else if(action?.payload?.['sortBy'] === 'desc') {
-                products = products.sort((a, b) => {
-                  if (a.id > b.id) {
-                    return -1;
-                  } else if (a.id < b.id) {
-                    return 1;
-                  }
-                  return 0;
-                })
-              } else if (action?.payload?.['sortBy'] === 'a-z') {
-                products = products.sort((a, b) => {
-                  if (a.name < b.name) {
-                    return -1;
-                  } else if (a.name > b.name) {
-                    return 1;
-                  }
-                  return 0;
-                })
-              } else if (action?.payload?.['sortBy'] === 'z-a') {
-                products = products.sort((a, b) => {
-                  if (a.name > b.name) {
-                    return -1;
-                  } else if (a.name < b.name) {
-                    return 1;
-                  }
-                  return 0;
-                })
-              } else if (action?.payload?.['sortBy'] === 'low-high') {
-                products = products.sort((a, b) => {
-                  if (a.sale_price < b.sale_price) {
-                    return -1;
-                  } else if (a.price > b.price) {
-                    return 1;
-                  }
-                  return 0;
-                })
-              } else if (action?.payload?.['sortBy'] === 'high-low') {
-                products = products.sort((a, b) => {
-                  if (a.sale_price > b.sale_price) {
-                    return -1;
-                  } else if (a.price < b.price) {
-                    return 1;
-                  }
-                  return 0;
-                })
-              }
-            } else if(!action?.payload?.['ids']) {
+              const sortBy = action?.payload?.['sortBy'];
+              
               products = products.sort((a, b) => {
-                if (a.id < b.id) {
-                  return -1;
-                } else if (a.id > b.id) {
-                  return 1;
+                switch(sortBy) {
+                  case 'asc':
+                    return a.id - b.id;
+                  
+                  case 'desc':
+                    return b.id - a.id;
+                  
+                  case 'a-z':
+                    return a.name.localeCompare(b.name);
+                  
+                  case 'z-a':
+                    return b.name.localeCompare(a.name);
+                  
+                  case 'low-high':
+                    const priceA = a.sale_price || a.price;
+                    const priceB = b.sale_price || b.price;
+                    return priceA - priceB;
+                  
+                  case 'high-low':
+                    const priceHighA = a.sale_price || a.price;
+                    const priceHighB = b.sale_price || b.price;
+                    return priceHighB - priceHighA;
+                  
+                  default:
+                    return 0;
                 }
-                return 0;
-              })
+              });
+            } else if(!action?.payload?.['ids']) {
+              // Default sorting by ID ascending
+              products = products.sort((a, b) => a.id - b.id);
             }
 
             if(action?.payload?.['search']) {
@@ -203,7 +177,32 @@ export class ProductState{
 
             if(action?.payload?.['brand']){
               products = products.filter(product => product?.brand?.slug === action?.payload?.['brand'])
+            }
 
+            // Filter by price ranges
+            if(action?.payload?.['price']) {
+              const priceRanges = action?.payload?.['price'].split(',');
+              
+              products = products.filter(product => {
+                const productPrice = product.sale_price || product.price;
+                
+                return priceRanges.some((range: string) => {
+                  if(range.includes('-')) {
+                    // Range format: "50000-100000"
+                    const [min, max] = range.split('-').map(Number);
+                    return productPrice >= min && productPrice <= max;
+                  } else {
+                    // Single value: "50000" (below) or "2000000" (above)
+                    const value = Number(range);
+                    if(range === '50000') {
+                      return productPrice < value;
+                    } else if(range === '2000000') {
+                      return productPrice > value;
+                    }
+                    return false;
+                  }
+                });
+              });
             }
           }
 
@@ -352,24 +351,13 @@ export class ProductState{
           // Buscar productos que tengan la categoría específica
           const categoryIdToSearch = action.payload!['category_id'];
           
-          // Si no hay productos con categorías, mostrar todos los productos
-          const productosConCategorias = result.data.filter((product: any) => product.categories?.length > 0);
+          // Filtrar productos por la categoría solicitada
+          let products = result.data.filter(product => {
+            return product?.categories_ids?.includes(categoryIdToSearch);
+          });
           
-          let products;
-          if (productosConCategorias.length === 0) {
-            products = result.data;
-          } else {
-            products = result.data.filter(product => {
-              return product?.categories_ids?.includes(categoryIdToSearch);
-            });
-          }
-          
-          // Si no hay productos para la categoría específica, mostrar algunos productos como ejemplo
-          if (products.length === 0 && result.data.length > 0) {
-            products = result.data.slice(0, action.payload!['paginate']);
-          } else {
-            products = products.slice(0, action.payload!['paginate']);
-          }
+          // Limitar la cantidad de productos según paginación
+          products = products.slice(0, action.payload!['paginate']);
 
           ctx.patchState({
             ...state,
