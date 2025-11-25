@@ -74,7 +74,16 @@ export class ThemeProductTabSectionComponent {
     if(this.categoryIds && this.categoryIds.length) {
       this.categorySubscription = this.category$.subscribe((res) => {
         if(res){
+          // Intentar obtener las categorías configuradas
           this.categories = this.getCategoriesByIds(res.data, this.categoryIds!);
+
+          // Si no se encuentran las categorías configuradas, usar las primeras disponibles
+          if(!this.categories.length && res.data && res.data.length) {
+            
+            // Filtrar solo categorías de tipo "product" y tomar las primeras 
+            const availableCategories = res.data.filter((cat: Category) => cat.type === 'product');
+            this.categories = availableCategories.slice(0, 3);
+          }
 
           if(this.categories.length){
             this.activeCategory = this.categories[0].id;
