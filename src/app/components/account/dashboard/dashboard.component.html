@@ -49,9 +49,18 @@
 
             @if(address){
               <li>
-                <h6>{{ 'address'| translate}}: {{ address.street }}
-                                              {{ address.city }}, {{ address.state.name }},
-                                              {{ address.country.name }} {{ address.pincode }}</h6>
+                <h6>
+                  {{ 'address'| translate}}: {{ address.street }} {{ address.city }}
+                  @if(address.state?.name){
+                    , {{ address.state.name }}
+                  }
+                  @if(address.country?.name){
+                    , {{ address.country.name }}
+                  }
+                  @if(address.pincode){
+                    {{ address.pincode }}
+                  }
+                </h6>
               </li>
             }
           </ul>

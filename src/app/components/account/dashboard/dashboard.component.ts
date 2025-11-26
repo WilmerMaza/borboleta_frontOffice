@@ -40,7 +40,6 @@ export class DashboardComponent implements OnInit {
     this.orders$.subscribe(orders => {
       if (orders?.data?.length >= 0) {
         this.totalOrders = orders.data.length;
-        console.log('📊 Total de órdenes en dashboard:', this.totalOrders);
       }
     });
   }

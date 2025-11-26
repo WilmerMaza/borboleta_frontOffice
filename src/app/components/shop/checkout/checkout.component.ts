@@ -64,6 +64,9 @@ import { PaymentBlockComponent } from "./payment-block/payment-block.component";
 import { GetCartItems } from "../../../shared/store/action/cart.action";
 import { GetAddresses } from "../../../shared/store/action/account.action";
 import { AuthService } from "../../../shared/services/auth.service";
+import { WompiService } from "../../../shared/services/wompi.service";
+import { Router } from "@angular/router";
+import { WompiButtonComponent, WompiButtonConfig } from "./wompi-button/wompi-button.component";
 
 @Component({
   selector: "app-checkout",
@@ -81,6 +84,7 @@ import { AuthService } from "../../../shared/services/auth.service";
     LoaderComponent,
     Select2Module,
     ButtonComponent,
+    WompiButtonComponent,
   ],
   templateUrl: "./checkout.component.html",
   styleUrl: "./checkout.component.scss",
@@ -127,6 +131,9 @@ export class CheckoutComponent {
   public codes = countryCodes;
   public isBrowser: boolean;
   cartItemsFromLocal: Cart[];
+  public showWompiWidget = false;
+  public wompiWidgetConfig: WompiButtonConfig | null = null;
+  private pendingCheckoutPayload: any = null;
 
   constructor(
     private store: Store,
@@ -134,6 +141,8 @@ export class CheckoutComponent {
     public cartService: CartService,
     private modal: NgbModal,
     private authService: AuthService,
+    private wompiService: WompiService,
+    private router: Router,
     @Inject(PLATFORM_ID) private platformId: Object
   ) {
     this.isBrowser = isPlatformBrowser(platformId);
@@ -159,7 +168,7 @@ export class CheckoutComponent {
       coupon: new FormControl(),
       delivery_description: new FormControl("", [Validators.required]),
       delivery_interval: new FormControl(),
-      payment_method: new FormControl("", [Validators.required]),
+      payment_method: new FormControl("wompi", [Validators.required]),
       create_account: new FormControl(false),
       name: new FormControl("", [Validators.required]),
       email: new FormControl("", [Validators.required, Validators.email]),
@@ -496,6 +505,9 @@ export class CheckoutComponent {
 
   selectPaymentMethod(value: string) {
     this.form.controls["payment_method"].setValue(value);
+    if (value !== 'wompi' && this.showWompiWidget) {
+      this.cancelWompiWidget();
+    }
     this.checkout();
   }
 
@@ -741,12 +753,256 @@ export class CheckoutComponent {
         total: total,
       };
 
-      this.store.dispatch(new PlaceOrder(payload));
+      // Verificar si el método de pago es Wompi
+      const paymentMethod = this.form.value.payment_method || '';
+      const isWompiPayment = paymentMethod === 'wompi';
+
+      if (isWompiPayment) {
+        // SI ES WOMPI: Guardar datos del checkout y obtener datos del widget
+        this.loading = true;
+        
+        const user = this.store.selectSnapshot((state) => state.account?.user);
+        
+        // Guardar payload "lógico" por si se necesita en el front
+        this.pendingCheckoutPayload = payload;
+
+        // Obtener direcciones completas y limpiar/serializar datos
+        let shippingAddress = null;
+        let billingAddress = null;
+        
+        // Función helper para limpiar direcciones (convertir objetos a valores primitivos)
+        const cleanAddress = (address: any): any => {
+          if (!address) return null;
+          
+          const cleaned: any = {};
+          for (const key in address) {
+            if (address.hasOwnProperty(key)) {
+              const value = address[key];
+              // Si es un objeto Date, convertir a string ISO
+              if (value instanceof Date) {
+                cleaned[key] = value.toISOString();
+              }
+              // Si es un objeto FormControl o similar, obtener su value
+              else if (value && typeof value === 'object' && 'value' in value) {
+                cleaned[key] = value.value;
+              }
+              // Si es null o undefined, omitirlo
+              else if (value === null || value === undefined) {
+                // No incluir campos nulos o undefined
+              }
+              // Si es un tipo primitivo, incluirlo
+              else {
+                cleaned[key] = value;
+              }
+            }
+          }
+          return cleaned;
+        };
+        
+        // Si hay direcciones en el formulario (guest checkout)
+        if (this.form.value.shipping_address) {
+          shippingAddress = cleanAddress(this.form.value.shipping_address);
+        } else if (payload.shipping_address_id) {
+          // Si hay ID, obtener la dirección del usuario
+          const address = user?.address?.find((addr: any) => addr.id === payload.shipping_address_id);
+          if (address) {
+            shippingAddress = cleanAddress(address);
+          }
+        }
+        
+        if (this.form.value.billing_address) {
+          billingAddress = cleanAddress(this.form.value.billing_address);
+          // Si billing_address tiene same_shipping = true, usar shipping_address
+          if (this.form.value.billing_address?.same_shipping && shippingAddress) {
+            billingAddress = { ...shippingAddress, same_shipping: true };
+          }
+        } else if (payload.billing_address_id) {
+          const address = user?.address?.find((addr: any) => addr.id === payload.billing_address_id);
+          if (address) {
+            billingAddress = cleanAddress(address);
+          }
+        }
+
+        // Preparar los datos que el back necesita para crear PendingOrder
+        const widgetRequestBody = {
+          products: payload.products,
+          shipping_address: shippingAddress,
+          billing_address: billingAddress,
+          shipping_cost: payload.shipping_total,
+          tax_amount: payload.tax_total,
+          discount_amount: 0,
+          subtotal: payload.total - payload.tax_total - payload.shipping_total,
+          total: payload.total,
+          coupon: payload.coupon,
+          delivery_description: payload.delivery_description,
+          delivery_interval: payload.delivery_interval,
+          notes: '',
+          points_amount: payload.points_amount,
+          wallet_balance: payload.wallet_balance
+        };
+
+        this.wompiService.getWidgetData(widgetRequestBody).subscribe({
+          next: (response) => {
+
+            if (response.success && response.data) {
+              const d = response.data;
+
+              // Guardar la orden temporal en localStorage usando la reference del back
+              if (this.isBrowser && this.pendingCheckoutPayload) {
+                const orderData = {
+                  ...this.pendingCheckoutPayload,
+                  reference: d.reference,
+                  timestamp: new Date().getTime()
+                };
+                localStorage.setItem(`temp_order_${d.reference}`, JSON.stringify(orderData));
+              }
+
+              // Validar que tenemos todos los datos necesarios
+              if (!d.signatureIntegrity) {
+                alert('Error: No se recibió la firma de integridad. Por favor contacte a soporte.');
+                this.loading = false;
+                return;
+              }
+
+              if (!d.reference) {
+                alert('Error: No se recibió la referencia de la orden. Por favor contacte a soporte.');
+                this.loading = false;
+                return;
+              }
+
+              // Validar que tenemos la llave pública del backend
+              if (!d.publicKey) {
+                alert('Error: No se recibió la llave pública. Por favor contacte a soporte.');
+                this.loading = false;
+                return;
+              }
+
+              // Configurar el widget con los datos recibidos del backend
+              this.wompiWidgetConfig = {
+                publicKey: d.publicKey,
+                currency: d.currency || 'COP',
+                amountInCents: d.amountInCents,
+                reference: d.reference,
+                signature: d.signatureIntegrity,
+                redirectUrl: d.redirectUrl,
+                expirationTime: d.expirationTime, // Importante: debe coincidir con el usado en la firma
+                env: d.publicKey?.includes("test") ? "test" : undefined,
+              };
+
+              this.showWompiWidget = true;
+              this.loading = false;
+            } else {
+              this.loading = false;
+              alert('Error al obtener los datos del widget. Por favor contacte a soporte.');
+            }
+          },
+          error: (err) => {
+            this.loading = false;
+            alert('Error al procesar el pago. Por favor intente nuevamente.\n\nDetalles: ' + (err.error?.message || err.message));
+          }
+        });
+      } else {
+        // SI NO ES WOMPI: Crear la orden normalmente
+        this.loading = true;
+        this.store.dispatch(new PlaceOrder(payload)).subscribe({
+          next: () => {
+            const order = this.store.selectSnapshot((state) => state.order.selectedOrder);
+            this.loading = false;
+            if (order && order.id) {
+              // Redirigir a la página de detalles de la orden
+              window.location.href = `/account/order/details/${order.id}`;
+            } else {
+              alert('Error al crear la orden. Por favor intente nuevamente.');
+            }
+          },
+          error: (error) => {
+            this.loading = false;
+            alert('Error al crear la orden. Por favor intente nuevamente.');
+          }
+        });
+      }
     }
   }
 
   clearCart() {
     this.store.dispatch(new ClearCart());
+  }
+
+  cancelWompiWidget() {
+    const hadWidget = this.showWompiWidget;
+    this.showWompiWidget = false;
+    this.wompiWidgetConfig = null;
+    this.pendingCheckoutPayload = null;
+    if (hadWidget) {
+      this.cleanupPendingCheckout();
+    }
+  }
+
+  onWompiWidgetEvent(event: any) {
+    const status = event?.transaction?.status || event?.status;
+    const transactionId = event?.transaction?.id || event?.transaction?.idempotency_key || event?.transactionId;
+
+    if (status === 'APPROVED' && transactionId) {
+      this.processOrderAfterWompi(transactionId);
+    } else if (status === 'DECLINED') {
+      this.cancelWompiWidget();
+      alert('El pago fue rechazado. Por favor intenta nuevamente o utiliza otro método de pago.');
+    } else if (status === 'VOIDED') {
+      this.cancelWompiWidget();
+      alert('El pago fue anulado. Si fue un error, intenta nuevamente.');
+    }
+  }
+
+  private processOrderAfterWompi(transactionId: string) {
+    const checkoutDataStr = this.isBrowser ? localStorage.getItem('pending_checkout') : null;
+    let payload = this.pendingCheckoutPayload;
+
+    if (!payload && checkoutDataStr) {
+      try {
+        const stored = JSON.parse(checkoutDataStr);
+        payload = stored?.payload;
+      } catch (error) {
+        // Error leyendo pending_checkout
+      }
+    }
+
+    if (!payload) {
+      alert('No se encontró la información del pedido. Por favor contacta a soporte.');
+      this.cancelWompiWidget();
+      return;
+    }
+
+    payload.transaction_id = transactionId;
+    payload.payment_method = 'wompi';
+
+    this.loading = true;
+    this.store.dispatch(new PlaceOrder(payload)).subscribe({
+      next: () => {
+        const order = this.store.selectSnapshot((state) => state.order.selectedOrder);
+        this.loading = false;
+        this.cleanupPendingCheckout();
+        this.showWompiWidget = false;
+        this.wompiWidgetConfig = null;
+        this.pendingCheckoutPayload = null;
+
+        if (order && order.id) {
+          this.store.dispatch(new ClearCart());
+          this.router.navigate(['/account/order']);
+        } else {
+          alert('El pago se procesó, pero no se pudo crear la orden. Contacta a soporte con el ID de transacción ' + transactionId);
+        }
+      },
+      error: (error) => {
+        this.loading = false;
+        alert('El pago se procesó, pero no se pudo crear la orden. Contacta a soporte con el ID de transacción ' + transactionId);
+      }
+    });
+  }
+
+  private cleanupPendingCheckout() {
+    if (!this.isBrowser) return;
+    localStorage.removeItem('pending_checkout');
+    localStorage.removeItem('wompi_payment_link_id');
   }
 
   openModal() {

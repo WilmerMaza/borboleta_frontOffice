@@ -2,6 +2,7 @@ import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { Component, HostListener, Inject, Input, PLATFORM_ID } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
+import { NgbTooltip } from '@ng-bootstrap/ng-bootstrap';
 import { Option } from '../../../interface/theme-option.interface';
 import { MenuService } from '../../../services/menu.service';
 import { MenuComponent } from '../../widgets/menu/menu.component';
@@ -16,7 +17,7 @@ import { NoticeComponent } from "../widgets/notice/notice.component";
 
 @Component({
     selector: 'app-header-six',
-    imports: [CommonModule, RouterModule, TranslateModule,
+    imports: [CommonModule, RouterModule, TranslateModule, NgbTooltip,
     TopBarComponent, HeaderLogoComponent, MenuComponent,
     CartComponent, SearchComponent, UserProfileComponent, HeaderCategoriesComponent, NoticeComponent],
     templateUrl: './header-six.component.html',

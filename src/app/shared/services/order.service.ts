@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Params } from '@angular/router';
-import { Observable, tap } from 'rxjs';
+import { Observable } from 'rxjs';
 import { CheckoutPayload, Order, OrderCheckout, OrderModel, PlaceOrder, RePaymentPayload } from '../interface/order.interface';
 import { environment } from '../../../environments/environment.development';
 
@@ -15,16 +15,23 @@ export class OrderService {
   constructor(private http: HttpClient) {}
 
   getOrders(payload: any): Observable<OrderModel> {
-    // El backend necesita user_id en los parámetros para filtrar
-    // ya que el token JWT no contiene user_id
+    // El user_id ahora viene en el payload desde el OrderState
     const params = {
-      ...payload,
-      user_id: 123 // ID temporal - el backend debe usar este para filtrar
+      ...payload
     };
     
-    console.log('📦 === OBTENIENDO ÓRDENES === 📦');
-    console.log('🌐 URL:', `${environment.URLS}/orders`);
-    console.log('📋 Parámetros:', params);
+    // Si no hay user_id en el payload, intentar obtenerlo del localStorage como fallback
+    if (!params.user_id && typeof window !== 'undefined') {
+      try {
+        const account = JSON.parse(localStorage.getItem('account') || '{}');
+        const userId = account.user?.id;
+        if (userId) {
+          params.user_id = userId;
+        }
+      } catch (error) {
+        // Ignorar errores al obtener user_id del localStorage
+      }
+    }
     
     return this.http.get<OrderModel>(`${environment.URLS}/orders`, { 
       params: params,
@@ -32,17 +39,7 @@ export class OrderService {
         'Content-Type': 'application/json',
         'Accept': 'application/json'
       }
-    }).pipe(
-      tap(result => {
-        console.log('📦 === RESPUESTA ÓRDENES === 📦');
-        console.log('📋 Resultado completo:', result);
-        if (result?.data?.length > 0) {
-          result.data.forEach((order, index) => {
-            console.log(`📦 Orden ${index + 1} - created_at:`, order.created_at);
-          });
-        }
-      })
-    );
+    });
   }
 
   viewOrder(id: string): Observable<OrderModel> {

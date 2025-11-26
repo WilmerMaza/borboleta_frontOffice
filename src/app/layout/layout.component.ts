@@ -20,12 +20,13 @@ import { GetMenu } from '../shared/store/action/menu.action';
 import { GetProductBySearchList } from '../shared/store/action/product.action';
 import { ThemeOptions } from '../shared/store/action/theme-option.action';
 import { ThemeOptionState } from '../shared/store/state/theme-option.state';
+import { NgbModule } from "@ng-bootstrap/ng-bootstrap";
 
 @Component({
     selector: 'app-layout',
     imports: [CommonModule, LoaderComponent, FooterComponent, RouterModule, LoadingBarRouterModule,
-        HeaderComponent, BackToTopComponent, StickyCompareComponent, NewsletterModalComponent,
-        RecentPurchasePopupComponent, ExitModalComponent, LoginModalComponent],
+    HeaderComponent, BackToTopComponent, StickyCompareComponent, NewsletterModalComponent,
+    RecentPurchasePopupComponent, ExitModalComponent, LoginModalComponent, NgbModule],
     templateUrl: './layout.component.html',
     styleUrl: './layout.component.scss'
 })

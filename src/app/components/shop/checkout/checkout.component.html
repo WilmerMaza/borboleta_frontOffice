@@ -318,7 +318,12 @@
                         <h2>{{ 'no_payment_options_found' | translate }}</h2>
                       </div>
                       }
-                      <app-payment-block [setting]="(setting$ | async)!" (selectPaymentMethod)="selectPaymentMethod($event)">
+                      <app-payment-block 
+                        [setting]="(setting$ | async)!" 
+                        [selectedPaymentMethod]="form.value.payment_method || ''"
+                        [showWompiWidget]="showWompiWidget"
+                        [wompiWidgetConfig]="wompiWidgetConfig"
+                        (selectPaymentMethod)="selectPaymentMethod($event)">
                       </app-payment-block>
                     </div>
                   </div>
@@ -574,16 +579,30 @@
                             </li>
                           </ul>
 
-                          <div class="text-end">
-                            <app-button
-                              [class]="'order-btn btn'"
-                              [id]="'place_order'"
-                              [type]="'button'"
-                              [disabled]="false"
-                              (click)="onPlaceOrderClick()">
-                              {{ 'place_order' | translate }}
-                            </app-button>
+                          <div class="wompi-widget-container" *ngIf="showWompiWidget && wompiWidgetConfig; else placeOrderButton">
+                            <p class="wompi-instruction">
+                              Completa tu pago con Wompi sin salir de nuestra tienda.
+                            </p>
+                            <app-wompi-button
+                              [config]="wompiWidgetConfig"
+                              (paymentEvent)="onWompiWidgetEvent($event)">
+                            </app-wompi-button>
+                            <button type="button" class="btn btn-outline mt-3" (click)="cancelWompiWidget()">
+                              Cancelar
+                            </button>
                           </div>
+                          <ng-template #placeOrderButton>
+                            <div class="text-end">
+                              <app-button
+                                [class]="'order-btn btn'"
+                                [id]="'place_order'"
+                                [type]="'button'"
+                                [disabled]="false"
+                                (click)="onPlaceOrderClick()">
+                                {{ 'place_order' | translate }}
+                              </app-button>
+                            </div>
+                          </ng-template>
                         </div>
                       </form>
                     </div>
