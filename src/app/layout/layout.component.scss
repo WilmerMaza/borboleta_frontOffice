@@ -1,0 +1,114 @@
+// Ocultar botón de comparar
+app-sticky-compare {
+  display: none !important;
+}
+
+// Botón flotante ayuda con tooltip
+.help-float-btn {
+  position: fixed;
+  right: 30px;
+  bottom: 30px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  z-index: 999;
+
+  .help-text {
+    background: #000000;
+    color: #ffffff;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 500;
+    white-space: nowrap;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(5px);
+    transition: all 0.3s ease;
+    pointer-events: none;
+  }
+
+  .help-icon {
+    background: #000000;
+    color: #ffffff;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+
+    i {
+      font-size: 24px;
+      transition: transform 0.3s ease;
+    }
+  }
+
+  &:hover {
+    text-decoration: none;
+
+    .help-text {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }
+
+    .help-icon {
+      background: #1a1a1a;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+      border-color: rgba(255, 255, 255, 0.25);
+
+      i {
+        transform: scale(1.1);
+      }
+    }
+  }
+
+  &:active {
+    .help-icon {
+      transform: translateY(0);
+    }
+  }
+
+  // Responsive - Tablet
+  @media (max-width: 991px) {
+    right: 25px;
+    bottom: 25px;
+
+    .help-text {
+      font-size: 12px;
+      padding: 6px 14px;
+    }
+
+    .help-icon {
+      width: 52px;
+      height: 52px;
+
+      i {
+        font-size: 22px;
+      }
+    }
+  }
+
+  // Responsive - Móvil
+  @media (max-width: 767px) {
+    right: 20px;
+    bottom: 20px;
+
+    .help-icon {
+      width: 50px;
+      height: 50px;
+
+      i {
+        font-size: 20px;
+      }
+    }
+  }
+}

@@ -44,9 +44,24 @@ export class AuthInterceptor implements HttpInterceptor {
       // End the interceptor chain if in maintenance mode
     }
 
-    const token = this.store.selectSnapshot(
+    // Obtener el token del estado de NGXS
+    let token = this.store.selectSnapshot(
       (state) => state.auth?.access_token
     );
+
+    // Si no hay token en el estado, intentar obtenerlo de localStorage como fallback
+    // Esto puede pasar durante la carga inicial antes de que NGXSStoragePlugin cargue el estado
+    if ((!token || token === "" || token === null) && typeof window !== 'undefined') {
+      try {
+        const authStorage = localStorage.getItem('auth');
+        if (authStorage) {
+          const authData = JSON.parse(authStorage);
+          token = authData?.access_token || null;
+        }
+      } catch (error) {
+        // Si hay un error al parsear localStorage, continuar sin token
+      }
+    }
 
     // Only add token if it exists and is valid
     if (token && token !== "" && token !== null) {
@@ -59,11 +74,31 @@ export class AuthInterceptor implements HttpInterceptor {
 
     return next.handle(req).pipe(
       catchError((error: HttpErrorResponse) => {
-        if (error.status === 401) {
-          // Token expired or invalid, clear auth state
-          this.notificationService.notification = false;
-          this.store.dispatch(new AuthClear());
-          this.authService.isLogin = true;
+        // Solo manejar 401 si realmente hay un token (indica que expiró o es inválido)
+        // Esto aplica para TODAS las peticiones, no solo /users/profile
+        if (error.status === 401 && token) {
+          // Token expired or invalid - cerrar sesión completamente
+          this.ngZone.run(() => {
+            // Limpiar localStorage
+            if (typeof window !== 'undefined') {
+              try {
+                localStorage.removeItem('auth');
+                localStorage.removeItem('account');
+              } catch (e) {
+                // Ignorar errores al limpiar localStorage
+              }
+            }
+            
+            // Limpiar el estado de autenticación y cuenta
+            this.notificationService.notification = false;
+            this.store.dispatch(new AuthClear());
+            
+            // Abrir modal de login
+            this.authService.isLogin = true;
+            
+            // Redirigir a la página principal
+            this.router.navigate(['/']);
+          });
         }
         return throwError(() => error);
       })

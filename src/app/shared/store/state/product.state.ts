@@ -116,6 +116,22 @@ export class ProductState{
 
       tap({
         next: (result: ProductModel) => {
+          console.log('========== PRODUCTOS DEL BACKEND ==========');
+          console.log('Total productos:', result.data?.length);
+          
+          // Buscar un producto con variaciones
+          const productWithVariations = result.data?.find(p => p.variations?.length > 0);
+          if (productWithVariations) {
+            console.log('✅ Producto CON variaciones encontrado:', productWithVariations.name);
+            console.log('   - ID:', productWithVariations.id);
+            console.log('   - Attributes:', productWithVariations.attributes);
+            console.log('   - Total variaciones:', productWithVariations.variations?.length);
+            console.log('   - Primera variación COMPLETA:', productWithVariations.variations?.[0]);
+          } else {
+            console.log('❌ No hay productos con variaciones');
+          }
+          console.log('==========================================');
+          
           let products = result.data || [];
           if(action?.payload) {
             // Note:- For Internal filter purpose only, once you apply filter logic on server side then you can remove  it as per your requirement.

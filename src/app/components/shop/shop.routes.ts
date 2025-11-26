@@ -18,6 +18,7 @@ import { CategoryComponent } from "./category/category.component";
 import { CategoryResolver } from "../../shared/resolver/category.resolver";
 import { OrderTrackingComponent } from "./order-tracking/order-tracking.component";
 import { OrderDetailsComponent } from "./order-details/order-details.component";
+import { PaymentValidationComponent } from "./payment-validation/payment-validation.component";
 
 export const shop: Routes = [
   {
@@ -49,6 +50,15 @@ export const shop: Routes = [
     path: 'checkout',
     component: CheckoutComponent,
     canActivate: [CheckoutGuard]
+  },
+  {
+    path: 'payment/validation',
+    component: PaymentValidationComponent
+  },
+  {
+    path: 'payment/thanks',
+    redirectTo: 'payment/validation',
+    pathMatch: 'full'
   },
   {
     path: 'seller/become-seller',

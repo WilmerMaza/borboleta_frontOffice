@@ -22,6 +22,17 @@
   @if((themeOption$ | async)?.general?.back_to_top_enable && show){
     <app-back-to-top></app-back-to-top>
   }
+  
+  <!-- Botón flotante ayuda -->
+  <a href="https://wa.me/573016268644?text=¡Hola!%20👋%20Necesito%20ayuda.%20¿Podrían%20contactarme?%20Gracias." 
+     target="_blank" 
+     class="help-float-btn"
+     aria-label="Contactar por WhatsApp para ayuda">
+    <span class="help-text">¿Necesitas ayuda?</span>
+    <div class="help-icon">
+      <i class="ri-question-line"></i>
+    </div>
+  </a>
 </div>
 
 @if((themeOption$ | async)?.popup?.news_letter?.is_enable){
