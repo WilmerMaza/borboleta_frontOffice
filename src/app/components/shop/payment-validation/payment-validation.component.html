@@ -1,0 +1,48 @@
+<div class="payment-validation-container">
+  <div class="validation-content">
+    @if(loading) {
+      <app-loader></app-loader>
+    }
+    
+    <div class="status-message">
+      <h2>{{ message }}</h2>
+      
+      @if(status === 'validating' && loading) {
+        <p>Por favor espera mientras procesamos tu pedido...</p>
+        <div class="processing-steps">
+          <div class="step @if(loading) {active}">
+            <i class="ri-checkbox-circle-line"></i>
+            <span>Pago verificado</span>
+          </div>
+          <div class="step @if(loading) {processing}">
+            <i class="ri-loader-4-line"></i>
+            <span>Creando orden...</span>
+          </div>
+          <div class="step">
+            <i class="ri-file-list-line"></i>
+            <span>Finalizando</span>
+          </div>
+        </div>
+      }
+      
+      @if(status === 'pending') {
+        <p>Tu pago está siendo procesado. Te notificaremos cuando se confirme.</p>
+      }
+      
+      @if(status === 'success') {
+        <div class="success-icon">
+          <i class="ri-checkbox-circle-fill"></i>
+        </div>
+        <p>¡Orden creada exitosamente! Redirigiendo...</p>
+      }
+      
+      @if(status === 'error') {
+        <div class="error-icon">
+          <i class="ri-error-warning-fill"></i>
+        </div>
+        <p>Serás redirigido al checkout en unos momentos.</p>
+      }
+    </div>
+  </div>
+</div>
+

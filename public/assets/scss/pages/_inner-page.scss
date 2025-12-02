@@ -6501,7 +6501,8 @@
   letter-spacing: 0.7px;
 
   &.bg-credit,
-  &.bg-completed {
+  &.bg-completed,
+  &.bg-paid {
     color: #2f8733;
     background-color: rgba(47, 135, 51, 0.1);
     border: 1px solid #2f87338a;

@@ -1,1 +1,20 @@
+.wompi-widget-container {
+  margin-top: 20px;
+  text-align: center;
+
+  .wompi-instruction {
+    margin-bottom: 15px;
+    color: #555555;
+    font-weight: 500;
+  }
+
+  app-wompi-button {
+    display: inline-block;
+  }
+
+  .btn-outline {
+    border-radius: 6px;
+  }
+}
+
 

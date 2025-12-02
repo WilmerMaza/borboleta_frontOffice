@@ -1,6 +1,6 @@
 import { Injectable } from "@angular/core";
 import { Action, Selector, State, StateContext, Store } from "@ngxs/store";
-import { tap } from "rxjs";
+import { catchError, of, tap, throwError } from "rxjs";
 import {
   AccountUser,
   AccountUserUpdatePassword,
@@ -60,11 +60,30 @@ export class AccountState {
             });
           }
         },
-        error: (err) => {
-          throw new Error(
-            err?.error?.message || "Error al obtener perfil del usuario"
-          );
-        },
+      }),
+      catchError((err) => {
+        // Solo silenciar errores 401 cuando NO hay token
+        let token = this.store.selectSnapshot((state) => state.auth?.access_token);
+        
+        // Si no hay token en el estado, verificar localStorage como fallback
+        if (!token && typeof window !== 'undefined') {
+          try {
+            const authStorage = localStorage.getItem('auth');
+            if (authStorage) {
+              const authData = JSON.parse(authStorage);
+              token = authData?.access_token || null;
+            }
+          } catch (e) {
+            // Ignorar errores al parsear
+          }
+        }
+        
+        if (err?.status === 401 && !token) {
+          // No hay token, error esperado - silenciar completamente
+          return of(null);
+        }
+        // Hay token pero falló o es otro error - propagar el error
+        return throwError(() => err);
       })
     );
   }
@@ -76,7 +95,6 @@ export class AccountState {
         next: (result) => {
           if (result?.success && result?.data?.addresses) {
             const currentUser = ctx.getState().user;
-            console.log("👤 Usuario actual:", currentUser);
             if (currentUser) {
               ctx.patchState({
                 user: {

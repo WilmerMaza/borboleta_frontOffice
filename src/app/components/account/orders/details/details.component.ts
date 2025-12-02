@@ -34,11 +34,13 @@ export class DetailsComponent {
   public order: Order;
   public isLogin: boolean;
 
-  constructor(private store: Store,
+  constructor(
+    private store: Store,
     private route: ActivatedRoute,
     private modal: NgbModal,
     private datePipe: DatePipe,
-    private location: Location) {
+    private location: Location
+  ) {
     this.store.dispatch(new GetOrderStatus());
   }
 
