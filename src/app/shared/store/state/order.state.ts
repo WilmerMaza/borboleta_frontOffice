@@ -1,7 +1,7 @@
 import { Injectable } from "@angular/core";
 import { Router } from "@angular/router";
 import { Action, Selector, State, StateContext, Store } from "@ngxs/store";
-import { tap } from "rxjs";
+import { map, tap } from "rxjs";
 
 import { Order, OrderCheckout } from "../../interface/order.interface";
 
@@ -104,24 +104,62 @@ export class OrderState {
   checkout(ctx: StateContext<OrderStateModel>, action: Checkout) {
     const state = ctx.getState();
 
-    // Obtener valores del estado actual del store
-    const currentState = this.store.selectSnapshot(state => state);
+    const currentState = this.store.selectSnapshot(s => s);
     const user = currentState.account?.user;
     const coupon = currentState.coupon?.coupon;
-    const cartItems = currentState.cart?.items || [];
-    
-    // Calcular subtotal usando los productos reales del carrito
-    const sub_total = cartItems.reduce((acc: number, item: any) => acc + Number(item.sub_total || 0), 0);
-    
-    // Calcular impuestos (ejemplo: 5% del subtotal)
+
+    // 👇 PRIORIDAD: Usar productos del payload (que vienen del componente con sub_total)
+    // Si no vienen, fallback al store
+    const itemsSource: any[] = action.payload?.products || [];
+    const items = itemsSource.length ? itemsSource : (currentState.cart?.items || []);
+
+    // Calcular subtotal: priorizar sub_total del payload, sino calcular desde precios
+    const sub_total = items.reduce((acc: number, item: any) => {
+      let itemSubTotal = Number(item.sub_total || 0);
+
+      // Si no trae sub_total, intenta calcularlo desde price
+      if (!itemSubTotal) {
+        const price =
+          item.single_price ??
+          (item.variation
+            ? (item.variation.sale_price || item.variation.price || 0)
+            : (item.wholesale_price ||
+               item.product?.sale_price ||
+               item.product?.price ||
+               0));
+
+        itemSubTotal = price * (item.quantity || 1);
+      }
+
+      return acc + itemSubTotal;
+    }, 0);
+
+    // Calcular impuestos (5%)
     const tax_total = sub_total * 0.05;
-    
-    // Calcular envío (ejemplo: gratis si el subtotal es mayor a X, sino $5)
-    const shipping_total = sub_total > 50 ? 0 : 5;
-    
+
+    // Calcular envío: si el carrito es digital solo, no hay envío
+    // Si no es digital, aplicar lógica: > 50,000 COP = gratis, sino 5,000 COP
+    // Verificar is_digital_only desde el payload o desde localStorage si está disponible
+    let isDigitalOnly = false;
+    if (typeof window !== 'undefined') {
+      try {
+        const cartData = localStorage.getItem('cart');
+        if (cartData) {
+          const cart = JSON.parse(cartData);
+          isDigitalOnly = cart.is_digital_only || false;
+        }
+      } catch (e) {
+        isDigitalOnly = currentState.cart?.is_digital_only || false;
+      }
+    } else {
+      isDigitalOnly = currentState.cart?.is_digital_only || false;
+    }
+
+    const shipping_total = isDigitalOnly ? 0 : (sub_total > 50000 ? 0 : 5000);
+
     // Obtener descuento del cupón aplicado
     const coupon_total_discount = coupon?.discount || 0;
-    
+
     // Obtener puntos y wallet del usuario
     const points_amount = action.payload?.points_amount ? Number(user?.point?.balance || 0) : 0;
     const wallet_balance = action.payload?.wallet_balance ? Number(user?.wallet?.balance || 0) : 0;
@@ -153,15 +191,28 @@ export class OrderState {
   @Action(PlaceOrder)
   placeOrder(ctx: StateContext<OrderStateModel>, action: PlaceOrder) {
     return this.orderService.createOrder(action.payload).pipe(
+      map((response: any) => {
+        // Manejar diferentes estructuras de respuesta
+        // Puede ser: { data: order }, { success: true, data: order }, o directamente order
+        const order = response?.data || response?.order || response;
+        
+        // Guardar la orden en el estado para que el componente pueda acceder a ella
+        ctx.patchState({
+          selectedOrder: order
+        });
+        
+        this.notificationService.showSuccess('¡Pedido realizado con éxito!');
+        
+        // Limpiar el carrito después de completar la orden
+        this.store.dispatch(new ClearCart());
+        
+        // NO redirigir aquí - dejar que el componente maneje la navegación/modal
+        // this.router.navigate(['/account/order']);
+        
+        // Retornar la orden para que el componente pueda usarla
+        return order;
+      }),
       tap({
-        next: (order) => {
-          this.notificationService.showSuccess('¡Pedido realizado con éxito!');
-          
-          // Limpiar el carrito después de completar la orden
-          this.store.dispatch(new ClearCart());
-          
-          this.router.navigate(['/account/order']);
-        },
         error: (err) => {
           this.notificationService.showError('Error al realizar el pedido');
           throw new Error(err?.error?.message);

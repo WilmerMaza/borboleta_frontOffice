@@ -1,58 +1,42 @@
-import { Injectable, ViewChild, } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { Store } from '@ngxs/store';
 import { UrlTree, Router, ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
+import { mapTo, catchError } from 'rxjs/operators';
 import { GetUserDetails } from './../../shared/store/action/account.action';
 import { AuthService } from './../../shared/services/auth.service';
-import { LoginModalComponent } from '../../shared/components/widgets/modal/login-modal/login-modal.component';
 
 @Injectable({
   providedIn: 'root'
 })
 export class CheckoutGuard {
 
-  @ViewChild("loginModal") LoginModal: LoginModalComponent;
-
-  constructor(private store: Store,
+  constructor(
+    private store: Store,
     private router: Router,
-    private authService: AuthService) {}
+    private authService: AuthService
+  ) {}
 
-  canActivate(route: ActivatedRouteSnapshot,
-    state: RouterStateSnapshot): Observable<boolean | UrlTree> | Promise<boolean | UrlTree> | boolean | UrlTree {
+  canActivate(
+    route: ActivatedRouteSnapshot,
+    state: RouterStateSnapshot
+  ): Observable<boolean | UrlTree> | boolean | UrlTree {
 
-    // Store the attempted URL for redirecting after login
+    // Guardar la URL a la que quería ir, por si luego inicia sesión
     this.authService.redirectUrl = state.url;
 
-    if(this.store.selectSnapshot(state => state.auth && state.auth.access_token)) {
+    // Leer el token actual
+    const accessToken = this.store.selectSnapshot(s => s.auth && s.auth.access_token);
 
-        this.store.dispatch(new GetUserDetails()).subscribe({
-            complete: () => {
-                return true;
-            }
-        });
-
-    } else {
-
-      // .setting.activation.guest_checkout
-        if(this.store.selectSnapshot(state => state.setting)) {
-
-            // Redirect to the login page
-            if(this.store.selectSnapshot(state => state.cart.is_digital_only)) {
-                this.LoginModal.openModal()
-                return true;
-                
-            }
-
-        } else {
-
-          this.LoginModal.openModal()
-          return true
-
-        }
-
+    // Si NO hay token → dejar entrar igual
+    if (!accessToken) {
+      return true;
     }
 
-    return true;
+    // Si HAY token → cargar detalles del usuario antes (o durante) la navegación
+    return this.store.dispatch(new GetUserDetails()).pipe(
+      mapTo(true),          // si todo va bien, se permite
+      catchError(() => of(true)) // si falla igual se deja pasar, para no bloquear checkout
+    );
   }
-
 }

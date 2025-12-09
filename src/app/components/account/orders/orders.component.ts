@@ -52,27 +52,15 @@ export class OrdersComponent implements OnInit {
       }
       
       if (params['order_created'] === 'true') {
-        // Recargar inmediatamente
+        // La orden ya está disponible inmediatamente, solo cargar una vez
         this.store.dispatch(new GetOrders(this.filter));
         
-        // Recargar después de un delay corto para asegurar que el backend procesó la orden
-        setTimeout(() => {
-          this.store.dispatch(new GetOrders(this.filter));
-        }, 1500);
-        
-        // Recargar nuevamente después de más tiempo por si acaso
-        setTimeout(() => {
-          this.store.dispatch(new GetOrders(this.filter));
-        }, 4000);
-        
-        // Limpiar el query param después de procesarlo
-        setTimeout(() => {
-          this.router.navigate([], {
-            relativeTo: this.route,
-            queryParams: {},
-            replaceUrl: true
-          });
-        }, 5000);
+        // Limpiar el query param inmediatamente
+        this.router.navigate([], {
+          relativeTo: this.route,
+          queryParams: {},
+          replaceUrl: true
+        });
       } else {
         // Cargar órdenes normalmente si no hay nueva orden
         this.store.dispatch(new GetOrders(this.filter));
@@ -103,30 +91,22 @@ export class OrdersComponent implements OnInit {
           localStorage.removeItem('pending_checkout');
           localStorage.removeItem('wompi_payment_link_id');
           
-          // Recargar órdenes para mostrar la nueva orden creada por el webhook
+          // La orden ya está disponible, solo cargar una vez
           this.store.dispatch(new GetOrders(this.filter));
-          setTimeout(() => {
-            this.store.dispatch(new GetOrders(this.filter));
-          }, 1000);
-          setTimeout(() => {
-            this.store.dispatch(new GetOrders(this.filter));
-          }, 3000);
           
-          // Limpiar el query param
-          setTimeout(() => {
-            this.router.navigate([], {
-              relativeTo: this.route,
-              queryParams: {},
-              replaceUrl: true
-            });
-          }, 5000);
+          // Limpiar el query param inmediatamente
+          this.router.navigate([], {
+            relativeTo: this.route,
+            queryParams: {},
+            replaceUrl: true
+          });
         } else {
-          // Recargar órdenes de todas formas
+          // Cargar órdenes normalmente
           this.store.dispatch(new GetOrders(this.filter));
         }
       },
       error: (err) => {
-        // Aún así recargar órdenes
+        // Cargar órdenes normalmente en caso de error
         this.store.dispatch(new GetOrders(this.filter));
       }
     });

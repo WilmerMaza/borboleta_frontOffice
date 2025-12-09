@@ -27,6 +27,8 @@ import {
 import { Observable, map, of } from "rxjs";
 import { AddressModalComponent } from "../../../shared/components/widgets/modal/address-modal/address-modal.component";
 import { CouponModalComponent } from "../../../shared/components/widgets/modal/coupon-modal/coupon-modal.component";
+import { OrderSuccessModalComponent } from "../../../shared/components/widgets/modal/order-success-modal/order-success-modal.component";
+import { WarningModalComponent } from "../../../shared/components/widgets/modal/warning-modal/warning-modal.component";
 import { BreadcrumbComponent } from "../../../shared/components/widgets/breadcrumb/breadcrumb.component";
 import { ButtonComponent } from "../../../shared/components/widgets/button/button.component";
 import { LoaderComponent } from "../../../shared/components/widgets/loader/loader.component";
@@ -62,7 +64,7 @@ import { AddressBlockComponent } from "./address-block/address-block.component";
 import { DeliveryBlockComponent } from "./delivery-block/delivery-block.component";
 import { PaymentBlockComponent } from "./payment-block/payment-block.component";
 import { GetCartItems } from "../../../shared/store/action/cart.action";
-import { GetAddresses } from "../../../shared/store/action/account.action";
+import { GetAddresses, GetUserDetails } from "../../../shared/store/action/account.action";
 import { AuthService } from "../../../shared/services/auth.service";
 import { WompiService } from "../../../shared/services/wompi.service";
 import { Router } from "@angular/router";
@@ -123,7 +125,7 @@ export class CheckoutComponent {
   public couponCode: string;
   public appliedCoupon: boolean = false;
   public couponError: string | null;
-  public checkoutTotal: OrderCheckout;
+  public checkoutTotal: OrderCheckout | null = null;
   public loading: boolean = false;
 
   public shippingStates$: Observable<Select2Data>;
@@ -134,6 +136,9 @@ export class CheckoutComponent {
   public showWompiWidget = false;
   public wompiWidgetConfig: WompiButtonConfig | null = null;
   private pendingCheckoutPayload: any = null;
+  private addressesLoaded = false;
+  private isProcessingOrder = false; // Bandera para evitar procesar la orden múltiples veces
+  private processedTransactionIds = new Set<string>(); // Set para rastrear transactionIds ya procesados
 
   constructor(
     private store: Store,
@@ -242,10 +247,16 @@ export class CheckoutComponent {
         this.store.selectSnapshot((state) => state.setting).setting?.activation
           .guest_checkout
       ) {
-        this.form.removeControl("shipping_address_id");
-        this.form.removeControl("billing_address_id");
-        this.form.removeControl("points_amount");
-        this.form.removeControl("wallet_balance");
+        // NO eliminamos los controles, solo los hacemos opcionales para guest:
+        this.form.get("shipping_address_id")?.clearValidators();
+        this.form.get("billing_address_id")?.clearValidators();
+        this.form.get("points_amount")?.clearValidators();
+        this.form.get("wallet_balance")?.clearValidators();
+
+        this.form.get("shipping_address_id")?.updateValueAndValidity({ emitEvent: false });
+        this.form.get("billing_address_id")?.updateValueAndValidity({ emitEvent: false });
+        this.form.get("points_amount")?.updateValueAndValidity({ emitEvent: false });
+        this.form.get("wallet_balance")?.updateValueAndValidity({ emitEvent: false });
 
         this.form.controls["create_account"].valueChanges.subscribe((value) => {
           if (value) {
@@ -352,8 +363,15 @@ export class CheckoutComponent {
           Array.isArray(cart.items) &&
           cart.items.length > 0
         ) {
-          // Cargar el carrito en el store
-          this.store.dispatch(new GetCartItems());
+          // Cargar el carrito en el store y ejecutar checkout cuando termine
+          this.store.dispatch(new GetCartItems()).subscribe({
+            complete: () => {
+              // Después de cargar el carrito, ejecutar checkout inmediatamente
+              setTimeout(() => {
+                this.checkout();
+              }, 100);
+            }
+          });
         }
       }
     } catch (error) {
@@ -363,11 +381,68 @@ export class CheckoutComponent {
   }
 
   ngOnInit(): void {
+    // Primero setup subscriptions para que los observables estén listos
+    this.setupFormSubscriptions();
+    
+    // Cargar el carrito desde localStorage y ejecutar checkout
     this.loadCartFromLocalStorage();
+    
     this.loadUserData();
     this.loadSavedAddresses();
-    this.setupFormSubscriptions();
     this.loadCartItemsFromLocal();
+    
+    // Ejecutar checkout de forma inmediata y también con varios timeouts para asegurar
+    if (this.isBrowser) {
+      // Primer intento: inmediato (50ms)
+      setTimeout(() => {
+        const cart = JSON.parse(localStorage.getItem("cart") || "{}");
+        if (cart && cart.items && cart.items.length > 0) {
+          this.checkout();
+        }
+      }, 50);
+      
+      // Segundo intento: después de un momento (300ms)
+      setTimeout(() => {
+        const cart = JSON.parse(localStorage.getItem("cart") || "{}");
+        if (cart && cart.items && cart.items.length > 0) {
+          const currentCheckout = this.store.selectSnapshot(OrderState.checkout);
+          if (!currentCheckout || !currentCheckout.total || !currentCheckout.total.sub_total || currentCheckout.total.sub_total === 0) {
+            this.checkout();
+          }
+        }
+      }, 300);
+      
+      // Tercer intento: último recurso (700ms)
+      setTimeout(() => {
+        const cart = JSON.parse(localStorage.getItem("cart") || "{}");
+        if (cart && cart.items && cart.items.length > 0) {
+          const currentCheckout = this.store.selectSnapshot(OrderState.checkout);
+          if (!currentCheckout || !currentCheckout.total || !currentCheckout.total.sub_total || currentCheckout.total.sub_total === 0) {
+            this.checkout();
+          }
+        }
+      }, 700);
+    }
+
+    // 👇 NUEVO: escuchar cuando el usuario se autentica
+    this.accessToken$.subscribe((token) => {
+      if (token && !this.addressesLoaded) {
+        this.addressesLoaded = true;
+
+        // Cargar datos del usuario y sus direcciones
+        this.store.dispatch(new GetUserDetails()).subscribe({
+          complete: () => {
+            this.store.dispatch(new GetAddresses()).subscribe({
+              complete: () => {
+                // Después de que lleguen direcciones, recargar valores en el formulario
+                this.loadUserData();
+                this.checkout();
+              }
+            });
+          }
+        });
+      }
+    });
   }
 
   private loadCartItemsFromLocal() {
@@ -380,24 +455,72 @@ export class CheckoutComponent {
   private loadUserData(): void {
     this.user$.subscribe((user) => {
       if (this.isBrowser && user?.address?.length) {
-        const savedShippingAddress = localStorage.getItem(
-          "selected_shipping_address"
-        );
-        const savedBillingAddress = localStorage.getItem(
-          "selected_billing_address"
-        );
+        const isDigitalOnly = this.store.selectSnapshot((state) => state.cart?.is_digital_only);
+        const savedShippingAddress = localStorage.getItem("selected_shipping_address");
+        const savedBillingAddress = localStorage.getItem("selected_billing_address");
 
+        // Asignar dirección de envío
         if (savedShippingAddress) {
-          const shippingAddress = JSON.parse(savedShippingAddress);
-          this.form.controls["shipping_address_id"].setValue(
-            shippingAddress.id
-          );
+          try {
+            const shippingAddress = JSON.parse(savedShippingAddress);
+            // Verificar que la dirección guardada aún existe
+            if (user.address.some((addr: any) => addr.id === shippingAddress.id)) {
+              this.form.controls["shipping_address_id"].setValue(shippingAddress.id);
+            } else if (!isDigitalOnly && user.address.length > 0) {
+              // Si la dirección guardada ya no existe, usar la primera
+              this.form.controls["shipping_address_id"].setValue(user.address[0].id);
+            }
+          } catch (e) {
+            // Si hay error parseando, usar la primera dirección
+            if (!isDigitalOnly && user.address.length > 0) {
+              this.form.controls["shipping_address_id"].setValue(user.address[0].id);
+            }
+          }
+        } else if (!isDigitalOnly && user.address.length > 0) {
+          // Si no hay dirección guardada, usar la primera disponible
+          this.form.controls["shipping_address_id"].setValue(user.address[0].id);
+          // Guardar en localStorage
+          localStorage.setItem("selected_shipping_address", JSON.stringify(user.address[0]));
         }
 
+        // Asignar dirección de facturación
         if (savedBillingAddress) {
-          const billingAddress = JSON.parse(savedBillingAddress);
-          this.form.controls["billing_address_id"].setValue(billingAddress.id);
+          try {
+            const billingAddress = JSON.parse(savedBillingAddress);
+            // Verificar que la dirección guardada aún existe
+            if (user.address.some((addr: any) => addr.id === billingAddress.id)) {
+              this.form.controls["billing_address_id"].setValue(billingAddress.id);
+            } else if (user.address.length > 0) {
+              // Si la dirección guardada ya no existe, usar la primera
+              this.form.controls["billing_address_id"].setValue(user.address[0].id);
+            }
+          } catch (e) {
+            // Si hay error parseando, usar la primera dirección
+            if (user.address.length > 0) {
+              this.form.controls["billing_address_id"].setValue(user.address[0].id);
+            }
+          }
+        } else if (user.address.length > 0) {
+          // Si no hay dirección guardada, usar la primera disponible
+          this.form.controls["billing_address_id"].setValue(user.address[0].id);
+          // Guardar en localStorage
+          localStorage.setItem("selected_billing_address", JSON.stringify(user.address[0]));
         }
+
+        // Actualizar validadores según si es digital o físico
+        if (isDigitalOnly) {
+          this.form.get("shipping_address_id")?.clearValidators();
+        } else {
+          this.form.get("shipping_address_id")?.setValidators([Validators.required]);
+        }
+        this.form.get("billing_address_id")?.setValidators([Validators.required]);
+
+        // Actualizar validación del formulario
+        this.form.get("shipping_address_id")?.updateValueAndValidity({ emitEvent: true });
+        this.form.get("billing_address_id")?.updateValueAndValidity({ emitEvent: true });
+
+        // Forzar actualización completa del formulario
+        this.form.updateValueAndValidity({ emitEvent: true });
       }
     });
   }
@@ -426,10 +549,36 @@ export class CheckoutComponent {
 
   private setupFormSubscriptions(): void {
     this.checkout$.subscribe((data) => {
-      this.checkoutTotal = data;
+      if (data) {
+        this.checkoutTotal = data;
+      }
     });
 
     this.products();
+    
+    // Calcular checkout automáticamente cuando hay items en el carrito
+    this.cartItem$.subscribe((items) => {
+      if (items && items.length > 0) {
+        // Ejecutar checkout inmediatamente cuando hay items
+        setTimeout(() => {
+          this.checkout();
+        }, 100);
+      }
+    });
+    
+    // Ejecutar checkout también directamente desde localStorage (no depende del store)
+    if (this.isBrowser) {
+      // Múltiples intentos para asegurar que se ejecute
+      setTimeout(() => {
+        const cart = JSON.parse(localStorage.getItem("cart") || "{}");
+        if (cart && cart.items && cart.items.length > 0) {
+          const currentCheckout = this.store.selectSnapshot(OrderState.checkout);
+          if (!currentCheckout || !currentCheckout.total || currentCheckout.total.sub_total === 0 || !currentCheckout.total.sub_total) {
+            this.checkout();
+          }
+        }
+      }, 300);
+    }
   }
 
   products() {
@@ -582,48 +731,79 @@ export class CheckoutComponent {
     // If has coupon error while checkout
     if (this.couponError) {
       this.couponError = null;
-      this.cpnRef.nativeElement.value = "";
+      if (this.cpnRef) {
+        this.cpnRef.nativeElement.value = "";
+      }
       this.form.controls["coupon"].reset();
     }
 
-    // Verificar si hay productos en el carrito
-    const hasProducts = this.productControl.length > 0;
+    if (!this.isBrowser) return;
 
-    // Permitir checkout si hay productos, incluso si el formulario no está completamente válido
-    if (hasProducts) {
-      this.loading = true;
+    // 👇 CARRITO REAL: SIEMPRE DESDE LOCALSTORAGE (la fuente de verdad)
+    const cart = JSON.parse(localStorage.getItem("cart") || "{}");
+    const cartItems = cart.items || [];
 
-      // Obtener user_id del localStorage
-      const userId = this.getUserIdFromLocalStorage();
-
-      // Crear un payload mínimo con los datos disponibles
-      const checkoutPayload = {
-        consumer_id: userId,
-        products: this.form.value.products || [],
-        shipping_address_id: this.form.value.shipping_address_id || null,
-        billing_address_id: this.form.value.billing_address_id || null,
-        points_amount: this.form.value.points_amount || false,
-        wallet_balance: this.form.value.wallet_balance || false,
-        coupon: this.form.value.coupon || null,
-        delivery_description: this.form.value.delivery_description || "",
-        delivery_interval: this.form.value.delivery_interval || "",
-        payment_method: this.form.value.payment_method || "",
-      };
-
-      this.store.dispatch(new Checkout(checkoutPayload)).subscribe({
-        next: (result) => {},
-        error: (err) => {
-          this.loading = false;
-          throw new Error(err);
-        },
-        complete: () => {
-          this.loading = false;
-        },
-      });
-    } else {
-      if (!this.form.valid) {
-      }
+    // Si no hay productos, no calculamos nada
+    if (!cartItems.length) {
+      this.loading = false;
+      this.checkoutTotal = null;
+      return;
     }
+
+    this.loading = true;
+
+    const userId = this.getUserIdFromLocalStorage();
+
+    // Construir productos con datos completos que el estado pueda usar para calcular
+    const products = cartItems.map((item: any) => ({
+      product_id: item.product_id || item.product?.id,
+      variation_id: item.variation_id || null,
+      quantity: item.quantity,
+
+      // Datos numéricos para el cálculo (CRÍTICO)
+      sub_total: item.sub_total || 0,
+      wholesale_price: item.wholesale_price || null,
+      single_price:
+        item.sub_total && item.quantity
+          ? item.sub_total / item.quantity
+          : (item.variation
+              ? (item.variation.sale_price || item.variation.price || 0)
+              : (item.product?.sale_price || item.product?.price || 0)),
+
+      // Info extra por si la necesitas después
+      product: item.product,
+      variation: item.variation,
+    }));
+
+    const checkoutPayload = {
+      consumer_id: userId || 0,
+      products,
+      shipping_address_id: this.form.value.shipping_address_id || null,
+      billing_address_id: this.form.value.billing_address_id || null,
+      points_amount: this.form.value.points_amount || false,
+      wallet_balance: this.form.value.wallet_balance || false,
+      coupon: this.form.value.coupon || null,
+      delivery_description: this.form.value.delivery_description || "",
+      delivery_interval: this.form.value.delivery_interval || "",
+      payment_method: this.form.value.payment_method || "",
+    };
+
+    this.store.dispatch(new Checkout(checkoutPayload)).subscribe({
+      next: () => {},
+      error: (err) => {
+        this.loading = false;
+        console.error("Error en checkout:", err);
+        this.checkoutTotal = null;
+      },
+      complete: () => {
+        this.loading = false;
+        // Verificar el estado después de un momento
+        setTimeout(() => {
+          const checkoutState = this.store.selectSnapshot(OrderState.checkout);
+          this.checkoutTotal = checkoutState;
+        }, 100);
+      },
+    });
   }
 
   placeorder() {
@@ -637,7 +817,18 @@ export class CheckoutComponent {
       return;
     }
 
-    if (this.form.valid) {
+    // Forzar actualización de validación antes de verificar si es válido
+    this.form.updateValueAndValidity({ emitEvent: false });
+
+    // Verificar campos críticos manualmente antes de verificar form.valid
+    const isDigitalOnly = this.store.selectSnapshot((state) => state.cart?.is_digital_only);
+    const hasShippingAddress = this.form.controls['shipping_address_id']?.value || isDigitalOnly;
+    const hasBillingAddress = this.form.controls['billing_address_id']?.value;
+    const hasPaymentMethod = this.form.controls['payment_method']?.value;
+    const hasProducts = this.productControl.length > 0;
+
+    // Si el formulario es válido O si todos los campos críticos tienen valores, proceder
+    if (this.form.valid || (hasShippingAddress && hasBillingAddress && hasPaymentMethod && hasProducts)) {
       if (this.cpnRef && !this.cpnRef.nativeElement.value) {
         this.form.controls["coupon"].reset();
       }
@@ -754,8 +945,23 @@ export class CheckoutComponent {
       };
 
       // Verificar si el método de pago es Wompi
+      // IMPORTANTE: Solo se permite crear órdenes con Wompi
       const paymentMethod = this.form.value.payment_method || '';
       const isWompiPayment = paymentMethod === 'wompi';
+
+      // Validar que el método de pago sea Wompi
+      if (!isWompiPayment) {
+        this.loading = false;
+        const modalRef = this.modal.open(WarningModalComponent, {
+          centered: true,
+          windowClass: 'theme-modal-2',
+          backdrop: 'static',
+          keyboard: false
+        });
+        modalRef.componentInstance.title = 'Método de Pago Requerido';
+        modalRef.componentInstance.message = 'Solo se permite realizar pedidos con Wompi. Por favor selecciona Wompi como método de pago.';
+        return;
+      }
 
       if (isWompiPayment) {
         // SI ES WOMPI: Guardar datos del checkout y obtener datos del widget
@@ -799,29 +1005,121 @@ export class CheckoutComponent {
           return cleaned;
         };
         
-        // Si hay direcciones en el formulario (guest checkout)
-        if (this.form.value.shipping_address) {
-          shippingAddress = cleanAddress(this.form.value.shipping_address);
-        } else if (payload.shipping_address_id) {
-          // Si hay ID, obtener la dirección del usuario
-          const address = user?.address?.find((addr: any) => addr.id === payload.shipping_address_id);
-          if (address) {
-            shippingAddress = cleanAddress(address);
+        // Obtener direcciones - PRIORIDAD: Usuario autenticado primero
+        const isDigitalOnly = this.store.selectSnapshot((state) => state.cart?.is_digital_only);
+        
+        // PRIORIDAD 1: Obtener direcciones del usuario usando los IDs del formulario
+        if (user?.address && Array.isArray(user.address) && user.address.length > 0) {
+          // BILLING ADDRESS desde usuario
+          const billingAddressId = payload.billing_address_id || this.form.value.billing_address_id;
+          if (billingAddressId) {
+            const address = user.address.find((addr: any) => addr.id == billingAddressId || addr.id === billingAddressId);
+            if (address) {
+              billingAddress = cleanAddress(address);
+              console.log('✅ Dirección de facturación obtenida del usuario:', { id: address.id, street: address.street, city: address.city });
+            }
+          }
+          
+          // SHIPPING ADDRESS desde usuario (solo si no es digital)
+          if (!isDigitalOnly) {
+            const shippingAddressId = payload.shipping_address_id || this.form.value.shipping_address_id;
+            if (shippingAddressId) {
+              const address = user.address.find((addr: any) => addr.id == shippingAddressId || addr.id === shippingAddressId);
+              if (address) {
+                shippingAddress = cleanAddress(address);
+                console.log('✅ Dirección de envío obtenida del usuario:', { id: address.id, street: address.street, city: address.city });
+              }
+            }
           }
         }
         
-        if (this.form.value.billing_address) {
-          billingAddress = cleanAddress(this.form.value.billing_address);
-          // Si billing_address tiene same_shipping = true, usar shipping_address
-          if (this.form.value.billing_address?.same_shipping && shippingAddress) {
-            billingAddress = { ...shippingAddress, same_shipping: true };
-          }
-        } else if (payload.billing_address_id) {
-          const address = user?.address?.find((addr: any) => addr.id === payload.billing_address_id);
-          if (address) {
-            billingAddress = cleanAddress(address);
+        // PRIORIDAD 2: Intentar desde localStorage si no se encontraron
+        if (!billingAddress && this.isBrowser) {
+          const savedBilling = localStorage.getItem("selected_billing_address");
+          if (savedBilling) {
+            try {
+              const savedAddr = JSON.parse(savedBilling);
+              if (user?.address?.some((addr: any) => addr.id == savedAddr.id || addr.id === savedAddr.id)) {
+                const address = user.address.find((addr: any) => addr.id == savedAddr.id || addr.id === savedAddr.id);
+                if (address) {
+                  billingAddress = cleanAddress(address);
+                }
+              }
+            } catch (e) {
+              console.error('Error parseando dirección guardada:', e);
+            }
           }
         }
+        
+        if (!shippingAddress && !isDigitalOnly && this.isBrowser) {
+          const savedShipping = localStorage.getItem("selected_shipping_address");
+          if (savedShipping) {
+            try {
+              const savedAddr = JSON.parse(savedShipping);
+              if (user?.address?.some((addr: any) => addr.id == savedAddr.id || addr.id === savedAddr.id)) {
+                const address = user.address.find((addr: any) => addr.id == savedAddr.id || addr.id === savedAddr.id);
+                if (address) {
+                  shippingAddress = cleanAddress(address);
+                }
+              }
+            } catch (e) {
+              console.error('Error parseando dirección guardada:', e);
+            }
+          }
+        }
+        
+        // PRIORIDAD 3: Usar la primera dirección del usuario si no se encontró ninguna
+        if (!billingAddress && user?.address && user.address.length > 0) {
+          billingAddress = cleanAddress(user.address[0]);
+          console.log('⚠️ Usando primera dirección del usuario para facturación');
+        }
+        
+        if (!shippingAddress && !isDigitalOnly && user?.address && user.address.length > 0) {
+          shippingAddress = cleanAddress(user.address[0]);
+          console.log('⚠️ Usando primera dirección del usuario para envío');
+        }
+        
+        // Validar que billingAddress tenga los campos requeridos
+        if (!billingAddress) {
+          alert('Por favor selecciona una dirección de facturación.');
+          this.loading = false;
+          return;
+        }
+        
+        if (!billingAddress.street || !billingAddress.city || !billingAddress.pincode) {
+          console.error('❌ Dirección de facturación incompleta:', billingAddress);
+          alert('La dirección de facturación está incompleta. Por favor verifica que tenga calle, ciudad y código postal.');
+          this.loading = false;
+          return;
+        }
+        
+        // Para productos digitales, usar billingAddress como shippingAddress si no hay una específica
+        if (isDigitalOnly && !shippingAddress) {
+          shippingAddress = { ...billingAddress };
+          console.log('⚠️ Producto digital: usando dirección de facturación como dirección de envío');
+        }
+        
+        // Validar que shippingAddress tenga los campos requeridos
+        if (!shippingAddress) {
+          alert('Por favor selecciona una dirección de envío.');
+          this.loading = false;
+          return;
+        }
+        
+        if (!shippingAddress.street || !shippingAddress.city || !shippingAddress.pincode) {
+          console.error('❌ Dirección de envío incompleta:', shippingAddress);
+          alert('La dirección de envío está incompleta. Por favor verifica que tenga calle, ciudad y código postal.');
+          this.loading = false;
+          return;
+        }
+        
+        console.log('📍 Direcciones finales antes de construir payload:', {
+          shipping: shippingAddress ? '✅ Presente' : '❌ Faltante',
+          billing: billingAddress ? '✅ Presente' : '❌ Faltante',
+          isDigitalOnly,
+          shippingStreet: shippingAddress?.street,
+          billingStreet: billingAddress?.street
+        });
 
         // Preparar los datos que el back necesita para crear PendingOrder
         const widgetRequestBody = {
@@ -841,8 +1139,11 @@ export class CheckoutComponent {
           wallet_balance: payload.wallet_balance
         };
 
+        // IMPORTANTE: El backend debe validar antes de crear la orden pendiente
+        // Si getWidgetData falla, significa que hay un error y NO se crea la orden pendiente
+        // Solo después del pago exitoso se crea la orden final
         this.wompiService.getWidgetData(widgetRequestBody).subscribe({
-          next: (response) => {
+              next: (response) => {
 
             if (response.success && response.data) {
               const d = response.data;
@@ -878,16 +1179,78 @@ export class CheckoutComponent {
               }
 
               // Configurar el widget con los datos recibidos del backend
+              // Configuración del widget sin expirationTime
+              // ❌ NO ENVIAR redirect-url mientras estás en localhost para pruebas
               this.wompiWidgetConfig = {
                 publicKey: d.publicKey,
                 currency: d.currency || 'COP',
-                amountInCents: d.amountInCents,
+                amountInCents: Number(d.amountInCents),
                 reference: d.reference,
-                signature: d.signatureIntegrity,
-                redirectUrl: d.redirectUrl,
-                expirationTime: d.expirationTime, // Importante: debe coincidir con el usado en la firma
+                signatureIntegrity: d.signatureIntegrity,
+                // redirectUrl: d.redirectUrl, // Comentado para pruebas en localhost
+                // Para pruebas con redirect HTTPS válido de Wompi, usa:
+                // redirectUrl: 'https://transaction-redirect.wompi.co/check',
                 env: d.publicKey?.includes("test") ? "test" : undefined,
               };
+
+              // 🔍 LOGS PARA COMPARAR FIRMA DEL BACKEND VS WIDGET
+              console.log('🔐 === COMPARACIÓN DE FIRMAS ===');
+              console.log('📥 FIRMA RECIBIDA DEL BACKEND:');
+              console.log({
+                signature: d.signatureIntegrity,
+                signatureLength: d.signatureIntegrity?.length,
+                signaturePreview: d.signatureIntegrity?.substring(0, 20) + '...' + d.signatureIntegrity?.substring(d.signatureIntegrity.length - 10)
+              });
+              console.log('📤 DATOS QUE SE ENVIAN AL WIDGET:');
+              console.log({
+                reference: d.reference,
+                referenceLength: d.reference?.length,
+                amountInCents: d.amountInCents,
+                amountInCentsLength: String(d.amountInCents)?.length,
+                currency: d.currency,
+                currencyLength: d.currency?.length,
+                expirationTime: d.expirationTime,
+                expirationTimeLength: d.expirationTime?.length,
+                signature: d.signatureIntegrity?.substring(0, 20) + '...' + d.signatureIntegrity?.substring(d.signatureIntegrity.length - 10),
+                signatureLength: d.signatureIntegrity?.length
+              });
+              
+              // Construir el string exacto que el widget enviará (según documentación Wompi)
+              // Formato: Reference + Amount + Currency (SIN expirationTime)
+              const referencePart = d.reference || '';
+              const amountPart = String(d.amountInCents || '');
+              const currencyPart = d.currency || 'COP';
+              
+              // String que el BACKEND debería estar usando para generar la firma
+              // Formato: Reference + Amount + Currency + SecretoIntegridad
+              const backendExpectedString = `${referencePart}${amountPart}${currencyPart}`;
+              
+              console.log('🔗 ANÁLISIS DEL STRING PARA LA FIRMA:');
+              console.log('📋 Partes individuales (para contar caracteres):');
+              console.log({
+                'reference': `"${referencePart}" (${referencePart.length} chars)`,
+                'amountInCents': `"${amountPart}" (${amountPart.length} chars)`,
+                'currency': `"${currencyPart}" (${currencyPart.length} chars)`
+              });
+              
+              console.log('🔗 STRING COMPLETO (sin secreto) que el BACKEND debería usar:');
+              console.log({
+                string: backendExpectedString,
+                stringLength: backendExpectedString.length,
+                stringPreview: backendExpectedString.substring(0, Math.min(80, backendExpectedString.length)) + (backendExpectedString.length > 80 ? '...' : ''),
+                fullString: backendExpectedString // String completo para copiar y comparar
+              });
+              
+              // Mostrar cada carácter para detectar espacios o caracteres invisibles
+              console.log('🔍 CARACTERES INDIVIDUALES (para detectar espacios/extra):');
+              const charArray = Array.from(backendExpectedString);
+              console.log({
+                totalChars: charArray.length,
+                first50: charArray.slice(0, 50).map((char, idx) => `${idx}: "${char}" (${char.charCodeAt(0)})`),
+                last15: charArray.slice(-15).map((char, idx) => `${charArray.length - 15 + idx}: "${char}" (${char.charCodeAt(0)})`)
+              });
+              
+              console.log('🔐 === FIN COMPARACIÓN ===');
 
               this.showWompiWidget = true;
               this.loading = false;
@@ -897,30 +1260,30 @@ export class CheckoutComponent {
             }
           },
           error: (err) => {
+            // Si hay error al obtener el widget, NO se crea la orden pendiente
+            // Esto previene que se creen órdenes pendientes si hay errores
             this.loading = false;
-            alert('Error al procesar el pago. Por favor intente nuevamente.\n\nDetalles: ' + (err.error?.message || err.message));
-          }
-        });
-      } else {
-        // SI NO ES WOMPI: Crear la orden normalmente
-        this.loading = true;
-        this.store.dispatch(new PlaceOrder(payload)).subscribe({
-          next: () => {
-            const order = this.store.selectSnapshot((state) => state.order.selectedOrder);
-            this.loading = false;
-            if (order && order.id) {
-              // Redirigir a la página de detalles de la orden
-              window.location.href = `/account/order/details/${order.id}`;
-            } else {
-              alert('Error al crear la orden. Por favor intente nuevamente.');
-            }
-          },
-          error: (error) => {
-            this.loading = false;
-            alert('Error al crear la orden. Por favor intente nuevamente.');
+            const errorMessage = err?.error?.message || err?.message || 'Error desconocido';
+            alert(`No se puede procesar el pedido. Por favor verifica los datos e intenta nuevamente.\n\nError: ${errorMessage}`);
+            console.error('Error al obtener datos del widget de Wompi (no se creó orden pendiente):', err);
           }
         });
       }
+    } else {
+      // Si el formulario no es válido, marcar todos los campos como touched para mostrar errores
+      Object.keys(this.form.controls).forEach(key => {
+        const control = this.form.get(key);
+        if (control) {
+          if (control instanceof FormGroup) {
+            Object.keys(control.controls).forEach(subKey => {
+              control.get(subKey)?.markAsTouched();
+            });
+          } else {
+            control.markAsTouched();
+          }
+        }
+      });
+      alert('Por favor, completa todos los campos requeridos antes de realizar el pedido.');
     }
   }
 
@@ -938,65 +1301,156 @@ export class CheckoutComponent {
     }
   }
 
-  onWompiWidgetEvent(event: any) {
-    const status = event?.transaction?.status || event?.status;
-    const transactionId = event?.transaction?.id || event?.transaction?.idempotency_key || event?.transactionId;
+  openWarningModal(title: string, message: string) {
+    const modalRef = this.modal.open(WarningModalComponent, {
+      centered: true,
+      windowClass: 'theme-modal-2',
+      backdrop: 'static',
+      keyboard: false
+    });
+    modalRef.componentInstance.title = title;
+    modalRef.componentInstance.message = message;
+  }
 
-    if (status === 'APPROVED' && transactionId) {
+  onWompiWidgetEvent(event: any) {
+    console.log('🎯 Evento recibido de Wompi:', event);
+    const status = event?.transaction?.status || event?.status;
+    const transactionId = event?.transactionId || 
+                         event?.transaction?.id || 
+                         event?.transaction?.idempotency_key || 
+                         event?.transaction?.transaction_id ||
+                         event?.id;
+
+    console.log('🔍 Información extraída:', { status, transactionId, fullEvent: event });
+
+    // Verificar si ya se procesó este transactionId
+    if (transactionId && this.processedTransactionIds.has(transactionId)) {
+      console.warn('⚠️ Este transactionId ya fue procesado, ignorando evento duplicado:', transactionId);
+      return;
+    }
+
+    // Si el status es APPROVED o si hay transactionId (asumir éxito si llegó aquí)
+    if ((status === 'APPROVED' || !status) && transactionId) {
+      console.log('✅ Procesando pago aprobado con transactionId:', transactionId);
+      console.log('📋 Payload disponible:', !!this.pendingCheckoutPayload);
+      console.log('📋 localStorage pending_checkout:', this.isBrowser ? !!localStorage.getItem('pending_checkout') : 'N/A');
+      
+      // Cerrar el widget de Wompi primero
+      this.showWompiWidget = false;
+      this.wompiWidgetConfig = null;
+      
+      // Procesar la orden después del pago exitoso
+      // NO marcar el transactionId aquí, se marcará después de procesar exitosamente
       this.processOrderAfterWompi(transactionId);
     } else if (status === 'DECLINED') {
       this.cancelWompiWidget();
-      alert('El pago fue rechazado. Por favor intenta nuevamente o utiliza otro método de pago.');
+      this.openWarningModal('Pago Rechazado', 'El pago fue rechazado. Por favor intenta nuevamente o utiliza otro método de pago.');
     } else if (status === 'VOIDED') {
       this.cancelWompiWidget();
-      alert('El pago fue anulado. Si fue un error, intenta nuevamente.');
+      this.openWarningModal('Pago Anulado', 'El pago fue anulado. Si fue un error, intenta nuevamente.');
+    } else {
+      console.warn('⚠️ Evento de Wompi sin status o transactionId claro:', { status, transactionId });
     }
   }
 
   private processOrderAfterWompi(transactionId: string) {
-    const checkoutDataStr = this.isBrowser ? localStorage.getItem('pending_checkout') : null;
-    let payload = this.pendingCheckoutPayload;
+    // Protección: evitar procesar múltiples veces
+    if (this.isProcessingOrder) {
+      console.warn('⚠️ Ya se está procesando una orden, ignorando solicitud duplicada para transactionId:', transactionId);
+      return;
+    }
 
-    if (!payload && checkoutDataStr) {
-      try {
-        const stored = JSON.parse(checkoutDataStr);
-        payload = stored?.payload;
-      } catch (error) {
-        // Error leyendo pending_checkout
+    // Verificar si ya se procesó este transactionId
+    if (this.processedTransactionIds.has(transactionId)) {
+      console.warn('⚠️ Este transactionId ya fue procesado:', transactionId);
+      return;
+    }
+
+    // Marcar como procesando y marcar el transactionId como procesado
+    this.isProcessingOrder = true;
+    this.processedTransactionIds.add(transactionId);
+
+    // Obtener la referencia de la orden pendiente
+    let reference: string | null = null;
+    
+    // Intentar obtener la referencia del pendingCheckoutPayload
+    if (this.pendingCheckoutPayload?.reference) {
+      reference = this.pendingCheckoutPayload.reference;
+    }
+    
+    // Si no está en pendingCheckoutPayload, buscar en localStorage
+    if (!reference && this.isBrowser) {
+      // Buscar en temp_order_* keys
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && key.startsWith('temp_order_')) {
+          try {
+            const orderData = JSON.parse(localStorage.getItem(key) || '{}');
+            if (orderData.reference) {
+              reference = orderData.reference;
+              break;
+            }
+          } catch (error) {
+            // Continuar buscando
+          }
+        }
+      }
+      
+      // Si aún no se encontró, intentar desde wompiWidgetConfig
+      if (!reference && this.wompiWidgetConfig?.reference) {
+        reference = this.wompiWidgetConfig.reference;
       }
     }
 
-    if (!payload) {
-      alert('No se encontró la información del pedido. Por favor contacta a soporte.');
+    if (!reference) {
+      console.error('❌ No se encontró la referencia de la orden pendiente');
+      this.isProcessingOrder = false; // Resetear bandera
+      this.openWarningModal('Error de Pedido', 'No se encontró la información del pedido. Por favor contacta a soporte.');
       this.cancelWompiWidget();
       return;
     }
 
-    payload.transaction_id = transactionId;
-    payload.payment_method = 'wompi';
+    console.log('✅ Pago confirmado exitosamente por Wompi. TransactionId:', transactionId);
+    console.log('ℹ️ No es necesario llamar a API adicional - Wompi ya confirmó el pago');
 
     this.loading = true;
-    this.store.dispatch(new PlaceOrder(payload)).subscribe({
-      next: () => {
-        const order = this.store.selectSnapshot((state) => state.order.selectedOrder);
-        this.loading = false;
-        this.cleanupPendingCheckout();
-        this.showWompiWidget = false;
-        this.wompiWidgetConfig = null;
-        this.pendingCheckoutPayload = null;
+    
+    // Mostrar loading brevemente para dar tiempo al backend/webhook de procesar
+    setTimeout(() => {
+      this.loading = false;
+      this.isProcessingOrder = false;
+      
+      // Limpiar datos
+      this.cleanupPendingCheckout();
+      this.showWompiWidget = false;
+      this.wompiWidgetConfig = null;
+      this.pendingCheckoutPayload = null;
 
-        if (order && order.id) {
-          this.store.dispatch(new ClearCart());
-          this.router.navigate(['/account/order']);
-        } else {
-          alert('El pago se procesó, pero no se pudo crear la orden. Contacta a soporte con el ID de transacción ' + transactionId);
+      // Limpiar datos temporales de localStorage
+      if (this.isBrowser) {
+        // Limpiar todas las claves temp_order_*
+        for (let i = localStorage.length - 1; i >= 0; i--) {
+          const key = localStorage.key(i);
+          if (key && key.startsWith('temp_order_')) {
+            localStorage.removeItem(key);
+          }
         }
-      },
-      error: (error) => {
-        this.loading = false;
-        alert('El pago se procesó, pero no se pudo crear la orden. Contacta a soporte con el ID de transacción ' + transactionId);
+        localStorage.removeItem('pending_checkout');
       }
-    });
+
+      // Limpiar el carrito después del pago exitoso
+      this.store.dispatch(new ClearCart());
+
+      // Mostrar modal de éxito directamente - el pago ya fue confirmado por Wompi
+      console.log('✅ Abriendo modal de éxito. TransactionId:', transactionId);
+      const modalRef = this.modal.open(OrderSuccessModalComponent, {
+        centered: true,
+        windowClass: 'theme-modal-2',
+        backdrop: 'static',
+        keyboard: false
+      });
+      console.log('✅ Modal de éxito mostrado');
+    }, 1000); // Esperar 1 segundo para dar tiempo al backend/webhook
   }
 
   private cleanupPendingCheckout() {
