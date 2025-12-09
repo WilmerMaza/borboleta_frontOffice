@@ -327,17 +327,76 @@ export class CartState {
   @Action(SyncCart)
   syncCart(ctx: StateContext<CartStateModel>, action: SyncCart) {
     
+    // Preservar el carrito original del localStorage antes de sincronizar
+    let existingCart: any = {};
+    if (typeof window !== 'undefined') {
+      try {
+        const cartData = localStorage.getItem('cart');
+        if (cartData) {
+          existingCart = JSON.parse(cartData);
+        }
+      } catch (e) {
+        // Ignorar errores de parsing
+      }
+    }
+    
     // Procesar cada item del carrito para sincronizar
     const syncedItems: Cart[] = action.payload.map(item => {
-      // Crear un objeto Cart válido
+      // Buscar el item original en localStorage para preservar sub_total y otros datos
+      const existingItem = existingCart.items?.find((localItem: any) => 
+        (item.variation_id && localItem.variation_id === item.variation_id) ||
+        (!item.variation_id && localItem.product_id === item.product_id)
+      );
+      
+      // Calcular sub_total: preservar el original si existe y es válido, sino calcularlo
+      let sub_total = 0;
+      if (existingItem?.sub_total && existingItem.sub_total > 0) {
+        // Preservar el sub_total original del localStorage
+        sub_total = existingItem.sub_total;
+      } else {
+        // Calcular desde los precios del item sincronizado
+        const price = item.variation 
+          ? (item.variation.sale_price || item.variation.price || 0)
+          : (item.product?.sale_price || item.product?.price || 0);
+        sub_total = price * item.quantity;
+      }
+      
+      // Preservar el objeto product completo del localStorage si existe
+      // Esto asegura que los precios estén disponibles
+      let productToUse = item.product!;
+      if (existingItem?.product) {
+        // Merge: usar el product del localStorage que tiene los precios correctos
+        // pero actualizar con cualquier dato nuevo del item sincronizado
+        productToUse = {
+          ...existingItem.product,
+          ...item.product,
+          // Preservar los precios del localStorage si existen
+          sale_price: existingItem.product.sale_price || item.product?.sale_price || 0,
+          price: existingItem.product.price || item.product?.price || 0,
+        };
+      }
+      
+      // Preservar la variation completa si existe
+      let variationToUse = item.variation || {} as Variation;
+      if (existingItem?.variation && Object.keys(existingItem.variation).length > 0) {
+        variationToUse = {
+          ...existingItem.variation,
+          ...item.variation,
+          // Preservar los precios de la variation del localStorage
+          sale_price: existingItem.variation.sale_price || item.variation?.sale_price || 0,
+          price: existingItem.variation.price || item.variation?.price || 0,
+        };
+      }
+      
+      // Crear un objeto Cart válido preservando datos originales
       const cartItem: Cart = {
-        id: Number(Math.floor(Math.random() * 10000).toString().padStart(4, '0')),
+        id: existingItem?.id || Number(Math.floor(Math.random() * 10000).toString().padStart(4, '0')),
         quantity: item.quantity,
-        sub_total: item.variation ? item.variation.sale_price * item.quantity : (item.product?.sale_price || 0) * item.quantity,
-        product: item.product!,
+        sub_total: sub_total,
+        product: productToUse,
         product_id: item.product_id,
-        wholesale_price: null,
-        variation: item.variation || {} as Variation, // Usar un objeto vacío como fallback
+        wholesale_price: existingItem?.wholesale_price || null,
+        variation: variationToUse,
         variation_id: item.variation_id || null
       };
       return cartItem;

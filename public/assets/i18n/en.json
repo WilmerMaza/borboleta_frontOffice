@@ -438,5 +438,9 @@
   "everyday_casual": "Everyday casual",
   "tops": "Tops",
   "DRESSES": "Dresses",
-  "WINTER_WEAR": "Winter Wear"
+  "WINTER_WEAR": "Winter Wear",
+  "order_created_successfully": "Order Created Successfully",
+  "your_order_has_been_created_successfully": "Your order has been created successfully",
+  "go_to_orders": "Go to Orders",
+  "understand": "Understand"
 }

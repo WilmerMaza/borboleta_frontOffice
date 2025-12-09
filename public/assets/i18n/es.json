@@ -444,7 +444,11 @@
   "everyday_casual": "Casual de todos los días",
   "tops": "Blusas",
   "DRESSES": "Vestidos",
-  "WINTER_WEAR": "Ropa de invierno"  
+  "WINTER_WEAR": "Ropa de invierno",
+  "order_created_successfully": "Orden Creada con Éxito",
+  "your_order_has_been_created_successfully": "Tu orden ha sido creada exitosamente",
+  "go_to_orders": "Ir a Órdenes",
+  "understand": "Entendido"  
   
 
 

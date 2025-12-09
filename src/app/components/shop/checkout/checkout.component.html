@@ -423,11 +423,19 @@
                           <div>
                             <h4>{{ item?.variation ? item?.variation?.name : item?.product?.name }}</h4>
                             <h5>
-                              {{ (item?.variation ? item.variation.sale_price : item?.product && item?.wholesale_price ? item?.wholesale_price : item?.product?.sale_price)! | currencySymbol }} X {{ item.quantity }}
+                              @if(item?.sub_total && item?.quantity && item.sub_total > 0) {
+                                {{ (item.sub_total / item.quantity) | currencySymbol }} X {{ item.quantity }}
+                              } @else {
+                                {{ (item?.variation ? item.variation.sale_price : item?.product && item?.wholesale_price ? item?.wholesale_price : item?.product?.sale_price)! | currencySymbol }} X {{ item.quantity }}
+                              }
                             </h5>
                           </div>
                           <span class="text-theme">
-                            {{ (item?.variation ? item.variation.sale_price : item?.product && item?.wholesale_price ? item?.wholesale_price : item?.product?.sale_price)! * item.quantity | currencySymbol }}
+                            @if(item?.sub_total && item.sub_total > 0) {
+                              {{ item.sub_total | currencySymbol }}
+                            } @else {
+                              {{ (item?.variation ? item.variation.sale_price : item?.product && item?.wholesale_price ? item?.wholesale_price : item?.product?.sale_price)! * item.quantity | currencySymbol }}
+                            }
                           </span>
                         </div>
                       </li>
@@ -569,9 +577,9 @@
                           </ul>
                           <ul class="total">
 
-                            @if(appliedCoupon ||(form.get('points_amount')?.value && checkoutTotal.total.convert_point_amount) && (setting$ | async)?.activation?.point_enable || (form.get('wallet_balance')?.value && checkoutTotal.total.convert_wallet_balance) && (setting$ | async)?.activation?.wallet_enable){
+                            @if(checkoutTotal && checkoutTotal.total && (appliedCoupon || (form.get('points_amount')?.value && checkoutTotal.total.convert_point_amount && (setting$ | async)?.activation?.point_enable) || (form.get('wallet_balance')?.value && checkoutTotal.total.convert_wallet_balance && (setting$ | async)?.activation?.wallet_enable))){
                               <li>{{ 'you_save' | translate }}
-                                <span class="count">{{ (checkoutTotal ? ( (checkoutTotal.total.total) - (checkoutTotal.total.sub_total) | currencySymbol) : 'not_calculated_yet' | translate ) }}</span>
+                                <span class="count">{{ (checkoutTotal.total.total - checkoutTotal.total.sub_total) | currencySymbol }}</span>
                               </li>
                             }
                             <li>{{ 'total' | translate }}
