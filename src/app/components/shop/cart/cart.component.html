@@ -50,12 +50,23 @@
                           </div>
                         </div>
                         <div class="col table-price">
-                          <h2 class="td-color">{{ (item?.variation ? item?.variation?.sale_price : item?.product && item?.wholesale_price ? item?.wholesale_price! : item?.product?.sale_price) | currencySymbol }}
+                          <h2 class="td-color">
+                            @if(item?.sub_total && item?.quantity && item.sub_total > 0) {
+                              {{ (item.sub_total / item.quantity) | currencySymbol }}
+                            } @else {
+                              {{ (item?.variation ? item?.variation?.sale_price : item?.product && item?.wholesale_price ? item?.wholesale_price! : item?.product?.sale_price) | currencySymbol }}
+                            }
                             @if(item?.product?.discount){
                               <del>{{ (item?.variation ? item?.variation?.price : item?.product?.price) | currencySymbol }}</del>
                             }
                           </h2>
-                          <h6 class="theme-color d-md-inline-block d-none">{{ (item.variation ? item.variation.sale_price : item?.product && item?.wholesale_price ? item?.wholesale_price! : item?.product?.sale_price!) * item.quantity | currencySymbol }}</h6>
+                          <h6 class="theme-color d-md-inline-block d-none">
+                            @if(item?.sub_total && item.sub_total > 0) {
+                              {{ item.sub_total | currencySymbol }}
+                            } @else {
+                              {{ (item.variation ? item.variation.sale_price : item?.product && item?.wholesale_price ? item?.wholesale_price! : item?.product?.sale_price!) * item.quantity | currencySymbol }}
+                            }
+                          </h6>
                         </div>
                         <div class="col">
                           <h2 class="td-color"><a href="javascript:void(0)" class="icon remove-btn" (click)="delete(item.id)"><i class="ri-close-line"></i></a>
@@ -64,7 +75,12 @@
                       </div>
                     </td>
                     <td class="table-price">
-                      <h2>{{ (item?.variation ? item?.variation?.sale_price : item?.product && item?.wholesale_price ? item?.wholesale_price! : item?.product?.sale_price) | currencySymbol }}
+                      <h2>
+                        @if(item?.sub_total && item?.quantity && item.sub_total > 0) {
+                          {{ (item.sub_total / item.quantity) | currencySymbol }}
+                        } @else {
+                          {{ (item?.variation ? item?.variation?.sale_price : item?.product && item?.wholesale_price ? item?.wholesale_price! : item?.product?.sale_price) | currencySymbol }}
+                        }
                         @if(item?.product?.discount){
                           <del>{{ (item?.variation ? item?.variation?.price : item?.product?.price) | currencySymbol }}</del>
                         }
@@ -95,7 +111,13 @@
                       </div>
                     </td>
                     <td>
-                      <h2 class="td-color">{{ (item.variation ? item.variation.sale_price : item?.product && item?.wholesale_price ? item?.wholesale_price! : item?.product?.sale_price!) * item.quantity | currencySymbol }}</h2>
+                      <h2 class="td-color">
+                        @if(item?.sub_total && item.sub_total > 0) {
+                          {{ item.sub_total | currencySymbol }}
+                        } @else {
+                          {{ (item.variation ? item.variation.sale_price : item?.product && item?.wholesale_price ? item?.wholesale_price! : item?.product?.sale_price!) * item.quantity | currencySymbol }}
+                        }
+                      </h2>
                     </td>
                     <td>
                       <a href="javascript:void(0)" class="icon remove-btn" (click)="delete(item.id)">
