@@ -41,14 +41,28 @@ export class SearchDropdownComponent {
     public menuService: MenuService){}
 
   reDirectCategory(slug: string){
-    this.router.navigate(['/collections'], {
-      queryParams: {
-        category: slug ? slug : null
-      },
-      skipLocationChange: false  // do trigger navigation
-    })
+    this.router.navigate(['/category', slug])
     this.term = '';
     this.menuService.isOpenSearch = false
+  }
+
+  redirectToSearch(){
+    this.router.navigate(['/search'], {
+      queryParams: {
+        search: this.term ? this.term : null
+      }
+    })
+    this.menuService.isOpenSearch = false
+  }
+
+  redirectToProduct(slug: string | undefined){
+    if (slug) {
+      this.menuService.isOpenSearch = false;
+      this.router.navigate(['/product', slug]).catch(() => {
+        // Si hay error en la navegación, asegurar que el buscador se cierre
+        this.menuService.isOpenSearch = false;
+      });
+    }
   }
 
 }

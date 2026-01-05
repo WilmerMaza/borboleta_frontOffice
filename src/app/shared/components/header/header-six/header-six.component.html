@@ -22,30 +22,32 @@
           <div class="menu-right pull-right">
             <div>
               <div class="icon-nav">
-                <ul>
-                  <li class="help-header-item">
-                    <a href="https://wa.me/573016268644?text=Hola,%20necesito%20ayuda%20con%20mi%20compra.%20¿Podrían%20asistirme?" 
-                       target="_blank" 
-                       class="help-header-btn"
-                       placement="bottom"
-                       ngbTooltip="¿Quieres ser mayorista?"
-                       aria-label="Contactar por WhatsApp para ayuda">
-                      <i class="ri-customer-service-2-line"></i>
-                    </a>
-                  </li>
-                  <li class="onhover-div">
-                    <a href="javascript:void(0)" [routerLink]="['/wishlist']" aria-label="Wishlist">
-                      <i class="ri-heart-line">
-                      </i>
-                    </a>
-                  </li>
-                  <li class="onhover-div">
-                    <app-cart></app-cart>
-                  </li>
-                  <li class="onhover-div onhover-dropdown mobile-cart">
-                    <app-user-profile></app-user-profile>
-                  </li>
-                </ul>
+                <div class="icons-container">
+                  <ul>
+                    <li class="help-header-item">
+                      <a href="https://wa.me/573016268644?text=Hola,%20necesito%20ayuda%20con%20mi%20compra.%20¿Podrían%20asistirme?" 
+                         target="_blank" 
+                         class="help-header-btn"
+                         placement="bottom"
+                         ngbTooltip="¿Quieres ser mayorista?"
+                         aria-label="Contactar por WhatsApp para ayuda">
+                        <i class="ri-customer-service-2-line"></i>
+                      </a>
+                    </li>
+                    <li class="onhover-div">
+                      <a href="javascript:void(0)" [routerLink]="['/wishlist']" aria-label="Wishlist">
+                        <i class="ri-heart-line">
+                        </i>
+                      </a>
+                    </li>
+                    <li class="onhover-div">
+                      <app-cart></app-cart>
+                    </li>
+                    <li class="onhover-div onhover-dropdown mobile-cart">
+                      <app-user-profile></app-user-profile>
+                    </li>
+                  </ul>
+                </div>
               </div>
             </div>
           </div>

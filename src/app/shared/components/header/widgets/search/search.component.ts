@@ -1,7 +1,8 @@
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { Component, ElementRef, HostListener, Inject, inject, Input, PLATFORM_ID, SimpleChanges, ViewChild } from '@angular/core';
 import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
+import { filter } from 'rxjs/operators';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { TranslateModule } from '@ngx-translate/core';
 import { Store } from '@ngxs/store';
@@ -63,13 +64,29 @@ export class SearchComponent {
         this.filteredCategory = categories
       });
 
-      this.productBySearch$.subscribe(item => this.product = item);
+      this.productBySearch$.subscribe(item => {
+        this.product = item;
+        // Resetear resultados cuando se cargan nuevos productos
+        if (this.menuService.isOpenSearch) {
+          this.filteredResults = this.product.slice(0, 4);
+        }
+      });
+      
       this.selectedCategory.valueChanges.subscribe(data => {
         this.isOpenResult = false;
         let category = data ?  { status: 1, category_id: data } : {status: 1};
         this.store.dispatch(new GetProductBySearchList(category))
         this.store.dispatch(new GetSearchByCategory(data ?  { status: 1, ids: data } : { status: 1, paginate: 4 }))
-      })
+      });
+      
+      // Observar cambios de navegación para resetear el estado del buscador
+      this.router.events.pipe(
+        filter(event => event instanceof NavigationEnd)
+      ).subscribe(() => {
+        // Resetear el estado cuando se completa una navegación
+        this.isOpenResult = false;
+        this.selectedResultIndex = -1;
+      });
   }
 
   ngOnInit() {
@@ -122,18 +139,33 @@ export class SearchComponent {
   }
 
   focusInput(val:boolean){
-    this.filteredResults = this.product.slice(0, 4)
-
-    if(val) this.isOpenResult = val;
+    if(val) {
+      this.filteredResults = this.product.slice(0, 4);
+      this.isOpenResult = val;
+      this.selectedResultIndex = -1;
+    }
   }
 
   filterWords(input: string): Product[] {
+    if (!input || input.trim().length === 0) {
+      return this.product.slice(0, 4);
+    }
+    
     return this.product.filter(product => {
       const productName = product.name.toLowerCase();
-      const inputLower = input.toLowerCase();
-      const words = productName.split(' ');
-      const isMatch = words.some(word => word.startsWith(inputLower));
-      return isMatch
+      const inputLower = input.toLowerCase().trim();
+      
+      // Si el término de búsqueda contiene espacios, buscar que todas las palabras estén en el nombre
+      const searchWords = inputLower.split(/\s+/).filter(word => word.length > 0);
+      
+      if (searchWords.length > 1) {
+        // Múltiples palabras: todas deben estar presentes en el nombre
+        return searchWords.every(searchWord => productName.includes(searchWord));
+      } else {
+        // Una sola palabra: buscar que alguna palabra del nombre empiece con el término o que el nombre lo contenga
+        const productWords = productName.split(' ');
+        return productWords.some(word => word.startsWith(inputLower)) || productName.includes(inputLower);
+      }
     });
   }
 
@@ -208,12 +240,16 @@ export class SearchComponent {
 
   openSearch(){
     this.menuService.isOpenSearch = true;
+    this.isOpenResult = false;
+    this.selectedResultIndex = -1;
+    this.filteredResults = this.product.slice(0, 4);
     this.startTypingAnimation();
   }
 
   closeSearch(){
     this.menuService.isOpenSearch = false;
     this.isOpenResult = false;
+    this.selectedResultIndex = -1;
   }
 
   startTypingAnimation() {

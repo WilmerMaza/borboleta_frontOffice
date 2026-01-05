@@ -66,7 +66,7 @@
                           </div>
                           }
                         </div>
-                        <div class="col-md-12">
+                        <div class="col-md-12" style="display: none;">
                           <div class="form-box form-checkbox">
                             <input type="checkbox" class="form-check-input checkbox_animated" id="account" formControlName="create_account">
                             <label class="form-check-label" for="account">{{ 'create_an_account' | translate }}?</label>
@@ -330,7 +330,7 @@
                   }
                   @if((accessToken$ | async)){
                   <ul>
-                    @if(!(cartDigital$ | async)){
+                    @if(!((cartDigital$ | async) ?? false)){
                     <li>
                       <div class="checkout-box">
                         <div class="checkout-title">
@@ -362,13 +362,13 @@
                       </div>
                     </li>
 
-                    @if(!(cartDigital$ | async)){
+                    @if(!((cartDigital$ | async) ?? false)){
                     <li>
                       <div class="checkout-box">
                         <div class="checkout-title">
                           <h4>{{ 'delivery_options' | translate }}</h4>
                         </div>
-                        @if(!(user$ | async)){
+                        @if(!(setting$ | async)?.delivery){
                         <div class="empty-box">
                           <h2>{{ 'no_delivery_options_found' | translate }}</h2>
                         </div>
@@ -384,7 +384,7 @@
                         <div class="checkout-title">
                           <h4>{{ 'payment_options' | translate }}</h4>
                         </div>
-                        @if(!(user$ | async)){
+                        @if(!(setting$ | async)?.payment_methods?.length){
                         <div class="empty-box">
                           <h2>{{ 'no_payment_options_found' | translate }}</h2>
                         </div>
@@ -518,6 +518,30 @@
                             }
                           </div>
                         }
+                        
+                        <!-- Resumen de factura con envío -->
+                        @if(checkoutTotal){
+                        <ul class="sub-total mt-3">
+                          <li>{{ 'subtotal' | translate }}
+                            <span class="count">{{ (checkoutTotal ? (checkoutTotal.total.sub_total | currencySymbol) : 'not_calculated_yet' | translate ) }}</span>
+                          </li>
+
+                          <li>
+                            {{ 'shipping' | translate }}
+                            <span class="count">El costo lo determina la transportadora</span>
+                          </li>
+
+                          <li>
+                            {{ 'tax' | translate }}
+                            <span class="count">{{ (checkoutTotal ? (checkoutTotal.total.tax_total | currencySymbol) : 'not_calculated_yet' | translate ) }}</span>
+                          </li>
+                        </ul>
+                        <ul class="total">
+                          <li>{{ 'subtotal' | translate }}
+                            <span class="count">{{ (checkoutTotal ? (checkoutTotal.total.sub_total | currencySymbol) : 'not_calculated_yet' | translate ) }}</span>
+                          </li>
+                        </ul>
+                        }
                       </div>
                       <form [formGroup]="form" (ngSubmit)="placeorder()">
                         <div class="custom-box-loader">
@@ -531,16 +555,19 @@
                               <span class="count">{{ (checkoutTotal ? (checkoutTotal.total.sub_total | currencySymbol) : 'not_calculated_yet' | translate ) }}</span>
                             </li>
 
-                            @if(!(cartDigital$ | async)){
+                            @if(!((cartDigital$ | async) ?? false)){
                             <li>
                               {{ 'shipping' | translate }}
-                              <span class="count">{{ (checkoutTotal ? (checkoutTotal.total.shipping_total | currencySymbol) : 'not_calculated_yet' | translate) }}</span>
+                              <span class="count">El costo lo determina la transportadora</span>
                             </li>
                             }
 
                             <li>
                               {{ 'tax' | translate }}
                               <span class="count">{{ (checkoutTotal ? (checkoutTotal.total.tax_total | currencySymbol) : 'not_calculated_yet' | translate ) }}</span>
+                            </li>
+                            <li class="tax-info-text">
+                              <small class="text-muted">El IVA es del 19%</small>
                             </li>
 
                             @if((user$ | async) && checkoutTotal && (user$ | async)?.point?.balance && (setting$ | async)?.activation?.point_enable){
