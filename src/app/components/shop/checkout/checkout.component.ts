@@ -24,7 +24,7 @@ import {
   Select2Module,
   Select2UpdateEvent,
 } from "ng-select2-component";
-import { Observable, map, of } from "rxjs";
+import { Observable, map, of, startWith } from "rxjs";
 import { AddressModalComponent } from "../../../shared/components/widgets/modal/address-modal/address-modal.component";
 import { CouponModalComponent } from "../../../shared/components/widgets/modal/coupon-modal/coupon-modal.component";
 import { OrderSuccessModalComponent } from "../../../shared/components/widgets/modal/order-success-modal/order-success-modal.component";
@@ -112,9 +112,43 @@ export class CheckoutComponent {
   ) as Observable<Values>;
   cartDigital$: Observable<boolean | number> = inject(Store).select(
     CartState.cartHasDigital
+  ).pipe(
+    startWith(false)
   ) as Observable<boolean | number>;
   countries$: Observable<Select2Data> = inject(Store).select(
     CountryState.countries
+  ).pipe(
+    map((countries: Select2Data) => {
+      // Filtrar solo Colombia
+      if (Array.isArray(countries)) {
+        const colombia = countries.find((country: any) => {
+          const label = typeof country === 'object' && 'label' in country 
+            ? (country as any).label 
+            : '';
+          return label?.toLowerCase().includes('colombia');
+        });
+        // Si encontramos Colombia, establecerla como valor por defecto y cargar sus estados
+        if (colombia && typeof colombia === 'object' && 'value' in colombia) {
+          const colombiaValue = (colombia as any).value;
+          if (!this.form.get('shipping_address.country_id')?.value) {
+            setTimeout(() => {
+              this.form.get('shipping_address.country_id')?.setValue(colombiaValue);
+              this.form.get('billing_address.country_id')?.setValue(colombiaValue);
+              // Cargar estados de Colombia
+              this.shippingCountryChange({ value: colombiaValue } as Select2UpdateEvent);
+              this.billingCountryChange({ value: colombiaValue } as Select2UpdateEvent);
+            }, 100);
+          }
+        }
+        return colombia ? [colombia] : countries.filter((country: any) => {
+          const label = typeof country === 'object' && 'label' in country 
+            ? (country as any).label 
+            : '';
+          return label?.toLowerCase().includes('colombia');
+        });
+      }
+      return countries;
+    })
   );
   coupon$: Observable<CouponModel> = inject(Store).select(CouponState.coupon);
 
@@ -130,7 +164,8 @@ export class CheckoutComponent {
 
   public shippingStates$: Observable<Select2Data>;
   public billingStates$: Observable<Select2Data>;
-  public codes = countryCodes;
+  // Filtrar solo código de Colombia (+57)
+  public codes = countryCodes.filter((code: any) => code.data?.class === 'co' || code.value === '57');
   public isBrowser: boolean;
   cartItemsFromLocal: Cart[];
   public showWompiWidget = false;
@@ -177,7 +212,7 @@ export class CheckoutComponent {
       create_account: new FormControl(false),
       name: new FormControl("", [Validators.required]),
       email: new FormControl("", [Validators.required, Validators.email]),
-      country_code: new FormControl("91", [Validators.required]),
+      country_code: new FormControl("57", [Validators.required]),
       phone: new FormControl("", [Validators.required]),
       password: new FormControl(),
       shipping_address: new FormGroup({
@@ -186,7 +221,7 @@ export class CheckoutComponent {
         city: new FormControl("", [Validators.required]),
         phone: new FormControl("", [Validators.required]),
         pincode: new FormControl("", [Validators.required]),
-        country_code: new FormControl("91", [Validators.required]),
+        country_code: new FormControl("57", [Validators.required]),
         country_id: new FormControl("", [Validators.required]),
         state_id: new FormControl("", [Validators.required]),
       }),
@@ -197,7 +232,7 @@ export class CheckoutComponent {
         city: new FormControl("", [Validators.required]),
         phone: new FormControl("", [Validators.required]),
         pincode: new FormControl("", [Validators.required]),
-        country_code: new FormControl("91", [Validators.required]),
+        country_code: new FormControl("57", [Validators.required]),
         country_id: new FormControl("", [Validators.required]),
         state_id: new FormControl("", [Validators.required]),
       }),
@@ -923,7 +958,7 @@ export class CheckoutComponent {
         const itemSubTotal = Number(item.sub_total || 0);
         return acc + itemSubTotal;
       }, 0);
-      const tax_total = amount * 0.05; // Calcular impuesto como 5% del subtotal
+      const tax_total = amount * 0.19; // Calcular impuesto como 19% del subtotal
       const shipping_total = 0; // Si tienes el cálculo, ponlo aquí
       const total = amount + tax_total + shipping_total;
 

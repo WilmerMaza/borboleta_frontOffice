@@ -30,7 +30,7 @@
       }
     </div>
     <div class="recent-search-section">
-      <h4 class="page-title">{{ 'related_product' | translate }} <a [routerLink]="['/collections']" (click)="menuService.isOpenSearch = false">{{ 'see_all' | translate }}</a></h4>
+      <h4 class="page-title">{{ 'related_product' | translate }} <a href="javascript:void(0)" (click)="redirectToSearch()">{{ 'see_all' | translate }}</a></h4>
       <!-- skeleton loader -->
       @if(productService.searchSkeleton){
         <ul class="skeleton-ul">
@@ -52,15 +52,15 @@
       @if(!productService.searchSkeleton){
         <ul>
           @for(product of products; track product.id; let i = $index){
-            <li class="result-item" [class.selected]="i === selectedResultIndex" >
+            <li class="result-item" [class.selected]="i === selectedResultIndex" (click)="redirectToProduct(product?.slug)">
               <div class="suggestion-image">
                 <img [src]="product.product_thumbnail ? product.product_thumbnail.original_url : 'assets/images/placeholder/product.png'" [alt]="product.name">
               </div>
               <div class="suggestion-category">
-                <a [routerLink]="['/product/', product?.slug]" (click)="menuService.isOpenSearch = false" [innerHTML]="product.name | highlighter:term:'partial'"></a>
+                <a href="javascript:void(0)" (click)="redirectToProduct(product?.slug); $event.stopPropagation()" [innerHTML]="product.name | highlighter:term:'partial'"></a>
                 <div>
                   @for(category of product.categories; track category.id){
-                    <p [routerLink]="['/collections']" [queryParams]="{ category:category.slug}" (click)="menuService.isOpenSearch = false">{{category.name}}</p>
+                    <p [routerLink]="['/category', category.slug]" (click)="menuService.isOpenSearch = false; $event.stopPropagation()">{{category.name}}</p>
                   }
                 </div>
               </div>

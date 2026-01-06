@@ -3,17 +3,34 @@ app-sticky-compare {
   display: none !important;
 }
 
+// Asegurar que el contenedor se muestre en móvil
+.compare-tap-top-box {
+  @media (max-width: 767px) {
+    display: flex !important;
+    z-index: 9999 !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    bottom: 80px !important; // Subir más el botón
+    right: 10px !important; // Más a la derecha
+  }
+
+  @media (max-width: 480px) {
+    bottom: 70px !important; // Subir más el botón
+    right: 8px !important; // Más a la derecha
+  }
+}
+
 // Botón flotante ayuda con tooltip
 .help-float-btn {
-  position: fixed;
-  right: 30px;
-  bottom: 30px;
-  display: flex;
+  position: relative !important;
+  display: flex !important;
   flex-direction: column;
   align-items: center;
   gap: 8px;
   text-decoration: none;
-  z-index: 999;
+  z-index: 9999 !important;
+  visibility: visible !important;
+  opacity: 1 !important;
 
   .help-text {
     background: #000000;
@@ -99,15 +116,40 @@ app-sticky-compare {
 
   // Responsive - Móvil
   @media (max-width: 767px) {
-    right: 20px;
-    bottom: 20px;
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    z-index: 9999 !important;
 
     .help-icon {
       width: 50px;
       height: 50px;
+      display: flex !important;
+      visibility: visible !important;
+      opacity: 1 !important;
 
       i {
         font-size: 20px;
+      }
+    }
+  }
+
+  // Asegurar visibilidad en móviles pequeños
+  @media (max-width: 480px) {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    z-index: 9999 !important;
+
+    .help-icon {
+      width: 48px;
+      height: 48px;
+      display: flex !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+
+      i {
+        font-size: 18px;
       }
     }
   }
