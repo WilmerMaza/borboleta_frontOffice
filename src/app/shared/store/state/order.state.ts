@@ -134,8 +134,8 @@ export class OrderState {
       return acc + itemSubTotal;
     }, 0);
 
-    // Calcular impuestos (5%)
-    const tax_total = sub_total * 0.05;
+    // Calcular impuestos (19%)
+    const tax_total = sub_total * 0.19;
 
     // Calcular envío: si el carrito es digital solo, no hay envío
     // Si no es digital, aplicar lógica: > 50,000 COP = gratis, sino 5,000 COP

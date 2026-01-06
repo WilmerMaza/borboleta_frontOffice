@@ -1,5 +1,30 @@
 // Botón de ayuda en header - Estilo blanco circular minimalista
 .help-header-item {
+  // Alineación exacta con otros elementos del icon-nav (onhover-div)
+  padding-block: calc(15px + (30 - 15) * ((100vw - 575px) / (1920 - 575)));
+  display: inline-block !important;
+  vertical-align: top;
+  margin: 0;
+  line-height: 1;
+
+  // Asegurar que se muestre en móvil - sobrescribir regla global
+  @media (max-width: 578px) {
+    display: inline-block !important;
+    
+    // Sobrescribir la regla que oculta el primer hijo
+    &:first-child,
+    &:nth-child(1) {
+      display: inline-block !important;
+    }
+    
+    padding-left: 2px !important;
+    padding-right: 2px !important;
+    padding-block: calc(15px + (30 - 15) * ((100vw - 575px) / (1920 - 575))) !important;
+    vertical-align: top;
+    margin: 0 !important;
+    line-height: 1;
+  }
+
   .help-header-btn {
     display: inline-flex;
     align-items: center;
@@ -10,8 +35,10 @@
     color: #000000;
     border-radius: 50%;
     text-decoration: none;
-
     transition: all 0.3s ease;
+    vertical-align: top;
+    margin: 0;
+    line-height: 1;
 
     i {
       font-size: 20px;
@@ -29,6 +56,73 @@
 
     &:active {
       transform: scale(1);
+    }
+
+    // Ajustes para móvil - mantener mismo tamaño que otros iconos
+    @media (max-width: 578px) {
+      width: 40px;
+      height: 40px;
+
+      i {
+        font-size: 20px;
+      }
+    }
+  }
+}
+
+// Reducir espaciado entre iconos en móvil para que quepa el botón de mayorista
+@media (max-width: 578px) {
+  // Reducir tamaño del logo para dar más espacio a los iconos
+  .menu-left {
+    flex: 0 0 auto !important;
+    min-width: auto !important;
+    
+    .brand-logo {
+      img {
+        max-width: 90px !important;
+        width: 90px !important;
+      }
+      padding-left: 5px !important;
+      padding-right: 5px !important;
+    }
+  }
+
+  // Reducir espacio del div de búsqueda central
+  .main-menu {
+    > div:nth-child(2) {
+      flex: 0 0 auto !important;
+      max-width: 100px !important;
+      min-width: 80px !important;
+      padding-left: 5px !important;
+      padding-right: 5px !important;
+    }
+  }
+
+  .menu-right {
+    flex: 0 0 auto !important;
+    min-width: auto !important;
+    
+    .icon-nav {
+      ul {
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        flex-wrap: nowrap !important;
+        
+        li {
+          display: inline-block !important;
+          padding-left: 2px !important;
+          padding-right: 2px !important;
+          float: none !important;
+          clear: none !important;
+          
+          &.help-header-item {
+            display: inline-block !important;
+            padding-left: 2px !important;
+            padding-right: 2px !important;
+          }
+        }
+      }
     }
   }
 }

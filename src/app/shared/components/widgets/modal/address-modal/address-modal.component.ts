@@ -43,6 +43,19 @@ import { ButtonComponent } from "../../button/button.component";
 export class AddressModalComponent {
   countries$: Observable<Select2Data> = inject(Store).select(
     CountryState.countries
+  ).pipe(
+    map((countries: Select2Data) => {
+      // Filtrar solo Colombia
+      if (Array.isArray(countries)) {
+        return countries.filter((country: any) => {
+          const label = typeof country === 'object' && 'label' in country 
+            ? (country as any).label 
+            : '';
+          return label?.toLowerCase().includes('colombia');
+        });
+      }
+      return countries;
+    })
   );
 
   @Input() userAddress: UserAddress;
@@ -50,7 +63,8 @@ export class AddressModalComponent {
   public form: FormGroup;
   public states$: Observable<Select2Data>;
   public address: UserAddress | null;
-  public codes = countryCodes;
+  // Filtrar solo código de Colombia (+57)
+  public codes = countryCodes.filter((code: any) => code.data?.class === 'co' || code.value === '57');
 
   constructor(
     public modal: NgbActiveModal,
@@ -64,7 +78,7 @@ export class AddressModalComponent {
       country_id: new FormControl("", [Validators.required]),
       city: new FormControl("", [Validators.required]),
       pincode: new FormControl("", [Validators.required]),
-      country_code: new FormControl("91", [Validators.required]),
+      country_code: new FormControl("57", [Validators.required]),
       phone: new FormControl("", [
         Validators.required,
         Validators.pattern(/^[0-9]*$/),
@@ -105,7 +119,7 @@ export class AddressModalComponent {
     } else {
       this.address = null;
       this.form.reset();
-      this.form?.controls?.["country_code"].setValue("91");
+      this.form?.controls?.["country_code"].setValue("57");
     }
   }
 
@@ -123,7 +137,7 @@ export class AddressModalComponent {
         complete: () => {
           this.form.reset();
           if (!this.address) {
-            this.form?.controls?.["country_code"].setValue("91");
+            this.form?.controls?.["country_code"].setValue("57");
           }
           this.modal.close("success");
         },
