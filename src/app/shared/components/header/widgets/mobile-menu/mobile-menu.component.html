@@ -6,6 +6,7 @@
         <span>{{ 'home' | translate }}</span>
       </a>
     </li>
+
     <li [class.active]="'search' === active">
       <a href="javascript:void(0)" [routerLink]="['/search']" (click)="activeMenu('search')">
         <i class="ri-search-2-line"></i>
@@ -31,4 +32,36 @@
       </a>
     </li>
   </ul>
+</div>
+
+<!-- Sidebar de categorías móvil -->
+<div class="mobile-category-sidebar" [class.open]="showCategories">
+  <div class="category-sidebar-overlay" (click)="toggleCategories()"></div>
+  <div class="category-sidebar-content">
+    <div class="category-sidebar-header">
+      <h5>{{ 'categories' | translate }}</h5>
+      <button class="btn-close" type="button" (click)="toggleCategories()">
+        <i class="ri-close-fill"></i>
+      </button>
+    </div>
+    <div class="category-sidebar-body">
+      @if(categories && categories.length){
+        <ul class="category-list">
+          @for(category of categories; track category.id){
+            <li>
+              <a href="javascript:void(0)" 
+                 [routerLink]="['/category', category.slug]" 
+                 (click)="toggleCategories()">
+                {{ category.name }}
+              </a>
+            </li>
+          }
+        </ul>
+      }@else {
+        <div class="no-categories">
+          <p>{{ 'no_category' | translate }}</p>
+        </div>
+      }
+    </div>
+  </div>
 </div>

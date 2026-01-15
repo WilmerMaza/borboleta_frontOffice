@@ -1,71 +1,58 @@
-// Botón de ayuda en header - Estilo blanco circular minimalista
-.help-header-item {
-  // Alineación exacta con otros elementos del icon-nav (onhover-div)
-  padding-block: calc(15px + (30 - 15) * ((100vw - 575px) / (1920 - 575)));
+// Botón de mayorista en header
+.wholesale-button-item {
   display: inline-block !important;
-  vertical-align: top;
+  vertical-align: middle;
   margin: 0;
-  line-height: 1;
+  padding: 0 8px;
 
-  // Asegurar que se muestre en móvil - sobrescribir regla global
   @media (max-width: 578px) {
     display: inline-block !important;
-    
-    // Sobrescribir la regla que oculta el primer hijo
-    &:first-child,
-    &:nth-child(1) {
-      display: inline-block !important;
-    }
-    
-    padding-left: 2px !important;
-    padding-right: 2px !important;
-    padding-block: calc(15px + (30 - 15) * ((100vw - 575px) / (1920 - 575))) !important;
-    vertical-align: top;
-    margin: 0 !important;
-    line-height: 1;
+    padding: 0 4px;
   }
 
-  .help-header-btn {
+  .wholesale-btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 40px;
-    height: 40px;
-    background: #ffffff;
-    color: #000000;
-    border-radius: 50%;
+    padding: 8px 16px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: #ffffff;
+    border-radius: 25px;
     text-decoration: none;
     transition: all 0.3s ease;
-    vertical-align: top;
-    margin: 0;
-    line-height: 1;
+    font-family: 'Cabin', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
 
-    i {
-      font-size: 20px;
-      line-height: 1;
+    .wholesale-btn-text {
+      display: inline-block;
     }
 
     &:hover {
-      background: #f8f8f8;
-      color: #000000;
+      background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+      color: #ffffff;
       text-decoration: none;
-      border-color: rgba(0, 0, 0, 0.15);
-      transform: scale(1.05);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
     }
 
     &:active {
-      transform: scale(1);
+      transform: translateY(0);
     }
 
-    // Ajustes para móvil - mantener mismo tamaño que otros iconos
-    @media (max-width: 578px) {
-      width: 40px;
-      height: 40px;
+    @media (max-width: 768px) {
+      padding: 6px 12px;
+      font-size: 11px;
+      letter-spacing: 0.3px;
+    }
 
-      i {
-        font-size: 20px;
-      }
+    @media (max-width: 578px) {
+      padding: 5px 10px;
+      font-size: 10px;
+      letter-spacing: 0.2px;
     }
   }
 }
@@ -116,7 +103,7 @@
           float: none !important;
           clear: none !important;
           
-          &.help-header-item {
+          &.wholesale-button-item {
             display: inline-block !important;
             padding-left: 2px !important;
             padding-right: 2px !important;

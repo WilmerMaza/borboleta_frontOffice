@@ -72,6 +72,82 @@ footer {
     .footer-mobile-title {
       display: none;
     }
+
+    // Diseño mejorado y equilibrado
+    display: flex;
+    align-items: flex-start;
+    position: relative;
+
+    // Línea divisoria vertical sutil entre columnas
+    &::after {
+      content: '';
+      position: absolute;
+      left: 50%;
+      top: 0;
+      bottom: 0;
+      width: 1px;
+      background: linear-gradient(to bottom, 
+        transparent 0%, 
+        rgba(0, 0, 0, 0.08) 10%, 
+        rgba(0, 0, 0, 0.08) 90%, 
+        transparent 100%);
+      transform: translateX(-50%);
+      
+      @media (max-width: 1199px) {
+        display: none;
+      }
+    }
+
+    .darken-layout &::after {
+      background: linear-gradient(to bottom, 
+        transparent 0%, 
+        rgba(255, 255, 255, 0.1) 10%, 
+        rgba(255, 255, 255, 0.1) 90%, 
+        transparent 100%);
+    }
+
+    .footer-about-section,
+    .footer-contact-section,
+    .footer-about-contact-section,
+    .footer-newsletter-section {
+      height: 100%;
+      padding: 0 30px;
+      
+      @media (max-width: 1199px) {
+        padding: 0 15px;
+      }
+
+      @media (max-width: 767px) {
+        padding: 0 10px;
+      }
+    }
+
+    // Mejorar espaciado de los elementos
+    .footer-content {
+      padding-top: 10px;
+    }
+
+    .sub-title {
+      padding-left: 0;
+      
+      h4 {
+        margin-bottom: 20px;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+      }
+    }
+
+    @media (min-width: 1200px) {
+      .col-xl-6 {
+        &:first-child {
+          padding-right: 40px;
+        }
+        
+        &:last-child {
+          padding-left: 40px;
+        }
+      }
+    }
   }
 
   .darken-layout {

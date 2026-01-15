@@ -6,6 +6,9 @@
   <app-loader></app-loader>
 }
 
+<!-- Promotional Banner -->
+<app-promotional-banner></app-promotional-banner>
+
 <app-header [logo]="setLogo().header_logo"></app-header>
 <router-outlet></router-outlet>
 <app-footer [logo]="setLogo().footer_logo"></app-footer>
@@ -24,15 +27,23 @@
   }
   
   <!-- Botón flotante ayuda -->
-  <a href="https://wa.me/573016268644?text=¡Hola!%20👋%20Necesito%20ayuda.%20¿Podrían%20contactarme?%20Gracias." 
-     target="_blank" 
-     class="help-float-btn"
-     aria-label="Contactar por WhatsApp para ayuda">
-    <span class="help-text">¿Necesitas ayuda?</span>
-    <div class="help-icon">
-      <i class="ri-question-line"></i>
-    </div>
-  </a>
+  <div #helpButton 
+       class="help-float-btn-container"
+       [class.dragging]="isDragging"
+       [style.right.px]="helpButtonPosition.right"
+       [style.bottom.px]="helpButtonPosition.bottom">
+    <a href="https://wa.me/573016268644?text=¡Hola!%20👋%20Necesito%20ayuda.%20¿Podrían%20contactarme?%20Gracias." 
+       target="_blank" 
+       class="help-float-btn"
+       [class.prevent-click]="isDragging || hasDragged"
+       (click)="onHelpButtonClick($event)"
+       aria-label="Contactar por WhatsApp para ayuda">
+      <span class="help-text">¿Necesitas ayuda?</span>
+      <div class="help-icon">
+        <i class="ri-question-line"></i>
+      </div>
+    </a>
+  </div>
 </div>
 
 @if((themeOption$ | async)?.popup?.news_letter?.is_enable){

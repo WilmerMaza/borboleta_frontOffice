@@ -6,54 +6,21 @@
   </section>
   <!-- Home Section End -->
   
-  <!-- Banner Section Start -->
-  <section class="pb-0 ratio2_1 banner-section">
-    <div class="container">
-      <div class="row g-sm-4 g-3">
-        @if(data?.content?.offer_banner?.banner_1?.status){
-        <div [ngClass]="data?.content?.offer_banner?.banner_2?.status ? 'col-6' : 'col-md-12'">
-          <div class="position-relative">
-            <app-image-link [image]="data?.content?.offer_banner?.banner_1"
-              [placeholder]="'assets/images/placeholder/two_column_banner.png'" [bgImage]="true"></app-image-link>
-            <div class="banner-skeleton">
-              <div class="skeleton-content">
-                <p class="card-text placeholder-glow row g-lg-3 g-0">
-                  <span class="col-lg-7 col-9">
-                    <span class="placeholder"></span>
-                  </span>
-                  <span class="col-lg-9 col-12">
-                    <span class="placeholder"></span>
-                  </span>
-                </p>
-              </div>
-            </div>
-          </div>
+  <!-- Nueva Coleccion Section Start -->
+  @if(data?.content?.products_list?.status && data?.content?.products_list?.product_ids){
+    <section class="section-b-space nueva-coleccion-section">
+      <div class="container">
+        <div class="nueva-coleccion-title">
+          <h2>{{ 'nueva_coleccion' | translate }}</h2>
         </div>
-        }
-        @if(data?.content?.offer_banner?.banner_2?.status){
-        <div [ngClass]="data?.content?.offer_banner?.banner_1?.status ? 'col-6' : 'col-md-12'">
-          <div class="position-relative">
-            <app-image-link [image]="data?.content?.offer_banner?.banner_2"
-              [placeholder]="'assets/images/placeholder/two_column_banner.png'" [bgImage]="true"></app-image-link>
-            <div class="banner-skeleton">
-              <div class="skeleton-content">
-                <p class="card-text placeholder-glow row g-lg-3 g-0">
-                  <span class="col-lg-7 col-9">
-                    <span class="placeholder"></span>
-                  </span>
-                  <span class="col-lg-9 col-12">
-                    <span class="placeholder"></span>
-                  </span>
-                </p>
-              </div>
-            </div>
-          </div>
+        <div class="nueva-coleccion-products">
+          <app-theme-product [productIds]="data?.content?.products_list?.product_ids || []" [style]="'vertical'"
+            [slider]="true" [options]="newCollectionSlider"></app-theme-product>
         </div>
-        }
       </div>
-    </div>
-  </section>
-  <!-- Banner Section End -->
+    </section>
+  }
+  <!-- Nueva Coleccion Section End -->
   
   <!-- Product slider Start -->
   @if(data?.content?.products_list?.status && data?.content?.products_list?.product_ids){

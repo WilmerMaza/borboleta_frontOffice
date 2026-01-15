@@ -1,0 +1,137 @@
+// Sidebar de categorías móvil
+.mobile-category-sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 9999;
+  visibility: hidden;
+  opacity: 0;
+  transition: all 0.3s ease;
+
+  &.open {
+    visibility: visible;
+    opacity: 1;
+  }
+
+  .category-sidebar-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    cursor: pointer;
+  }
+
+  .category-sidebar-content {
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 85%;
+    max-width: 350px;
+    height: 100%;
+    background-color: #ffffff;
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+    transition: left 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    z-index: 10000;
+  }
+
+  &.open .category-sidebar-content {
+    left: 0;
+  }
+
+  .category-sidebar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    border-bottom: 1px solid #e5e5e5;
+    background-color: #ffffff;
+
+    h5 {
+      margin: 0;
+      font-size: 18px;
+      font-weight: 600;
+      color: #222222;
+    }
+
+    .btn-close {
+      background: none;
+      border: none;
+      padding: 0;
+      width: 30px;
+      height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: #222222;
+      font-size: 24px;
+      transition: color 0.3s ease;
+
+      &:hover {
+        color: var(--theme-color, #000);
+      }
+
+      i {
+        display: block;
+      }
+    }
+  }
+
+  .category-sidebar-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0;
+
+    .category-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+
+      li {
+        border-bottom: 1px solid #f5f5f5;
+
+        a {
+          display: block;
+          padding: 15px 20px;
+          color: #222222;
+          text-decoration: none;
+          font-size: 16px;
+          font-weight: 500;
+          transition: all 0.3s ease;
+          position: relative;
+
+          &:hover {
+            background-color: #f8f8f8;
+            color: var(--theme-color, #000);
+            padding-left: 25px;
+          }
+
+          &:active {
+            background-color: #f0f0f0;
+          }
+        }
+
+        &:last-child {
+          border-bottom: none;
+        }
+      }
+    }
+
+    .no-categories {
+      padding: 40px 20px;
+      text-align: center;
+
+      p {
+        margin: 0;
+        color: #666666;
+        font-size: 14px;
+      }
+    }
+  }
+}

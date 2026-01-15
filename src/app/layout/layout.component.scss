@@ -20,17 +20,54 @@ app-sticky-compare {
   }
 }
 
+// Contenedor del botón flotante ayuda (arrastrable)
+.help-float-btn-container {
+  position: fixed !important;
+  right: 50px;
+  bottom: 50px;
+  z-index: 9999 !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  cursor: move;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+
+  &.dragging {
+    cursor: grabbing !important;
+    
+    .help-float-btn {
+      cursor: grabbing !important;
+      pointer-events: none;
+    }
+  }
+
+  // En móvil, mantener posiciones específicas a menos que se haya movido
+  @media (max-width: 767px) {
+    &:not([style*="right"]) {
+      right: 40px !important;
+      bottom: 40px !important;
+    }
+  }
+
+  @media (max-width: 480px) {
+    &:not([style*="right"]) {
+      right: -5px !important;
+      bottom: 81px !important;
+    }
+  }
+}
+
 // Botón flotante ayuda con tooltip
 .help-float-btn {
-  position: relative !important;
   display: flex !important;
   flex-direction: column;
   align-items: center;
   gap: 8px;
   text-decoration: none;
-  z-index: 9999 !important;
-  visibility: visible !important;
-  opacity: 1 !important;
+  cursor: grab;
+  position: relative;
 
   .help-text {
     background: #000000;
@@ -67,38 +104,12 @@ app-sticky-compare {
     }
   }
 
-  &:hover {
-    text-decoration: none;
-
-    .help-text {
-      opacity: 1;
-      visibility: visible;
-      transform: translateY(0);
-    }
-
-    .help-icon {
-      background: #1a1a1a;
-      transform: translateY(-2px);
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
-      border-color: rgba(255, 255, 255, 0.25);
-
-      i {
-        transform: scale(1.1);
-      }
-    }
-  }
-
-  &:active {
-    .help-icon {
-      transform: translateY(0);
-    }
+  &.prevent-click {
+    pointer-events: none;
   }
 
   // Responsive - Tablet
   @media (max-width: 991px) {
-    right: 25px;
-    bottom: 25px;
-
     .help-text {
       font-size: 12px;
       padding: 6px 14px;
@@ -116,11 +127,6 @@ app-sticky-compare {
 
   // Responsive - Móvil
   @media (max-width: 767px) {
-    display: flex !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-    z-index: 9999 !important;
-
     .help-icon {
       width: 50px;
       height: 50px;
@@ -136,11 +142,6 @@ app-sticky-compare {
 
   // Asegurar visibilidad en móviles pequeños
   @media (max-width: 480px) {
-    display: flex !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-    z-index: 9999 !important;
-
     .help-icon {
       width: 48px;
       height: 48px;
@@ -154,3 +155,33 @@ app-sticky-compare {
     }
   }
 }
+
+// Hover solo cuando no se está arrastrando
+.help-float-btn-container:not(.dragging) .help-float-btn:hover {
+  text-decoration: none;
+
+  .help-text {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
+
+  .help-icon {
+    background: #1a1a1a;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+    border-color: rgba(255, 255, 255, 0.25);
+
+    i {
+      transform: scale(1.1);
+    }
+  }
+}
+
+// Active solo cuando no se está arrastrando
+.help-float-btn-container:not(.dragging) .help-float-btn:active {
+  .help-icon {
+    transform: translateY(0);
+  }
+}
+

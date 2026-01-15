@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, Input } from '@angular/core';
+import { Component, inject, Input, OnInit } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
 import { Select, Store } from '@ngxs/store';
@@ -10,9 +10,12 @@ import { Product } from '../../../interface/product.interface';
 import { MenuService } from '../../../services/menu.service';
 import { GetSelectedBlogs } from '../../../store/action/blog.action';
 import { GetMenuProducts } from '../../../store/action/product.action';
+import { GetCategories } from '../../../store/action/category.action';
 import { BlogState } from '../../../store/state/blog.state';
 import { MenuState } from '../../../store/state/menu.state';
 import { ProductState } from '../../../store/state/product.state';
+import { CategoryState } from '../../../store/state/category.state';
+import { CategoryModel, Category } from '../../../interface/category.interface';
 import { Menu } from '../../interface/menu.interface';
 import { NoDataComponent } from '../no-data/no-data.component';
 import { ProductBoxComponent } from '../product-box/product-box.component';
@@ -26,17 +29,20 @@ import { environment } from '../../../../../environments/environment';
     templateUrl: './menu.component.html',
     styleUrl: './menu.component.scss'
 })
-export class MenuComponent {
+export class MenuComponent implements OnInit {
 
   @Input() class: string;
 
   blog$: Observable<Blog[]> = inject(Store).select(BlogState.selectedBlogs);
   menu$: Observable<MenuModel> = inject(Store).select(MenuState.menu);
   menuProduct$: Observable<Product[]> = inject(Store).select(ProductState.menuProducts);
+  category$: Observable<CategoryModel> = inject(Store).select(CategoryState.category);
 
   public menu: Menu[] = [];
   public products: Product[];
   public blogs: Blog[];
+  public categories: Category[] = [];
+  public categoriesExpanded: boolean = false;
 
   public StorageURL = environment.storageURL;
 
@@ -60,6 +66,21 @@ export class MenuComponent {
         })
       }
     })
+  }
+
+  ngOnInit() {
+    // Obtener categorías
+    this.store.dispatch(new GetCategories({ status: 1, type: 'product' }));
+    
+    this.category$.subscribe(res => {
+      if(res && res.data) {
+        this.categories = res.data.filter(category => category.type === 'product');
+      }
+    });
+  }
+
+  toggleCategories() {
+    this.categoriesExpanded = !this.categoriesExpanded;
   }
 
   mainMenuOpen(){
