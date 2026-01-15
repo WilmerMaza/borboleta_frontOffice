@@ -1978,6 +1978,10 @@ header {
         background-color: $white;
         border: 1px solid $round-border;
       }
+
+      &.open-side {
+        display: block;
+      }
     }
   }
 
