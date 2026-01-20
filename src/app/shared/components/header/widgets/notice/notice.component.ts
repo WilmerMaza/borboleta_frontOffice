@@ -36,8 +36,12 @@ export class NoticeComponent {
   }
 
   ngAfterViewInit() {
-    if (this.isBrowser && this.swiperContainer) {
-      new SwiperCore(this.swiperContainer.nativeElement, this.swiperConfig);
+    if (this.isBrowser && this.swiperContainer?.nativeElement && this.content && this.content.length > 0) {
+      try {
+        new SwiperCore(this.swiperContainer.nativeElement, this.swiperConfig);
+      } catch (error) {
+        console.warn('Error initializing Swiper in NoticeComponent:', error);
+      }
     }
   }
 }

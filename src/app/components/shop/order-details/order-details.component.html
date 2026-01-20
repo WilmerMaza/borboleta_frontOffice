@@ -19,31 +19,33 @@
 
                       @if(order && !order.sub_orders.length){
                         <ul>
-                            @for(orderStatus of (orderStatus$ | async)?.data; track orderStatus.id){
-                              <li [class.active]="orderStatus?.sequence! <= order.order_status.sequence!" [ngClass]="{
-                                                          'd-none': (orderStatus?.sequence! >= order.order_status.sequence!
-                                                          && (order.order_status && order.order_status.slug == 'cancelled')) ||
-                                                          orderStatus?.slug == 'cancelled' || (order.is_digital_only && (orderStatus?.slug == 'shipped' || orderStatus?.slug == 'out-for-delivery'))
-                                                      }">
-                                <div class="panel-content">
-                                  <div class="icon">
-                                    <img src="assets/svg/tracking/{{orderStatus?.slug}}.svg" class="img-fluid" alt="image">
+                            @for(orderStatus of (orderStatusWithActivities$ | async)?.data; track orderStatus.id){
+                              @if(orderStatus && order?.order_status){
+                                <li [class.active]="orderStatus.sequence <= order.order_status.sequence" [ngClass]="{'d-none': ((orderStatus.sequence >= order.order_status.sequence && order.order_status.slug == 'cancelled')
+                                    || orderStatus.slug == 'cancelled') || (order.is_digital_only && (orderStatus.slug == 'shipped' || orderStatus.slug == 'out-for-delivery'))}">
+                                  <div class="panel-content">
+                                    <div class="icon">
+                                      <img src="assets/svg/tracking/{{orderStatus.slug}}.svg" class="img-fluid" alt="image">
+                                    </div>
+                                    <div>
+                                      <div class="status">{{ orderStatus.name.replaceAll('_', ' ') | titlecase }}</div>
+                                      @if(orderStatus.sequence <= order.order_status.sequence && orderStatus.activities_date){
+                                        <span class="panel-content-sm">{{ orderStatus.activities_date  }}</span>
+                                      }
+                                    </div>
                                   </div>
-                                  <div class="status">{{ orderStatus?.name?.replaceAll('_', ' ') | titlecase }}</div>
-                                </div>
-                              </li>
+                                </li>
+                              }
                             }
 
-                          @if(order && order.order_status && order.order_status.slug == 'cancelled'){
+                          @if(order?.order_status && order.order_status.slug == 'cancelled'){
                             <li class="active cancelled-box">
-                              @if(order && order.order_status){
-                                <div class="panel-content">
-                                  <div class="icon">
-                                    <img src="assets/svg/tracking/{{order.order_status.slug}}.svg" class="img-fluid" alt="image">
-                                  </div>
-                                  <div class="status">{{ order.order_status.name.replaceAll('_', ' ')! | titlecase }}</div>
+                              <div class="panel-content">
+                                <div class="icon">
+                                  <img src="assets/svg/tracking/{{order.order_status.slug}}.svg" class="img-fluid" alt="image">
                                 </div>
-                              }
+                                <div class="status">{{ order.order_status.name?.replaceAll('_', ' ') | titlecase }}</div>
+                              </div>
                             </li>
                           }
                         </ul>

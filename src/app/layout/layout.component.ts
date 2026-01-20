@@ -1,5 +1,5 @@
 import { CommonModule, isPlatformBrowser } from '@angular/common';
-import { Component, HostListener, inject, Inject, PLATFORM_ID, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, HostListener, inject, Inject, OnDestroy, PLATFORM_ID, ViewChild } from '@angular/core';
 import { ActivatedRoute, NavigationEnd, Params, Router, RouterModule } from '@angular/router';
 import { LoadingBarRouterModule } from '@ngx-loading-bar/router';
 import { Store } from '@ngxs/store';
@@ -11,6 +11,7 @@ import { LoaderComponent } from '../shared/components/widgets/loader/loader.comp
 import { ExitModalComponent } from '../shared/components/widgets/modal/exit-modal/exit-modal.component';
 import { LoginModalComponent } from '../shared/components/widgets/modal/login-modal/login-modal.component';
 import { NewsletterModalComponent } from '../shared/components/widgets/modal/newsletter-modal/newsletter-modal.component';
+import { PromotionalBannerComponent } from '../shared/components/widgets/promotional-banner/promotional-banner.component';
 import { RecentPurchasePopupComponent } from '../shared/components/widgets/recent-purchase-popup/recent-purchase-popup.component';
 import { StickyCompareComponent } from '../shared/components/widgets/sticky-compare/sticky-compare.component';
 import { Option } from '../shared/interface/theme-option.interface';
@@ -26,11 +27,11 @@ import { NgbModule } from "@ng-bootstrap/ng-bootstrap";
     selector: 'app-layout',
     imports: [CommonModule, LoaderComponent, FooterComponent, RouterModule, LoadingBarRouterModule,
     HeaderComponent, BackToTopComponent, StickyCompareComponent, NewsletterModalComponent,
-    RecentPurchasePopupComponent, ExitModalComponent, LoginModalComponent, NgbModule],
+    RecentPurchasePopupComponent, ExitModalComponent, LoginModalComponent, NgbModule, PromotionalBannerComponent],
     templateUrl: './layout.component.html',
     styleUrl: './layout.component.scss'
 })
-export class LayoutComponent {
+export class LayoutComponent implements AfterViewInit, OnDestroy {
 
   themeOption$: Observable<Option> = inject(Store).select(ThemeOptionState.themeOptions) as Observable<Option>;
   cookies$: Observable<boolean> = inject(Store).select(ThemeOptionState.cookies)
@@ -39,12 +40,28 @@ export class LayoutComponent {
   @ViewChild("newsletterModal") NewsletterModal: NewsletterModalComponent;
   @ViewChild("exitModal") ExitModal: ExitModalComponent;
   @ViewChild("loginModal") LoginModal: LoginModalComponent;
+  @ViewChild("helpButton") helpButtonElement!: ElementRef;
 
   public cookies: boolean;
   public exit: boolean;
   public theme: string;
   public show: boolean;
   public isBrowser: boolean;
+
+  // Propiedades para drag-and-drop del botón de ayuda
+  public isDragging: boolean = false;
+  public hasDragged: boolean = false;
+  public dragStartX: number = 0;
+  public dragStartY: number = 0;
+  public dragOffsetX: number = 0;
+  public dragOffsetY: number = 0;
+  public helpButtonPosition: { right: number; bottom: number } = { right: 50, bottom: 50 };
+  private readonly DRAG_THRESHOLD: number = 5; // Píxeles mínimos para considerar arrastre
+  private readonly STORAGE_KEY: string = 'helpButtonPosition';
+  private mouseMoveHandler?: (e: MouseEvent) => void;
+  private mouseUpHandler?: () => void;
+  private touchMoveHandler?: (e: TouchEvent) => void;
+  private touchEndHandler?: () => void;
 
   constructor(private store: Store,
     private route: ActivatedRoute,
@@ -429,6 +446,33 @@ export class LayoutComponent {
   }
 
 
+  ngAfterViewInit() {
+    if (this.isBrowser) {
+      this.restoreHelpButtonPosition();
+      this.setupDragListeners();
+    }
+  }
+
+  ngOnDestroy() {
+    // Limpiar event listeners al destruir el componente
+    this.cleanupDragListeners();
+  }
+
+  private cleanupDragListeners() {
+    if (this.mouseMoveHandler) {
+      document.removeEventListener('mousemove', this.mouseMoveHandler);
+    }
+    if (this.mouseUpHandler) {
+      document.removeEventListener('mouseup', this.mouseUpHandler);
+    }
+    if (this.touchMoveHandler) {
+      document.removeEventListener('touchmove', this.touchMoveHandler);
+    }
+    if (this.touchEndHandler) {
+      document.removeEventListener('touchend', this.touchEndHandler);
+    }
+  }
+
   // @HostListener Decorator
   @HostListener("window:scroll", [])
   onWindowScroll() {
@@ -439,6 +483,181 @@ export class LayoutComponent {
       } else {
         this.show = false;
       }
+    }
+  }
+
+  @HostListener("window:resize", [])
+  onWindowResize() {
+    if (this.isBrowser) {
+      this.constrainHelpButtonPosition();
+    }
+  }
+
+  // Métodos para drag-and-drop del botón de ayuda
+  private setupDragListeners() {
+    if (!this.helpButtonElement?.nativeElement) return;
+
+    const element = this.helpButtonElement.nativeElement;
+
+    // Crear handlers para poder removerlos después
+    this.mouseMoveHandler = (e: MouseEvent) => this.onDragMove(e.clientX, e.clientY);
+    this.mouseUpHandler = () => this.onDragEnd();
+    this.touchMoveHandler = (e: TouchEvent) => {
+      if (this.isDragging) {
+        e.preventDefault();
+        const touch = e.touches[0];
+        this.onDragMove(touch.clientX, touch.clientY);
+      }
+    };
+    this.touchEndHandler = () => this.onDragEnd();
+
+    // Eventos de mouse - solo mousedown en el elemento
+    element.addEventListener('mousedown', (e: MouseEvent) => {
+      e.preventDefault();
+      this.onDragStart(e.clientX, e.clientY);
+      document.addEventListener('mousemove', this.mouseMoveHandler!);
+      document.addEventListener('mouseup', this.mouseUpHandler!);
+    });
+
+    // Eventos de touch - solo touchstart en el elemento
+    element.addEventListener('touchstart', (e: TouchEvent) => {
+      e.preventDefault();
+      const touch = e.touches[0];
+      this.onDragStart(touch.clientX, touch.clientY);
+      document.addEventListener('touchmove', this.touchMoveHandler!, { passive: false });
+      document.addEventListener('touchend', this.touchEndHandler!);
+    }, { passive: false });
+  }
+
+  private onDragStart(clientX: number, clientY: number) {
+    if (!this.helpButtonElement?.nativeElement) return;
+
+    // Reset estados
+    this.isDragging = false;
+    this.hasDragged = false;
+    this.dragStartX = clientX;
+    this.dragStartY = clientY;
+
+    const rect = this.helpButtonElement.nativeElement.getBoundingClientRect();
+    // Calcular offset desde el punto de click hasta el lado derecho e inferior del elemento
+    this.dragOffsetX = rect.right - clientX;
+    this.dragOffsetY = rect.bottom - clientY;
+  }
+
+  private onDragMove(clientX: number, clientY: number) {
+    if (!this.helpButtonElement?.nativeElement) return;
+
+    const deltaX = Math.abs(clientX - this.dragStartX);
+    const deltaY = Math.abs(clientY - this.dragStartY);
+
+    // Si no se ha movido lo suficiente, no iniciar arrastre
+    if (!this.isDragging && (deltaX < this.DRAG_THRESHOLD && deltaY < this.DRAG_THRESHOLD)) {
+      return;
+    }
+
+    if (!this.isDragging) {
+      this.isDragging = true;
+      this.helpButtonElement.nativeElement.classList.add('dragging');
+    }
+
+    this.hasDragged = true;
+
+    // Calcular nueva posición: right = distancia desde el borde derecho de la ventana
+    const newRight = window.innerWidth - clientX - this.dragOffsetX;
+    const newBottom = window.innerHeight - clientY - this.dragOffsetY;
+
+    // Obtener dimensiones reales del botón
+    const rect = this.helpButtonElement.nativeElement.getBoundingClientRect();
+    const buttonWidth = rect.width || 60;
+    const buttonHeight = rect.height || 60;
+
+    // Actualizar posición con límites
+    this.helpButtonPosition = {
+      right: Math.max(0, Math.min(newRight, window.innerWidth - buttonWidth)),
+      bottom: Math.max(0, Math.min(newBottom, window.innerHeight - buttonHeight))
+    };
+  }
+
+  private onDragEnd() {
+    // Remover event listeners del documento
+    if (this.mouseMoveHandler) {
+      document.removeEventListener('mousemove', this.mouseMoveHandler);
+    }
+    if (this.mouseUpHandler) {
+      document.removeEventListener('mouseup', this.mouseUpHandler);
+    }
+    if (this.touchMoveHandler) {
+      document.removeEventListener('touchmove', this.touchMoveHandler);
+    }
+    if (this.touchEndHandler) {
+      document.removeEventListener('touchend', this.touchEndHandler);
+    }
+
+    // Guardar posición si estaba arrastrando
+    if (this.isDragging) {
+      this.saveHelpButtonPosition();
+    }
+
+    // Reset estados
+    this.isDragging = false;
+    if (this.helpButtonElement?.nativeElement) {
+      this.helpButtonElement.nativeElement.classList.remove('dragging');
+    }
+
+    // Reset hasDragged después de un breve delay para permitir que el click se procese
+    const wasDragging = this.hasDragged;
+    setTimeout(() => {
+      this.hasDragged = false;
+    }, wasDragging ? 100 : 0);
+  }
+
+  onHelpButtonClick(event: MouseEvent) {
+    // Solo prevenir click si realmente se arrastró (más del threshold)
+    if (this.hasDragged) {
+      event.preventDefault();
+      event.stopPropagation();
+      return false;
+    }
+    // Permitir click normal
+    return true;
+  }
+
+  private constrainHelpButtonPosition() {
+    if (!this.helpButtonElement?.nativeElement) return;
+
+    const rect = this.helpButtonElement.nativeElement.getBoundingClientRect();
+    const buttonWidth = rect.width || 60;
+    const buttonHeight = rect.height || 60;
+
+    this.helpButtonPosition.right = Math.max(0, Math.min(this.helpButtonPosition.right, window.innerWidth - buttonWidth));
+    this.helpButtonPosition.bottom = Math.max(0, Math.min(this.helpButtonPosition.bottom, window.innerHeight - buttonHeight));
+  }
+
+  private saveHelpButtonPosition() {
+    if (this.isBrowser) {
+      try {
+        localStorage.setItem(this.STORAGE_KEY, JSON.stringify(this.helpButtonPosition));
+      } catch (error) {
+        console.warn('Error saving help button position:', error);
+      }
+    }
+  }
+
+  private restoreHelpButtonPosition() {
+    if (!this.isBrowser) return;
+
+    try {
+      const saved = localStorage.getItem(this.STORAGE_KEY);
+      if (saved) {
+        const position = JSON.parse(saved);
+        if (position && typeof position.right === 'number' && typeof position.bottom === 'number') {
+          this.helpButtonPosition = position;
+          // Asegurar que la posición es válida
+          this.constrainHelpButtonPosition();
+        }
+      }
+    } catch (error) {
+      console.warn('Error restoring help button position:', error);
     }
   }
 }
