@@ -21,48 +21,7 @@
   </div>
   <div class="dark-layout">
     <div class="container">
-      <section class="small-section">
-        <div class="row footer-theme2">
-          <div class="col p-set">
-            <div class="footer-link" (click)="toggle('categories')">
-              <div class="footer-title" [class.show]="active['categories']">
-                <h4>{{ 'categories' | translate }}</h4>
-              </div>
-              <div class="footer-content">
-                <app-footer-categories [categoryIds]="data?.footer?.footer_categories || []"></app-footer-categories>
-                <!-- No Data -->
-                 @if(!data?.footer?.footer_categories?.length) {
-                   <app-no-data [class]="'no-data-footer'" [text]="'no_category_found'"></app-no-data>
-                 }
-              </div>
-            </div>
-            <div class="footer-link-b" (click)="toggle('useful_link')">
-              <div class="footer-title" [class.show]="active['useful_link']">
-                <h4>{{ 'useful_links' | translate }}</h4>
-              </div>
-              <div class="footer-content">
-                <app-footer-links [links]="data?.footer?.useful_link || []"></app-footer-links>
-                <!-- No Data -->
-                 @if(!data?.footer?.useful_link?.length) {
-                   <app-no-data [class]="'no-data-footer'" [text]="'no_link_found'"></app-no-data>
-                 }
-              </div>
-            </div>
-            <div class="footer-link-b" (click)="toggle('help_center')">
-              <div class="footer-title" [class.show]="active['help_center']">
-                <h4>{{ 'help_center' | translate }}</h4>
-              </div>
-              <div class="footer-content">
-                <app-footer-links [links]="data?.footer?.help_center || []"></app-footer-links>
-                <!-- No Data -->
-                 @if(!data?.footer?.help_center?.length) {
-                   <app-no-data [class]="'no-data-footer'" [text]="'no_link_found'"></app-no-data>
-                 }
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+      <!-- Ocultado: Sección small-section con Categorías, Useful Links y Help Center -->
     </div>
   </div>
   <div class="sub-footer darker-subfooter">

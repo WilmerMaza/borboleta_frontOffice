@@ -1752,6 +1752,18 @@ header {
         flex-direction: row;
         flex-wrap: wrap;
       }
+
+      .nav-item + .nav-item {
+        margin-left: calc(16px + 40 * ((92vw - 1200px) / 720));
+
+        @media (max-width: 1399px) {
+          margin-left: 16px;
+        }
+
+        @media (max-width: 1199px) {
+          margin-left: 0;
+        }
+      }
     }
   }
 
@@ -1965,6 +1977,10 @@ header {
       .sm-vertical {
         background-color: $white;
         border: 1px solid $round-border;
+      }
+
+      &.open-side {
+        display: block;
       }
     }
   }
@@ -2371,9 +2387,14 @@ header {
   padding: 10px;
   width: 100%;
   background-color: $white;
-  z-index: 2;
+  z-index: 9998;
   overflow: hidden;
   box-shadow: 0 -3px 10px 0px rgba($black, 0.08);
+  
+  // Ocultar en desktop - solo mostrar en móvil
+  @media (min-width: 768px) {
+    display: none !important;
+  }
 
   ul {
     display: flex;

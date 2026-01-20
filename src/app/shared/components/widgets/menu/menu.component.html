@@ -22,7 +22,7 @@
                 <div *ngTemplateOutlet="recursiveMenu; context: { $implicit: (menu$ |async)?.data }"></div>
                 <ng-template #recursiveMenu let-menus>
                   <ng-container>
-                    @for(menu of menus; track menu.id){
+                    @for(menu of menus; track menu.id; let first = $first){
                       <li [ngClass]="[menu.link_type == 'sub' && menu.child ? 'nav-item dropdown' : 'nav-item', menu.mega_menu ? 'dropdown-mega' : '']" [class.new-nav-item]="menu.badge_text">
                         @if(menu.link_type === 'sub'){
                           <a class="nav-link dropdown-toggle" (click)="toggle(menu)">
@@ -165,6 +165,34 @@
                           </ul>
                         }
                       </li>
+                      <!-- Insertar categorías después de "Inicio" - Solo visible en móvil -->
+                      @if(first && categories && categories.length){
+                        <li class="nav-item dropdown mobile-categories-menu" [class.show]="categoriesExpanded">
+                          <a class="nav-link dropdown-toggle" href="javascript:void(0)" (click)="toggleCategories()">
+                            {{ 'categories' | translate }}
+                          </a>
+                          <ul class="dropdown-menu" [class.show]="categoriesExpanded">
+                            @for(category of categories; track category.id){
+                              <li>
+                                <a class="dropdown-item" href="javascript:void(0)" [routerLink]="['/category', category.slug]" (click)="mainMenuClose()">
+                                  {{ category.name }}
+                                </a>
+                              </li>
+                            }
+                          </ul>
+                        </li>
+                      }
+                      @if(menu.title === 'Promociones'){
+                        <li class="nav-item wholesale-menu-item">
+                          <a href="https://wa.me/573016268644?text=Hola,%20quiero%20ser%20mayorista.%20¿Podrían%20contactarme?" 
+                             target="_blank" 
+                             class="wholesale-menu-btn"
+                             aria-label="Quiero ser mayorista">
+                            <span class="wholesale-menu-btn-text">Quiero ser mayorista</span>
+                            <i class="ri-arrow-right-line wholesale-menu-arrow"></i>
+                          </a>
+                        </li>
+                      }
                     }
                   </ng-container>
                 </ng-template>

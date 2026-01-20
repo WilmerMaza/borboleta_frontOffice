@@ -1,7 +1,10 @@
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { Component, Inject, Input, PLATFORM_ID } from '@angular/core';
+import { RouterModule } from '@angular/router';
 import { Store } from '@ngxs/store';
 import { of } from 'rxjs';
+import { TranslateModule } from '@ngx-translate/core';
+import { OwlOptions } from 'ngx-owl-carousel-o';
 import { ImageLinkComponent } from '../../../../shared/components/widgets/image-link/image-link.component';
 import { ThemeHomeSliderComponent } from '../../widgets/theme-home-slider/theme-home-slider.component';
 import { ThemeProductTabSectionComponent } from '../../widgets/theme-product-tab-section/theme-product-tab-section.component';
@@ -16,7 +19,7 @@ import { GetProductByIds } from '../../../../shared/store/action/product.action'
 @Component({
     selector: 'app-fashion-1',
     providers: [Store],
-    imports: [CommonModule, ThemeHomeSliderComponent, 
+    imports: [CommonModule, RouterModule, TranslateModule, ThemeHomeSliderComponent, 
         ThemeTitleComponent, ThemeProductComponent, ThemeProductTabSectionComponent, 
          ImageLinkComponent],
     templateUrl: './fashion-1.component.html',
@@ -28,6 +31,41 @@ export class Fashion1Component {
   @Input() slug?: string;
 
   private platformId: boolean;
+
+  public newCollectionSlider: OwlOptions = {
+    loop: false, // Cambiado a false para evitar el error cuando hay pocos items
+    nav: true,
+    dots: false,
+    margin: 24,
+    navText: [
+      "<i class='ri-arrow-left-s-line'></i>",
+      "<i class='ri-arrow-right-s-line'></i>",
+    ],
+    items: 4,
+    responsive: {
+      0: {
+        items: 1,
+        margin: 16,
+        autoHeight: true,
+        loop: false,
+      },
+      576: {
+        items: 2,
+        margin: 16,
+        loop: false,
+      },
+      768: {
+        items: 3,
+        margin: 20,
+        loop: false,
+      },
+      992: {
+        items: 4,
+        margin: 24,
+        loop: false,
+      },
+    },
+  };
 
   constructor(private store: Store,
     @Inject(PLATFORM_ID) platformId: Object,

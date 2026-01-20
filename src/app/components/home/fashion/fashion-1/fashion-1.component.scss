@@ -1,0 +1,89 @@
+// Nueva Coleccion Section
+.nueva-coleccion-section {
+  padding-top: calc(40px + (60 - 40) * ((100vw - 320px) / (1920 - 320)));
+  padding-bottom: calc(40px + (60 - 40) * ((100vw - 320px) / (1920 - 320)));
+}
+
+.nueva-coleccion-title {
+  text-align: center;
+  margin-bottom: calc(30px + (50 - 30) * ((100vw - 320px) / (1920 - 320)));
+
+  h2 {
+    font-size: calc(20px + (32 - 20) * ((100vw - 320px) / (1920 - 320)));
+    font-weight: 600;
+    color: #222222;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 0;
+  }
+}
+
+.nueva-coleccion-products {
+  margin-bottom: calc(30px + (40 - 30) * ((100vw - 320px) / (1920 - 320)));
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  padding: 20px;
+  background-color: #ffffff;
+  position: relative;
+
+  @media (max-width: 768px) {
+    padding: 15px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  }
+
+  // Estilos para las flechas de navegación del carrusel
+  ::ng-deep .owl-theme {
+    .owl-nav {
+      margin-top: 0;
+
+      .owl-prev,
+      .owl-next {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        background-color: rgba(255, 255, 255, 0.9);
+        color: #222222;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        transition: all 0.3s ease;
+        opacity: 1;
+        z-index: 10;
+
+        &:hover {
+          background-color: #222222;
+          color: #ffffff;
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        i {
+          font-size: 18px;
+        }
+      }
+
+      .owl-prev {
+        left: -20px;
+
+        @media (max-width: 768px) {
+          left: -10px;
+          width: 35px;
+          height: 35px;
+        }
+      }
+
+      .owl-next {
+        right: -20px;
+
+        @media (max-width: 768px) {
+          right: -10px;
+          width: 35px;
+          height: 35px;
+        }
+      }
+    }
+  }
+}
