@@ -10,11 +10,16 @@
                 <div class="checkout-detail-box">
                   @if((setting$ | async) && !(accessToken$ | async)){
                   <div class="checkout-form-section">
-                    <div class="checkbox-main-box">
-                      <div class="checkout-title1">
-                        <h2>{{ 'account_details' | translate }}</h2>
-                      </div>
-                      <form [formGroup]="form" class="checkout-form row g-md-4 g-sm-3 g-2">
+                    <div ngbAccordion [closeOthers]="false" class="checkout-accordion">
+                      <div ngbAccordionItem [collapsed]="false" class="checkbox-main-box">
+                        <div ngbAccordionHeader>
+                          <button ngbAccordionButton class="checkout-title1">
+                            <h2 class="m-0">{{ 'account_details' | translate }}</h2>
+                          </button>
+                        </div>
+                        <div ngbAccordionCollapse>
+                          <div ngbAccordionBody>
+                            <form [formGroup]="form" class="checkout-form row g-md-4 g-sm-3 g-2">
                         <div class="col-sm-6">
                           <div class="form-box">
                             <label for="name" class="form-label">{{ 'name' | translate }}</label>
@@ -85,13 +90,19 @@
                           </div>
                         </div>
                         }
-                      </form>
-                    </div>
-                    <div class="checkbox-main-box">
-                      <div class="checkout-title1">
-                        <h2>{{ 'shipping_details' | translate }}</h2>
+                            </form>
+                          </div>
+                        </div>
                       </div>
-                      <form [formGroup]="form" class="checkout-form">
+                      <div ngbAccordionItem [collapsed]="true" class="checkbox-main-box">
+                        <div ngbAccordionHeader>
+                          <button ngbAccordionButton class="checkout-title1">
+                            <h2 class="m-0">{{ 'shipping_details' | translate }}</h2>
+                          </button>
+                        </div>
+                        <div ngbAccordionCollapse>
+                          <div ngbAccordionBody>
+                            <form [formGroup]="form" class="checkout-form">
                         <div class="row g-md-4 g-sm-3 g-2" formGroupName="shipping_address">
                           <div class="col-md-12">
                             <div class="form-box">
@@ -189,13 +200,20 @@
                             }
                           </div>
                         </div>
-                      </form>
-                    </div>
-                    <div class="checkbox-main-box">
-                      <div class="checkout-title1">
-                        <h2>{{ 'billing_details' | translate }}</h2>
+                            </form>
+                          </div>
+                        </div>
                       </div>
-                      <form [formGroup]="form" class="checkout-form">
+                    @if(false){
+                      <div ngbAccordionItem [collapsed]="true" class="checkbox-main-box">
+                        <div ngbAccordionHeader>
+                          <button ngbAccordionButton class="checkout-title1">
+                            <h2 class="m-0">{{ 'billing_details' | translate }}</h2>
+                          </button>
+                        </div>
+                        <div ngbAccordionCollapse>
+                          <div ngbAccordionBody>
+                            <form [formGroup]="form" class="checkout-form">
                         <div class="row g-md-4 g-sm-3 g-2" formGroupName="billing_address">
                           @if(form.controls['shipping_address'].valid){
                           <div class="col-md-12">
@@ -301,18 +319,31 @@
                             }
                           </div>
                         </div>
-                      </form>
-                    </div>
-                    <div class="checkbox-main-box">
-                      <div class="checkout-title1">
-                        <h2>{{ 'delivery_options' | translate }}</h2>
+                            </form>
+                          </div>
+                        </div>
                       </div>
-                      <app-delivery-block [setting]="(setting$ | async)!" (selectDelivery)="selectDelivery($event)"></app-delivery-block>
-                    </div>
-                    <div class="checkbox-main-box">
-                      <div class="checkout-title1">
-                        <h2>{{ 'payment_options' | translate }}</h2>
+                    }
+                      <div ngbAccordionItem [collapsed]="true" class="checkbox-main-box">
+                        <div ngbAccordionHeader>
+                          <button ngbAccordionButton class="checkout-title1">
+                            <h2 class="m-0">{{ 'delivery_options' | translate }}</h2>
+                          </button>
+                        </div>
+                        <div ngbAccordionCollapse>
+                          <div ngbAccordionBody>
+                            <app-delivery-block [setting]="(setting$ | async)!" (selectDelivery)="selectDelivery($event)"></app-delivery-block>
+                          </div>
+                        </div>
                       </div>
+                      <div ngbAccordionItem [collapsed]="true" class="checkbox-main-box">
+                        <div ngbAccordionHeader>
+                          <button ngbAccordionButton class="checkout-title1">
+                            <h2 class="m-0">{{ 'payment_options' | translate }}</h2>
+                          </button>
+                        </div>
+                        <div ngbAccordionCollapse>
+                          <div ngbAccordionBody>
                       @if(!(setting$ | async)?.payment_methods?.length){
                       <div class="empty-box">
                         <h2>{{ 'no_payment_options_found' | translate }}</h2>
@@ -325,6 +356,9 @@
                         [wompiWidgetConfig]="wompiWidgetConfig"
                         (selectPaymentMethod)="selectPaymentMethod($event)">
                       </app-payment-block>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   </div>
                   }
@@ -347,6 +381,7 @@
                     </li>
                     }
 
+                    @if(false){
                     <li>
                       <div class="checkout-box">
                         <div  class="checkout-title">
@@ -361,6 +396,7 @@
                         </div>
                       </div>
                     </li>
+                    }
 
                     @if(!((cartDigital$ | async) ?? false)){
                     <li>
@@ -368,11 +404,6 @@
                         <div class="checkout-title">
                           <h4>{{ 'delivery_options' | translate }}</h4>
                         </div>
-                        @if(!(setting$ | async)?.delivery){
-                        <div class="empty-box">
-                          <h2>{{ 'no_delivery_options_found' | translate }}</h2>
-                        </div>
-                        }
                         <app-delivery-block [setting]="(setting$ | async)!" (selectDelivery)="selectDelivery($event)">
                         </app-delivery-block>
                       </div>
@@ -401,7 +432,8 @@
 
             <div class="col-lg-5">
               <div class="checkout-right-box">
-                <div class="checkout-details">
+                <div class="checkout-summary-container">
+                  <div class="checkout-details">
                   @if((cartItem$ | async)?.length){
                   <div class="order-box">
                     <div class="title-box">
@@ -518,30 +550,6 @@
                             }
                           </div>
                         }
-                        
-                        <!-- Resumen de factura con envío -->
-                        @if(checkoutTotal){
-                        <ul class="sub-total mt-3">
-                          <li>{{ 'subtotal' | translate }}
-                            <span class="count">{{ (checkoutTotal ? (checkoutTotal.total.sub_total | currencySymbol) : 'not_calculated_yet' | translate ) }}</span>
-                          </li>
-
-                          <li>
-                            {{ 'shipping' | translate }}
-                            <span class="count">El costo lo determina la transportadora</span>
-                          </li>
-
-                          <li>
-                            {{ 'tax' | translate }}
-                            <span class="count">{{ (checkoutTotal ? (checkoutTotal.total.tax_total | currencySymbol) : 'not_calculated_yet' | translate ) }}</span>
-                          </li>
-                        </ul>
-                        <ul class="total">
-                          <li>{{ 'subtotal' | translate }}
-                            <span class="count">{{ (checkoutTotal ? (checkoutTotal.total.sub_total | currencySymbol) : 'not_calculated_yet' | translate ) }}</span>
-                          </li>
-                        </ul>
-                        }
                       </div>
                       <form [formGroup]="form" (ngSubmit)="placeorder()">
                         <div class="custom-box-loader">
@@ -565,9 +573,6 @@
                             <li>
                               {{ 'tax' | translate }}
                               <span class="count">{{ (checkoutTotal ? (checkoutTotal.total.tax_total | currencySymbol) : 'not_calculated_yet' | translate ) }}</span>
-                            </li>
-                            <li class="tax-info-text">
-                              <small class="text-muted">El IVA es del 19%</small>
                             </li>
 
                             @if((user$ | async) && checkoutTotal && (user$ | async)?.point?.balance && (setting$ | async)?.activation?.point_enable){
@@ -643,6 +648,7 @@
                     </div>
                   </div>
                 }
+                </div>
               </div>
             </div>
           </div>

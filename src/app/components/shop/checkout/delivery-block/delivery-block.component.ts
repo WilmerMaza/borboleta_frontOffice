@@ -21,10 +21,17 @@ export class DeliveryBlockComponent {
   public delivery_interval: string | null = null;
 
   ngOnInit() {
-    if(this.setting?.delivery){
-      // Automatically emit the selectAddress event for the first item if it's available
+    // Always emit a default delivery option
+    if(this.setting?.delivery?.default?.title){
       let delivery: DeliveryBlock = {
-        delivery_description: this.setting.delivery?.default?.title+ ' | Tiempo de despacho entre 24 a 72 horas después de la compra',
+        delivery_description: this.setting.delivery.default.title+ ' | Tiempo de despacho entre 24 a 72 horas después de la compra',
+        delivery_interval: this.delivery_interval,
+      }
+      this.selectDelivery.emit(delivery);
+    } else {
+      // Emit default delivery if no configuration exists
+      let delivery: DeliveryBlock = {
+        delivery_description: 'Envío estándar | Tiempo de despacho entre 24 a 72 horas después de cancelado',
         delivery_interval: this.delivery_interval,
       }
       this.selectDelivery.emit(delivery);

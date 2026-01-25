@@ -3,7 +3,7 @@
     "data": [
         {
             "id": 2,
-            "title": "Inicio",
+            "title": "Categorías",
             "sort": "0",
             "link_type": "link",
             "is_target_blank": 0,
@@ -29,7 +29,7 @@
         },
         {
             "id": 3,
-            "title": "nav.title",
+            "title": "Catálogo",
             "sort": "1",
             "link_type": "sub",
             "is_target_blank": null,
@@ -425,7 +425,7 @@
         },
         {
             "id": 19,
-            "title": "Promociones",
+            "title": "Descuentos",
             "sort": "2",
             "link_type": "sub",
             "is_target_blank": 0,
