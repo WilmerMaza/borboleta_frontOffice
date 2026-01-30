@@ -18,16 +18,20 @@
   }
 }
 
-// Contenedor del lado derecho
+// Resumen del pedido siempre visible (sticky) al hacer scroll
 .checkout-right-box {
   position: sticky;
   top: 20px;
   left: 0;
-  // Transición suave para evitar saltos bruscos
-  transition: top 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  will-change: top;
-  margin-top: 20px; // Separar del breadcrumb
-  
+  z-index: 2;
+  align-self: flex-start;
+  transition: top 0.2s ease, box-shadow 0.2s ease;
+  margin-top: 20px;
+
+  @media (min-width: 992px) {
+    top: 24px;
+  }
+
   .checkout-details {
     position: unset;
     top: unset;

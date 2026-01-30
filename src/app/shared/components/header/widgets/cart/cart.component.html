@@ -1,8 +1,8 @@
-<div (click)="cart == 'cart_sidebar' && cartToggle(true)">
+<div class="cart-icon-wrapper" (click)="cart == 'cart_sidebar' && cartToggle(true)" [class.cart-icon-bump]="cartIconBump">
   <i class="ri-shopping-cart-line"></i>
 </div>
 @if((cartItem$ | async)?.length){
-  <span class="cart_qty_cls">{{ (cartItem$ | async)?.length }}</span>
+  <span class="cart_qty_cls" [class.cart-qty-bump]="cartIconBump">{{ (cartItem$ | async)?.length }}</span>
 }
   <!-- Add to cart bar -->
   <div id="cart_side" [ngClass]="{ 'add_to_cart right right-cart-box': cart == 'cart_sidebar', 'show-div shopping-cart': cart == 'cart_mini' }" [class.open-side]="(sidebarCartOpen$ | async)">

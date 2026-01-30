@@ -2,8 +2,9 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Params } from '../interface/core.interface';
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { environment } from '../../../environments/environment.development';
-import { MenuModel } from '../interface/menu.interface';
+import { Menu, MenuModel } from '../interface/menu.interface';
 
 @Injectable({
   providedIn: 'root'
@@ -18,6 +19,13 @@ export class MenuService {
   constructor(private http: HttpClient) {}
 
   getMenu(payload?: Params): Observable<MenuModel> {
-    return this.http.get<MenuModel>(`${environment.URL}/menu.json`, { params: payload });
+    return this.http.get<MenuModel | Menu[]>(`${environment.URLS}/menus`, { params: payload }).pipe(
+      map((response): MenuModel => {
+        if (Array.isArray(response)) {
+          return { data: response, total: response.length };
+        }
+        return response;
+      })
+    );
   }
 }

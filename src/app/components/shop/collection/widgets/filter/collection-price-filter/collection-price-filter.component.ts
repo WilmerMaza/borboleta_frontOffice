@@ -69,21 +69,24 @@ export class CollectionPriceFilterComponent {
   }
 
   applyFilter(event: Event) {
-    const index = this.selectedPrices.indexOf((<HTMLInputElement>event?.target)?.value);  // checked and unchecked value
+    const value = (<HTMLInputElement>event?.target)?.value;
+    const isChecked = (<HTMLInputElement>event?.target)?.checked;
+    const index = this.selectedPrices.indexOf(value);
 
-    if ((<HTMLInputElement>event?.target)?.checked)
-      this.selectedPrices.push((<HTMLInputElement>event?.target)?.value); // push in array cheked value
-    else
-      this.selectedPrices.splice(index,1);  // removed in array unchecked value
+    if (isChecked) {
+      if (index === -1) this.selectedPrices.push(value);
+    } else {
+      if (index >= 0) this.selectedPrices.splice(index, 1);
+    }
 
     this.router.navigate([], {
       relativeTo: this.route,
       queryParams: {
-        price: this.selectedPrices.length ? this.selectedPrices?.join(",") : null,
+        price: this.selectedPrices.length ? this.selectedPrices.join(',') : null,
         page: 1
       },
-      queryParamsHandling: 'merge', // preserve the existing query params in the route
-      skipLocationChange: false  // do trigger navigation
+      queryParamsHandling: 'merge',
+      skipLocationChange: false
     });
   }
 

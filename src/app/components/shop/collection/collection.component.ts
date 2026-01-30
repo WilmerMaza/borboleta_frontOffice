@@ -56,6 +56,7 @@ export class CollectionComponent {
     'rating': '',
     'attribute': '',
     'brand': '',
+    'is_sale_enable': '', // 1 = solo productos en descuento
   };
 
   public scrollFilter: Params = {
@@ -81,17 +82,21 @@ export class CollectionComponent {
         'sortBy': params['sortBy'] ? params['sortBy'] : this.filter['sortBy'],
         'rating': params['rating'] ? params['rating'] : '',
         'attribute': params['attribute'] ? params['attribute'] : '',
-        'brand': params['brand'] ? params['brand'] : ''
-      }
+        'brand': params['brand'] ? params['brand'] : '',
+        'is_sale_enable': params['is_sale_enable'] === '1' ? '1' : ''
+      };
 
       this.scrollFilter = {
         ...this.filter,
         'page': this.scrollFilter['page'],
         'paginate': this.scrollFilter['paginate']
-      }
+      };
 
-
-
+      // Breadcrumb: "Descuentos" cuando solo productos en oferta
+      this.breadcrumb = {
+        title: this.filter['is_sale_enable'] === '1' ? 'products_on_sale' : 'collections',
+        items: [{ label: this.filter['is_sale_enable'] === '1' ? 'products_on_sale' : 'collections', active: true }]
+      };
 
       this.store.dispatch(new GetProducts(this.filter));
       // Params For Demo Purpose only

@@ -20,14 +20,12 @@ export class GlobalErrorHandler implements ErrorHandler {
         const notifier = this.injector.get(NotificationService);
         const store = this.injector.get(Store);
 
-        // Solo ignorar errores 401 del endpoint /users/profile cuando NO hay token
-        // Si hay token y falla, el AuthInterceptor se encarga de cerrar la sesión
-        if (error instanceof HttpErrorResponse && 
-            error.status === 401 && 
-            error.url?.includes('/users/profile')) {
+        // Silenciar 401 cuando el usuario no tiene token (navegación sin login).
+        // No silenciar 401 en login/registro para que el formulario pueda mostrar "credenciales incorrectas".
+        const isAuthEndpoint = error.url?.includes('/login') || error.url?.includes('/register');
+        if (error instanceof HttpErrorResponse && error.status === 401 && !isAuthEndpoint) {
           let token = store.selectSnapshot(AuthState.accessToken);
-          
-          // Si no hay token en el estado, verificar localStorage como fallback
+
           if (!token && typeof window !== 'undefined') {
             try {
               const authStorage = localStorage.getItem('auth');
@@ -39,12 +37,13 @@ export class GlobalErrorHandler implements ErrorHandler {
               // Ignorar errores al parsear
             }
           }
-          
+
           if (!token) {
-            // No hay token, es un error esperado - silenciarlo completamente
+            // Usuario no logueado: no mostrar "token requerido" al navegar
             return;
           }
-          // Si hay token, dejar que el AuthInterceptor maneje el cierre de sesión
+          // Con token, el AuthInterceptor ya maneja sesión expirada; no mostrar mensaje duplicado
+          return;
         }
 
         let message;

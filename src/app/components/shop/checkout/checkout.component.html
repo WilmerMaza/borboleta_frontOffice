@@ -637,9 +637,16 @@
                                 [class]="'order-btn btn'"
                                 [id]="'place_order'"
                                 [type]="'button'"
-                                [disabled]="false"
+                                [disabled]="loading"
                                 (click)="onPlaceOrderClick()">
-                                {{ 'place_order' | translate }}
+                                @if(loading){
+                                  <span class="d-inline-flex align-items-center gap-2">
+                                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                    {{ 'processing' | translate }}
+                                  </span>
+                                } @else {
+                                  {{ 'place_order' | translate }}
+                                }
                               </app-button>
                             </div>
                           </ng-template>

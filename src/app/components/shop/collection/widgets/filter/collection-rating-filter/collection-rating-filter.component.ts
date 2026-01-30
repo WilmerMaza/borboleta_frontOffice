@@ -27,23 +27,25 @@ export class CollectionRatingFilterComponent {
   }
 
   applyFilter(event: Event) {
-    const index = this.selectedRatings.indexOf((<HTMLInputElement>event?.target)?.value);  // checked and unchecked value
+    const value = (<HTMLInputElement>event?.target)?.value;
+    const isChecked = (<HTMLInputElement>event?.target)?.checked;
+    const index = this.selectedRatings.indexOf(value);
 
-    if ((<HTMLInputElement>event?.target)?.checked)
-      this.selectedRatings.push((<HTMLInputElement>event?.target)?.value); // push in array cheked value
-    else
-      this.selectedRatings.splice(index,1);  // removed in array unchecked value
+    if (isChecked) {
+      if (index === -1) this.selectedRatings.push(value);
+    } else {
+      if (index >= 0) this.selectedRatings.splice(index, 1);
+    }
 
     this.router.navigate([], {
       relativeTo: this.route,
       queryParams: {
-        rating: this.selectedRatings.length ? this.selectedRatings?.join(",") : null,
+        rating: this.selectedRatings.length ? this.selectedRatings.join(',') : null,
         page: 1
       },
-      queryParamsHandling: 'merge', // preserve the existing query params in the route
-      skipLocationChange: false  // do trigger navigation,
+      queryParamsHandling: 'merge',
+      skipLocationChange: false
     });
-
   }
 
   // check if the item are selected

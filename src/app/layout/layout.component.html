@@ -1,7 +1,9 @@
-<!-- Top Progress Loader -->
-<ngx-loading-bar class="loader-bg" [includeSpinner]="true" [height]="'3px'"></ngx-loading-bar>
+<!-- Barra de progreso: solo después de la carga inicial (mariposa) -->
+@if(!themeOptionService.preloader){
+  <ngx-loading-bar class="loader-bg" [includeSpinner]="true" [height]="'3px'"></ngx-loading-bar>
+}
 
-<!-- Main Loader -->
+<!-- Loader inicial: mariposa (Borboleta) hasta que menú y datos estén listos -->
 @if(themeOptionService.preloader){
   <app-loader></app-loader>
 }

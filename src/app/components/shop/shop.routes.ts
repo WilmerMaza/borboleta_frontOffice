@@ -38,8 +38,7 @@ export const shop: Routes = [
   },
   {
     path: 'wishlist',
-    component: WishlistComponent,
-    canActivate: [AuthGuard]
+    component: WishlistComponent
   },
   {
     path: 'compare',

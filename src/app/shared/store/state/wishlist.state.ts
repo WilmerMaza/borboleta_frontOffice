@@ -1,11 +1,9 @@
 import { Injectable } from "@angular/core";
-import { Router } from '@angular/router';
 import { Action, Selector, State, StateContext, Store } from "@ngxs/store";
-import { tap } from "rxjs";
+import { of } from "rxjs";
 
 import { Product } from "../../interface/product.interface";
 
-import { AuthService } from "../../services/auth.service";
 import { NotificationService } from "../../services/notification.service";
 import { WishlistService } from "../../services/wishlist.service";
 
@@ -15,9 +13,11 @@ export class WishlistStateModel {
   wishlist = {
     data: [] as Product[],
     total: 0
-  }
-  wishlistIds: number[]
+  };
+  wishlistIds: number[] = [];
 }
+
+const WISHLIST_STORAGE_KEY = "wishlist";
 
 @State<WishlistStateModel>({
   name: "wishlist",
@@ -29,14 +29,18 @@ export class WishlistStateModel {
     wishlistIds: []
   },
 })
-
 @Injectable()
 export class WishlistState {
 
-  constructor(private store: Store, public router: Router,
+  constructor(
+    private store: Store,
     private wishlistService: WishlistService,
-    private authService: AuthService,
-    private notificationService: NotificationService){}
+    private notificationService: NotificationService
+  ) {}
+
+  ngxsOnInit(ctx: StateContext<WishlistStateModel>) {
+    this.loadFromLocalStorage(ctx);
+  }
 
   @Selector()
   static wishlistItems(state: WishlistStateModel) {
@@ -48,49 +52,80 @@ export class WishlistState {
     return state.wishlistIds;
   }
 
+  private loadFromLocalStorage(ctx: StateContext<WishlistStateModel>) {
+    if (typeof window === "undefined") return;
+    try {
+      const raw = localStorage.getItem(WISHLIST_STORAGE_KEY);
+      if (!raw) return;
+      const data: Product[] = JSON.parse(raw);
+      if (!Array.isArray(data)) return;
+      const ids = data.map((p) => p.id);
+      ctx.patchState({
+        wishlist: { data, total: data.length },
+        wishlistIds: ids
+      });
+    } catch {
+      localStorage.removeItem(WISHLIST_STORAGE_KEY);
+    }
+  }
+
+  private saveToLocalStorage(data: Product[]) {
+    if (typeof window === "undefined") return;
+    try {
+      localStorage.setItem(WISHLIST_STORAGE_KEY, JSON.stringify(data));
+    } catch {
+      localStorage.removeItem(WISHLIST_STORAGE_KEY);
+    }
+  }
+
   @Action(GetWishlist)
-  getWishlistItems(ctx: StateContext<GetWishlist>) {
+  getWishlistItems(ctx: StateContext<WishlistStateModel>) {
     this.wishlistService.skeletonLoader = true;
-    // if(!this.store.selectSnapshot(state => state.auth && state.auth.access_token)) {
-    //   return;
-    // }
-    return this.wishlistService.getWishlistItems().pipe(
-      tap({
-        next: result => {
-          let ids = result.data.map(product => product.id)
-          ctx.patchState({
-            wishlist: {
-              data: result.data,
-              total: result?.total ? result?.total : result.data?.length
-            },
-            wishlistIds: ids
-          });
-        },
-        complete: () => {
-          this.wishlistService.skeletonLoader = false;
-        },
-        error: err => {
-          throw new Error(err?.error?.message);
-        }
-      })
-    );
+    this.loadFromLocalStorage(ctx);
+    this.wishlistService.skeletonLoader = false;
   }
 
   @Action(AddToWishlist)
-  add(ctx: StateContext<WishlistStateModel>, action: AddToWishlist){
-    // Add Wishlist Logic Here
-    this.router.navigate(['/wishlist']);
+  add(ctx: StateContext<WishlistStateModel>, action: AddToWishlist) {
+    const product = action.payload?.product;
+    if (!product) return of(undefined);
+
+    const state = ctx.getState();
+    const exists = state.wishlistIds.includes(product.id);
+
+    if (exists) {
+      const newData = state.wishlist.data.filter((p) => p.id !== product.id);
+      const newIds = newData.map((p) => p.id);
+      ctx.patchState({
+        wishlist: { data: newData, total: newData.length },
+        wishlistIds: newIds
+      });
+      this.saveToLocalStorage(newData);
+      this.notificationService.showSuccess("Producto eliminado de tu lista de deseos");
+      return of(undefined);
+    }
+
+    const newData = [...state.wishlist.data, product];
+    const newIds = newData.map((p) => p.id);
+    ctx.patchState({
+      wishlist: { data: newData, total: newData.length },
+      wishlistIds: newIds
+    });
+    this.saveToLocalStorage(newData);
+    this.notificationService.showSuccess("Producto agregado a tu lista de deseos");
+    return of(undefined);
   }
 
   @Action(DeleteWishlist)
   delete(ctx: StateContext<WishlistStateModel>, { id }: DeleteWishlist) {
     const state = ctx.getState();
-    let item = state.wishlist.data.filter(value => value.id !== id);
+    const newData = state.wishlist.data.filter((p) => p.id !== id);
+    const newIds = newData.map((p) => p.id);
     ctx.patchState({
-      wishlist: {
-        data: item,
-        total: state.wishlist.total - 1
-      }
+      wishlist: { data: newData, total: newData.length },
+      wishlistIds: newIds
     });
+    this.saveToLocalStorage(newData);
+    return of(undefined);
   }
 }

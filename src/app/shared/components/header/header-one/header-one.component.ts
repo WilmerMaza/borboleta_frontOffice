@@ -53,9 +53,7 @@ export class HeaderOneComponent {
     this.menuService.mainMenuToggle = true;
   }
 
-  reDirectWishlist(){
-    if(!this.store.selectSnapshot(state => state.auth && state.auth.access_token))
-      this.authService.isLogin = true;
-    else this.router.navigate(['/wishlist'])
+  reDirectWishlist() {
+    this.router.navigate(['/wishlist']);
   }
 }

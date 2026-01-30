@@ -112,7 +112,18 @@ export class ProductState{
   getProducts(ctx: StateContext<ProductStateModel>, action: GetProducts) {
     this.productService.skeletonLoader = true;
 
-    return this.productService.getProducts(action.payload).pipe(
+    // Sin filtros (category, brand, price, etc.) → usar API de todos los productos
+    const p = action?.payload || {};
+    const hasNoFilters = !p['category'] && !p['brand'] && !p['price'] && !p['tag'] && !p['attribute'] && !p['search'] && !p['store_slug'] && !p['is_sale_enable'];
+    const request$ = hasNoFilters
+      ? this.productService.getAllProducts(
+          p['page'] ?? 1,
+          p['paginate'] ?? 12,
+          p['sortBy'] ?? 'asc'
+        )
+      : this.productService.getProducts(action.payload);
+
+    return request$.pipe(
 
       tap({
         next: (result: ProductModel) => {

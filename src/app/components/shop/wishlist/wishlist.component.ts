@@ -16,7 +16,6 @@ import { WishlistService } from '../../../shared/services/wishlist.service';
 import { DeleteWishlist, GetWishlist } from '../../../shared/store/action/wishlist.action';
 import { ThemeOptionState } from '../../../shared/store/state/theme-option.state';
 import { WishlistState } from '../../../shared/store/state/wishlist.state';
-import { Product } from 'src/app/shared/interface/product.interface';
 
 @Component({
     selector: 'app-wishlist',
@@ -30,28 +29,21 @@ export class WishlistComponent {
   wishlistItems$: Observable<WishlistModel> = inject(Store).select(WishlistState.wishlistItems);
   themeOption$: Observable<Option> = inject(Store).select(ThemeOptionState.themeOptions) as Observable<Option>;
 
-  public wishlistItems: Product[];
-
   public breadcrumb: breadcrumb = {
     title: "Wishlist",
     items: [{ label: 'Wishlist', active: true }]
-  }
+  };
 
   public skeletonItems = Array.from({ length: 12 }, (_, index) => index);
 
-  constructor(private store: Store,
-    public wishlistService: WishlistService){
-    }
+  constructor(
+    private store: Store,
+    public wishlistService: WishlistService
+  ) {}
 
-    ngOnInit() {
-      this.store.dispatch(new GetWishlist());
-
-      this.wishlistItems$.subscribe((items) => {
-        if(items) {
-          this.wishlistItems = items.data;
-        }
-      })
-    }
+  ngOnInit() {
+    this.store.dispatch(new GetWishlist());
+  }
 
   removeWishlist(id: number){
     this.store.dispatch(new DeleteWishlist(id));
