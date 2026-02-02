@@ -1,10 +1,10 @@
 import { CommonModule } from '@angular/common';
-import { Component, HostListener, inject, Input } from '@angular/core';
+import { Component, HostListener, inject, Input, OnDestroy } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { TranslateModule } from '@ngx-translate/core';
 import { Store } from '@ngxs/store';
-import { Observable } from 'rxjs';
+import { Observable, Subscription } from 'rxjs';
 import { Cart, CartAddOrUpdate } from '../../../../interface/cart.interface';
 import { Values } from '../../../../interface/setting.interface';
 import { Option } from '../../../../interface/theme-option.interface';
@@ -24,7 +24,7 @@ import { VariationModalComponent } from '../../../widgets/modal/variation-modal/
     templateUrl: './cart.component.html',
     styleUrl: './cart.component.scss'
 })
-export class CartComponent {
+export class CartComponent implements OnDestroy {
 
   cartItem$: Observable<Cart[]> = inject(Store).select(CartState.cartItems);
   cartTotal$: Observable<number> = inject(Store).select(CartState.cartTotal);
@@ -43,6 +43,11 @@ export class CartComponent {
   // public confetti: number = 0;
   public loader: boolean = false;
   public width: number;
+  /** Animación del icono al añadir producto al carrito */
+  public cartIconBump: boolean = false;
+  private previousCartCount: number | null = null;
+  private bumpTimeout: ReturnType<typeof setTimeout> | null = null;
+  private cartItemSub: Subscription | null = null;
 
   constructor(private store: Store, public cartService: CartService, private modal: NgbModal) {
     this.themeOption$.subscribe((option) => {
@@ -67,6 +72,29 @@ export class CartComponent {
         // this.confetti = 0;
       }
     });
+
+    // Animación del icono cuando se añade un producto al carrito
+    this.cartItemSub = this.cartItem$.subscribe(items => {
+      const count = items?.length ?? 0;
+      if (this.previousCartCount !== null && count > this.previousCartCount) {
+        this.triggerCartIconBump();
+      }
+      this.previousCartCount = count;
+    });
+  }
+
+  private triggerCartIconBump(): void {
+    if (this.bumpTimeout) clearTimeout(this.bumpTimeout);
+    this.cartIconBump = true;
+    this.bumpTimeout = setTimeout(() => {
+      this.cartIconBump = false;
+      this.bumpTimeout = null;
+    }, 600);
+  }
+
+  ngOnDestroy(): void {
+    this.cartItemSub?.unsubscribe();
+    if (this.bumpTimeout) clearTimeout(this.bumpTimeout);
   }
 
   @HostListener('window:resize', ['$event'])

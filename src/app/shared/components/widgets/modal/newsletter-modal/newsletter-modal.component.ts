@@ -56,12 +56,18 @@ export class NewsletterModalComponent {
   }
 
   ngAfterViewInit(): void {
-    if(this.newsletter === true){
-      setTimeout(() => {
-      this.openModal()
-      }, 3000);
-      this.store.dispatch(new UpdateSession('newsletter', false));
-    }
+    if (this.newsletter !== true) return;
+    this.store.dispatch(new UpdateSession('newsletter', false));
+    // Abrir el modal solo después de que el preloader (mariposa) se haya ocultado
+    let check: ReturnType<typeof setInterval>;
+    check = setInterval(() => {
+      if (!this.themeOptionService.preloader) {
+        clearInterval(check);
+        setTimeout(() => this.openModal(), 1500); // 1.5 s después de que se oculte la mariposa
+      }
+    }, 150);
+    // Timeout de seguridad: si en 8 s no se ocultó el preloader, abrir igual
+    setTimeout(() => clearInterval(check), 8000);
   }
 
   async openModal() {

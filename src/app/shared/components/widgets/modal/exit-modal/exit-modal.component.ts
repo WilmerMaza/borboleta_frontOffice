@@ -6,6 +6,7 @@ import { Option } from '../../../../interface/theme-option.interface';
 import { ModalDismissReasons, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { UpdateSession } from '../../../../store/action/theme-option.action';
 import { ButtonComponent } from '../../button/button.component';
+import { ThemeOptionService } from '../../../../services/theme-option.service';
 import { environment } from './../../../../../../environments/environment';
 
 @Component({
@@ -27,15 +28,21 @@ export class ExitModalComponent {
   public themeOption: Option;
   public storageURL = environment.storageURL
 
-  constructor(private modalService: NgbModal, private store: Store){
+  constructor(
+    private modalService: NgbModal,
+    private store: Store,
+    private themeOptionService: ThemeOptionService
+  ) {
     this.exit$.subscribe(res => this.exit = res);
     this.themeOption$.subscribe(res => this.themeOption = res);
   }
 
   @HostListener('window:mouseout', ['$event'])
   onMouseOut(event: MouseEvent) {
+    // No mostrar modal de salida mientras el preloader (mariposa) esté visible
+    if (this.themeOptionService.preloader) return;
     if (event.clientY <= 0) {
-      if(this.exit === true){
+      if (this.exit === true) {
         this.openModal();
         this.store.dispatch(new UpdateSession('exit', false));
       }

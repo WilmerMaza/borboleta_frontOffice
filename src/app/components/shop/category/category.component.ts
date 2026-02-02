@@ -58,11 +58,12 @@ export class CategoryComponent {
         this.breadcrumb.items[0].label = this.category?.name
       })
 
-      const category = this.route.snapshot.paramMap.get('slug')
+      const categorySlug = this.route.snapshot.paramMap.get('slug');
+      const showAll = this.route.snapshot.queryParamMap.get('show_all') === '1' || this.route.snapshot.queryParamMap.get('show_all') === 'true';
       this.filter = {
         ...this.filter,
-        category: category
-      }
+        category: showAll ? '' : categorySlug
+      };
       this.store.dispatch(new GetProducts(this.filter));
   }
 
@@ -71,14 +72,15 @@ export class CategoryComponent {
     this.routerEventsSubscription = this.router.events.pipe(
       filter(event => event instanceof NavigationEnd),
       switchMap(() => {
-        const category = this.route.snapshot.paramMap.get('slug');
+        const categorySlug = this.route.snapshot.paramMap.get('slug');
         return this.route.queryParams.pipe(
           switchMap(params => {
+            const showAll = params['show_all'] === '1' || params['show_all'] === 'true';
             this.filter = {
               page: params['page'] ? params['page'] : 1,
               paginate: 40,
               status: 1,
-              category: params['category'] ? params['category'] : category,
+              category: showAll ? '' : (params['category'] ? params['category'] : categorySlug),
               price: params['price'] ? params['price'] : '',
               brand: params['brand'] ? params['brand'] : '',
               tag: params['tag'] ? params['tag'] : '',

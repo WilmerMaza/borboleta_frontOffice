@@ -17,6 +17,7 @@ import {
   Validators,
 } from "@angular/forms";
 import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
+import { NgbAccordionModule } from "@ng-bootstrap/ng-bootstrap";
 import { TranslateModule } from "@ngx-translate/core";
 import { Select, Store } from "@ngxs/store";
 import {
@@ -87,6 +88,7 @@ import { WompiButtonComponent, WompiButtonConfig } from "./wompi-button/wompi-bu
     Select2Module,
     ButtonComponent,
     WompiButtonComponent,
+    NgbAccordionModule,
   ],
   templateUrl: "./checkout.component.html",
   styleUrl: "./checkout.component.scss",

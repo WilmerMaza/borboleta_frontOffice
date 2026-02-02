@@ -19,7 +19,16 @@
               </ul>
             } @else {
               <ul class="navbar-nav">
-                <div *ngTemplateOutlet="recursiveMenu; context: { $implicit: (menu$ |async)?.data }"></div>
+                <ng-container *ngTemplateOutlet="recursiveMenu; context: { $implicit: (menu$ |async)?.data }"></ng-container>
+                <li class="nav-item wholesale-menu-item">
+                  <a href="https://wa.me/573016268644?text=Hola,%20quiero%20ser%20mayorista.%20¿Podrían%20contactarme?"
+                     target="_blank"
+                     class="wholesale-menu-btn"
+                     aria-label="Quiero ser mayorista">
+                    <span class="wholesale-menu-btn-text">Mayoristas</span>
+                    <i class="ri-arrow-right-line wholesale-menu-arrow"></i>
+                  </a>
+                </li>
                 <ng-template #recursiveMenu let-menus>
                   <ng-container>
                     @for(menu of menus; track menu.id; let first = $first){
@@ -174,23 +183,12 @@
                           <ul class="dropdown-menu" [class.show]="categoriesExpanded">
                             @for(category of categories; track category.id){
                               <li>
-                                <a class="dropdown-item" href="javascript:void(0)" [routerLink]="['/category', category.slug]" (click)="mainMenuClose()">
+                                <a class="dropdown-item" href="javascript:void(0)" [routerLink]="['/category', category.slug]" (click)="mainMenuClose(); categoriesExpanded = false">
                                   {{ category.name }}
                                 </a>
                               </li>
                             }
                           </ul>
-                        </li>
-                      }
-                      @if(menu.title === 'Promociones'){
-                        <li class="nav-item wholesale-menu-item">
-                          <a href="https://wa.me/573016268644?text=Hola,%20quiero%20ser%20mayorista.%20¿Podrían%20contactarme?" 
-                             target="_blank" 
-                             class="wholesale-menu-btn"
-                             aria-label="Quiero ser mayorista">
-                            <span class="wholesale-menu-btn-text">Quiero ser mayorista</span>
-                            <i class="ri-arrow-right-line wholesale-menu-arrow"></i>
-                          </a>
                         </li>
                       }
                     }

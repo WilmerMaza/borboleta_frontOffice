@@ -26,21 +26,24 @@ export class CollectionAttributeFilterComponent {
   }
 
   applyFilter(event: Event) {
-    const index = this.selectedAttributes.indexOf((<HTMLInputElement>event?.target)?.value);  // checked and unchecked value
+    const value = (<HTMLInputElement>event?.target)?.value;
+    const isChecked = (<HTMLInputElement>event?.target)?.checked;
+    const index = this.selectedAttributes.indexOf(value);
 
-    if ((<HTMLInputElement>event?.target)?.checked)
-      this.selectedAttributes.push((<HTMLInputElement>event?.target)?.value); // push in array cheked value
-    else
-      this.selectedAttributes.splice(index,1);  // removed in array unchecked value
+    if (isChecked) {
+      if (index === -1) this.selectedAttributes.push(value);
+    } else {
+      if (index >= 0) this.selectedAttributes.splice(index, 1);
+    }
 
     this.router.navigate([], {
       relativeTo: this.route,
       queryParams: {
-        attribute: this.selectedAttributes.length ? this.selectedAttributes?.join(",") : null,
+        attribute: this.selectedAttributes.length ? this.selectedAttributes.join(',') : null,
         page: 1
       },
-      queryParamsHandling: 'merge', // preserve the existing query params in the route
-      skipLocationChange: false  // do trigger navigation
+      queryParamsHandling: 'merge',
+      skipLocationChange: false
     });
   }
 

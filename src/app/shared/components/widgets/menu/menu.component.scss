@@ -1,22 +1,39 @@
 // Estilos para la sección de categorías (sin estilos adicionales, usa los mismos que el resto del menú)
 
-// Ocultar categorías en desktop - solo mostrar en móvil
+// Ocultar el enlace "Categorías" (texto) en desktop: solo debe verse el botón negro/dropdown.
+// Este bloque (mobile-categories-menu) solo visible en móvil.
 .mobile-categories-menu {
   display: none;
-  
+
   @media (max-width: 1199px) {
     display: block;
   }
 }
 
-// Botón de mayorista en el menú
+// Refuerzo: en desktop (xl = 1200px+) no mostrar el enlace Categorías de texto
+@media (min-width: 1200px) {
+  li.mobile-categories-menu {
+    display: none !important;
+  }
+}
+
+// Contenedor del menú: flex para que el botón Mayorista quede al final
+:host ::ng-deep .navbar-nav {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+// Botón de mayorista: siempre al lado del último ítem (margin-left: auto) y 40px a la derecha
 .wholesale-menu-item {
   display: flex;
   align-items: center;
-  margin-left: 40px;
-  
+  margin-left: auto;
+  margin-right: 40px;
+
   @media (max-width: 1199px) {
     margin-left: 0;
+    margin-right: 0;
     width: 100%;
     margin-top: 10px;
   }

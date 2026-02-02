@@ -148,6 +148,19 @@
 @else if(homePage?.slug == 'digital_download'){
   <app-digital-download [data]="homePage" [slug]="theme"></app-digital-download>
 }
-@else if('single_product' == 'single_product'){
+@else if(homePage?.slug == 'single_product'){
   <app-single-product [data]="homePage" [slug]="theme"></app-single-product>
+}
+@else {
+  <section class="section-b-space">
+    <div class="container">
+      <div class="row justify-content-center">
+        <div class="col-12 col-md-8 text-center py-5">
+          <h2 class="mb-3">{{ 'home_configuring' | translate }}</h2>
+          <p class="text-muted mb-4">{{ 'home_configuring_desc' | translate }}</p>
+          <a [routerLink]="['/collections']" class="btn btn-solid">{{ 'view_collections' | translate }}</a>
+        </div>
+      </div>
+    </div>
+  </section>
 }

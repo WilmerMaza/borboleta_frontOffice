@@ -58,13 +58,16 @@ export class AuthInterceptor implements HttpInterceptor {
           const authData = JSON.parse(authStorage);
           token = authData?.access_token || null;
         }
-      } catch (error) {
-        // Si hay un error al parsear localStorage, continuar sin token
+      } catch {
+        // ignorar errores al parsear
       }
     }
+    if (!token || token === '' || token === null) {
+      token = this.store.selectSnapshot((state) => state.auth?.access_token) ?? null;
+    }
 
-    // Only add token if it exists and is valid
-    if (token && token !== "" && token !== null) {
+    // Enviar el token en el header: Authorization: Bearer <tu_token>
+    if (token) {
       req = req.clone({
         setHeaders: {
           Authorization: `Bearer ${token}`,

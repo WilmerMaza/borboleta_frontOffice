@@ -36,7 +36,6 @@ export class ProductContentComponent {
 
   cartItem$: Observable<Cart[]> = inject(Store).select(CartState.cartItems);
   setting$: Observable<Values> = inject(Store).select(SettingState.setting) as Observable<Values>;
-  wishlistIds$: Observable<number[]> = inject(Store).select(WishlistState.wishlistIds);
 
   @Input() product: Product;
   @Input() option: Option | null;
@@ -133,13 +132,17 @@ export class ProductContentComponent {
     }
   }
 
-  addToWishlist(product: Product){
-    if(this.store.selectSnapshot(state => state.auth && state.auth.access_token)) {
-      product['is_wishlist'] = !product['is_wishlist'];
-    }
-    let action = product['is_wishlist'] && product['is_wishlist'] && !!this.store.selectSnapshot(state => state.auth && state.auth.access_token) ? new AddToWishlist({ product_id: product.id }) : new DeleteWishlist(product.id);
-    if(action){
-      this.store.dispatch(action);
+  get isInWishlist(): boolean {
+    const ids = this.store.selectSnapshot(WishlistState.wishlistIds) || [];
+    return this.product ? ids.includes(this.product.id) : false;
+  }
+
+  addToWishlist(product: Product) {
+    if (!product) return;
+    if (this.isInWishlist) {
+      this.store.dispatch(new DeleteWishlist(product.id));
+    } else {
+      this.store.dispatch(new AddToWishlist({ product }));
     }
   }
 

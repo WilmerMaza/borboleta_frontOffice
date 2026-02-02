@@ -1,5 +1,6 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
+import { Router, RouterModule } from '@angular/router';
 import { Select, Store } from '@ngxs/store';
 import { ThemeOptionState } from '../../../shared/store/state/theme-option.state';
 import { Observable } from 'rxjs';
@@ -11,7 +12,7 @@ import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
     selector: 'app-error404',
-    imports: [CommonModule, TranslateModule, BreadcrumbComponent, ButtonComponent],
+    imports: [CommonModule, TranslateModule, RouterModule, BreadcrumbComponent, ButtonComponent],
     templateUrl: './error404.component.html',
     styleUrl: './error404.component.scss'
 })
@@ -20,13 +21,17 @@ export class Error404Component {
   themeOption$: Observable<Option> = inject(Store).select(ThemeOptionState.themeOptions) as Observable<Option>;
 
   public breadcrumb: breadcrumb = {
-    title: "404 page",
-    items: [{ label: "404 page", active: true }]
+    title: "404",
+    items: [{ label: "404", active: true }]
+  };
+
+  constructor(private location: Location, private router: Router) {}
+
+  back() {
+    this.location.back();
   }
 
-  constructor(private location: Location) {}
-
-  back(){
-    this.location.back();
+  goHome() {
+    this.router.navigate(['/']);
   }
 }

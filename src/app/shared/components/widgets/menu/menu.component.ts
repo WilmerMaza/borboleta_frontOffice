@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject, Input, OnInit } from '@angular/core';
-import { Router, RouterModule } from '@angular/router';
+import { NavigationEnd, Router, RouterModule } from '@angular/router';
+import { filter } from 'rxjs/operators';
 import { TranslateModule } from '@ngx-translate/core';
 import { Select, Store } from '@ngxs/store';
 import { Observable } from 'rxjs';
@@ -71,11 +72,19 @@ export class MenuComponent implements OnInit {
   ngOnInit() {
     // Obtener categorías
     this.store.dispatch(new GetCategories({ status: 1, type: 'product' }));
-    
+
     this.category$.subscribe(res => {
       if(res && res.data) {
         this.categories = res.data.filter(category => category.type === 'product');
       }
+    });
+
+    // Al navegar (ej. al entrar a una categoría), cerrar menú y dropdown
+    this.router.events.pipe(
+      filter((event): event is NavigationEnd => event instanceof NavigationEnd)
+    ).subscribe(() => {
+      this.menuService.mainMenuToggle = false;
+      this.categoriesExpanded = false;
     });
   }
 
