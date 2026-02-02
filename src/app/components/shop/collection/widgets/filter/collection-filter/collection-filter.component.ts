@@ -58,20 +58,43 @@ export class CollectionFilterComponent {
       params[key] = this.filtersObj[key].length ? this.filtersObj[key]?.join(',') : null;
     });
 
-    this.router.navigate([], {
-      relativeTo: this.route,
-      queryParams: params,
-      queryParamsHandling: 'merge',
-      skipLocationChange: false
-    });
+    // En página de categoría: si quitamos la categoría, poner show_all=1 para cargar todos los productos
+    const isCategoryPage = this.router.url.includes('/category/');
+    if (isCategoryPage && !params['category']) {
+      this.router.navigate([], {
+        relativeTo: this.route,
+        queryParams: { ...params, show_all: '1', page: 1 },
+        queryParamsHandling: '',
+        skipLocationChange: false
+      });
+    } else {
+      this.router.navigate([], {
+        relativeTo: this.route,
+        queryParams: params,
+        queryParamsHandling: 'merge',
+        skipLocationChange: false
+      });
+    }
   }
 
   clear() {
-    this.router.navigate([], {
-      relativeTo: this.route,
-      queryParams: null,
-      skipLocationChange: false
-    });
+    const isCategoryPage = this.router.url.includes('/category/');
+    if (isCategoryPage) {
+      // En categoría: Limpiar todo → mostrar todos los productos en la misma página
+      this.router.navigate([], {
+        relativeTo: this.route,
+        queryParams: { show_all: '1', page: 1 },
+        queryParamsHandling: '',
+        skipLocationChange: false
+      });
+    } else {
+      this.router.navigate([], {
+        relativeTo: this.route,
+        queryParams: {},
+        queryParamsHandling: '',
+        skipLocationChange: false
+      });
+    }
   }
 
   private splitFilter(filterKey: keyof Params): string[] {

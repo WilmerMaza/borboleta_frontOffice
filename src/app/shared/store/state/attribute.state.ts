@@ -67,8 +67,10 @@ export class AttributeState{
         complete: () => {
           this.attributeService.skeletonLoader = false;
         },
-        error: err => {
-          throw new Error(err?.error?.message);
+        error: () => {
+          // Si falla (ej. attribute.json no existe), ocultar skeleton para que se muestren los filtros
+          this.attributeService.skeletonLoader = false;
+          throw new Error('Error loading attributes');
         }
       })
     );

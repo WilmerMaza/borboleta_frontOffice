@@ -1,3 +1,4 @@
+
 .wompi-widget-container {
   margin-top: 20px;
   text-align: center;
@@ -14,6 +15,169 @@
 
   .btn-outline {
     border-radius: 6px;
+  }
+}
+
+// Resumen del pedido siempre visible (sticky) al hacer scroll
+.checkout-right-box {
+  position: sticky;
+  top: 20px;
+  left: 0;
+  z-index: 2;
+  align-self: flex-start;
+  transition: top 0.2s ease, box-shadow 0.2s ease;
+  margin-top: 20px;
+
+  @media (min-width: 992px) {
+    top: 24px;
+  }
+
+  .checkout-details {
+    position: unset;
+    top: unset;
+    left: unset;
+  }
+}
+
+// Contenedor con color de fondo solo para summary order y billing summary
+.checkout-summary-container {
+  background-color: #f8f6f0;
+  padding: 20px;
+  border-radius: 8px;
+  position: relative;
+  
+  // Aplicar el mismo color a los divs internos y quitar bordes/líneas
+  .checkout-details {
+    background-color: #f8f6f0;
+    border: none !important;
+    box-shadow: none !important;
+  }
+  
+  .order-box {
+    background-color: #f8f6f0;
+    border: none !important;
+    box-shadow: none !important;
+    margin-bottom: 0 !important;
+    
+    .title-box {
+      border-bottom: none !important;
+      border: none !important;
+      border-top: none !important;
+      padding-bottom: 0 !important;
+      margin-bottom: 0 !important;
+    }
+  }
+  
+  // Quitar bordes de listas y elementos internos que forman el cuadro
+  ul.sub-total,
+  ul.total,
+  ul.qty {
+    border: none !important;
+    
+    li {
+      border: none !important;
+      border-bottom: none !important;
+      border-top: none !important;
+      border-color: transparent !important;
+    }
+  }
+  
+  // Quitar cualquier línea divisoria
+  hr, .border-cls {
+    border: none !important;
+    border-top: none !important;
+    border-bottom: none !important;
+  }
+  
+  // Mantener solo los bordes necesarios para inputs y elementos de formulario
+  input, select, textarea, button, .form-control {
+    border-color: initial !important;
+  }
+}
+
+// Estilos para los acordeones del checkout
+.checkout-form-section {
+  margin-top: 20px; // Separar del breadcrumb
+}
+
+.checkout-accordion {
+  .checkbox-main-box {
+    margin-bottom: 20px;
+
+    border-bottom: none;
+    border-radius: 8px;
+    overflow: hidden;
+
+    [ngbAccordionHeader] {
+      padding: 0;
+      border: none;
+
+      button[ngbAccordionButton] {
+        width: 100%;
+        padding: 0;
+        background: transparent;
+        border: none;
+        text-align: left;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        transition: background-color 0.3s ease;
+        margin-bottom: 20px;
+
+        &:hover {
+          background-color: transparent;
+        }
+
+        &:focus {
+          box-shadow: none;
+          outline: none;
+        }
+
+        .checkout-title1 {
+          width: 100%;
+          margin: 0;
+          padding: 0;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+
+          h2 {
+            font-size: calc(18px + 2 * (100vw - 320px) / 1600);
+            font-weight: 600;
+            line-height: 1.3;
+            letter-spacing: unset;
+            text-transform: unset;
+            margin: 0;
+          }
+        }
+
+        // Icono de flecha
+        &::after {
+          content: '';
+          width: 0;
+          height: 0;
+          border-left: 6px solid transparent;
+          border-right: 6px solid transparent;
+          border-top: 8px solid #333;
+          transition: transform 0.3s ease;
+          margin-left: auto;
+          flex-shrink: 0;
+        }
+
+        &[aria-expanded="true"]::after {
+          transform: rotate(180deg);
+        }
+      }
+    }
+
+    [ngbAccordionCollapse] {
+      border-top: none;
+    }
+
+    [ngbAccordionBody] {
+      padding: 20px;
+    }
   }
 }
 

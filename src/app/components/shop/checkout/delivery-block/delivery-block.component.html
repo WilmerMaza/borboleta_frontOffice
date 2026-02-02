@@ -1,6 +1,6 @@
 <div class="checkout-detail">
   <div class="row g-4">
-    @if(setting.delivery){
+    @if(setting?.delivery?.default?.title){
       <div class="col-xxl-6">
         <div class="delivery-option">
           <div class="delivery-category">
@@ -15,9 +15,24 @@
           </div>
         </div>
       </div>
+    } @else {
+      <div class="col-12">
+        <div class="delivery-option">
+          <div class="delivery-category">
+            <div class="shipment-detail w-100">
+              <div class="form-check custom-form-check hide-check-box">
+                <input class="form-check-input" type="radio" name="standard" id="standard" [checked]="true" (change)="setDeliveryDescription('Envío estándar | Tiempo de despacho entre 24 a 72 horas después de cancelado', 'standard')">
+                <label class="form-check-label" for="standard">
+                  Envío estándar | Tiempo de despacho entre 24 a 72 horas después de la compra
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     }
 
-    @if(setting.delivery.same_day_delivery){
+    @if(setting?.delivery?.same_day_delivery){
       <div class="col-xxl-6">
         <div class="delivery-option">
           <div class="delivery-category">
@@ -34,7 +49,7 @@
       </div>
     }
 
-    @if(setting.delivery.same_day_delivery){
+    @if(setting?.delivery?.same_day_delivery){
       <div class="col-12 future-box" [class.show]="deliveryType && deliveryType == 'same_day'">
         <div class="future-option">
           <div class="delivery-items">

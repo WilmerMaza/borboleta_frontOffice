@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, RouterModule } from '@angular/router';
+import { TranslateModule } from '@ngx-translate/core';
 import { Select, Store } from '@ngxs/store';
 import { Observable } from 'rxjs';
 
@@ -63,7 +64,7 @@ import { SingleProductComponent } from './single-product/single-product.componen
 
 @Component({
     selector: 'app-home',
-    imports: [CommonModule,
+    imports: [CommonModule, RouterModule, TranslateModule,
         Fashion1Component, Fashion2Component, Fashion3Component, Fashion4Component, Fashion5Component,
         Fashion6Component, Fashion7Component, Furniture1Component, Furniture2Component, FurnitureDarkComponent,
         Electronic1Component, Electronic2Component, Electronic3Component, Marketplace1Component,
@@ -90,13 +91,13 @@ export class HomeComponent {
     private route: ActivatedRoute,
     private themeOptionService: ThemeOptionService) {
       this.route.queryParams.subscribe(params => {
-        this.themeOptionService.preloader = true;
+        // No volver a mostrar la mariposa: solo el layout controla el preloader inicial
         this.activeTheme$.subscribe(theme => {
           this.theme = params['theme'] ? params['theme'] : theme;
           if(this.theme){
             this.store.dispatch(new GetHomePage(params['theme'] ? params['theme'] : theme)).subscribe((data: any) => {
               this.homePage = data.theme.homePage;
-              this.themeOptionService.preloader = false;
+              this.themeOptionService.preloader = false; // por si acaso quedó true
             })
           }
         })

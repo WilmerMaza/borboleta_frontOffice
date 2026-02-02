@@ -1,0 +1,44 @@
+// Animación del icono del carrito al añadir un producto
+@keyframes cart-bump {
+  0% {
+    transform: scale(1);
+  }
+  25% {
+    transform: scale(1.35);
+  }
+  50% {
+    transform: scale(0.9);
+  }
+  75% {
+    transform: scale(1.15);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes cart-qty-pop {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.4);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.cart-icon-wrapper {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  &.cart-icon-bump i {
+    animation: cart-bump 0.5s ease-out;
+  }
+}
+
+.cart_qty_cls.cart-qty-bump {
+  animation: cart-qty-pop 0.4s ease-out;
+}

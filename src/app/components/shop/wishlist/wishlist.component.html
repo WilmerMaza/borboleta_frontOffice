@@ -9,7 +9,7 @@
             <app-loader [loaderClass]="'loader-wrapper blur-bg'"></app-loader>
           </div>
         } @else {
-          @if(wishlistItems && wishlistItems.length){
+          @if((wishlistItems$ | async)?.data?.length){
             <table class="table cart-table">
               <thead>
                 <tr class="table-head">
@@ -21,7 +21,7 @@
                 </tr>
               </thead>
               <tbody>
-                @for(product of wishlistItems; track product.id){
+                @for(product of (wishlistItems$ | async)?.data; track product.id){
                   <tr>
                     <td>
                       <a href="javascript:void(0)" [routerLink]="['/product/', product.slug]">
@@ -86,7 +86,7 @@
               </tbody>
             </table>
           }
-          @if(!wishlistItems.length && !wishlistService.skeletonLoader){
+          @if(!(wishlistItems$ | async)?.data?.length && !wishlistService.skeletonLoader){
             <app-no-data
               [class]="'no-data-added'"
               [image]="'assets/svg/empty-items.svg'"

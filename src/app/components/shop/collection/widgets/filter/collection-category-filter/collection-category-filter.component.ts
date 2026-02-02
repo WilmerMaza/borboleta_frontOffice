@@ -45,21 +45,30 @@ export class CollectionCategoryFilterComponent {
   }
 
   applyFilter(event: Event) {
-    const index = this.selectedCategories.indexOf((<HTMLInputElement>event?.target)?.value);  // checked and unchecked value
+    const value = (<HTMLInputElement>event?.target)?.value;
+    const isChecked = (<HTMLInputElement>event?.target)?.checked;
+    const index = this.selectedCategories.indexOf(value);
 
-    if ((<HTMLInputElement>event?.target)?.checked)
-      this.selectedCategories.push((<HTMLInputElement>event?.target)?.value); // push in array cheked value
-    else
-      this.selectedCategories.splice(index,1);  // removed in array unchecked value
+    if (isChecked) {
+      // Marcar: agregar solo si no está ya (evita duplicados)
+      if (index === -1) {
+        this.selectedCategories.push(value);
+      }
+    } else {
+      // Desmarcar: quitar solo si existe (evita splice(-1, 1))
+      if (index >= 0) {
+        this.selectedCategories.splice(index, 1);
+      }
+    }
 
     this.router.navigate([], {
       relativeTo: this.route,
       queryParams: {
-        category: this.selectedCategories.length ? this.selectedCategories?.join(",") : null,
+        category: this.selectedCategories.length ? this.selectedCategories.join(',') : null,
         page: 1
       },
-      queryParamsHandling: 'merge', // preserve the existing query params in the route
-      skipLocationChange: false  // do trigger navigation
+      queryParamsHandling: 'merge',
+      skipLocationChange: false
     });
   }
 

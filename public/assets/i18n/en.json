@@ -336,6 +336,8 @@
   "rtl": "RTL",
   "rtl_mode": "RTL Mode",
   "sale": "Sale",
+  "collections": "Collections",
+  "products_on_sale": "Products on sale",
   "sale_modal_works": "sale-modal works !",
   "sales_ends_in": "Sales Ends In",
   "same_as_shipping": "Is the shipping address the same as your billing address?",

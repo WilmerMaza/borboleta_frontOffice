@@ -11,7 +11,6 @@ import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { CollectionCategoryFilterComponent } from '../filter/collection-category-filter/collection-category-filter.component';
 import { CollectionAttributeFilterComponent } from '../filter/collection-attribute-filter/collection-attribute-filter.component';
 import { CollectionPriceFilterComponent } from '../filter/collection-price-filter/collection-price-filter.component';
-import { CollectionRatingFilterComponent } from '../filter/collection-rating-filter/collection-rating-filter.component';
 import { CollectionBrandFilterComponent } from '../filter/collection-brand-filter/collection-brand-filter.component';
 import { CollectionFilterComponent } from '../filter/collection-filter/collection-filter.component';
 import { TranslateModule } from '@ngx-translate/core';
@@ -20,7 +19,7 @@ import { SkeletonCollectionSidebarComponent } from '../skeleton-collection-sideb
 @Component({
     selector: 'app-collection-sidebar',
     imports: [CommonModule, NgbModule, TranslateModule, CollectionCategoryFilterComponent,
-        CollectionAttributeFilterComponent, CollectionPriceFilterComponent, CollectionRatingFilterComponent,
+        CollectionAttributeFilterComponent, CollectionPriceFilterComponent,
         CollectionBrandFilterComponent, CollectionFilterComponent, SkeletonCollectionSidebarComponent],
     templateUrl: './sidebar.component.html',
     styleUrl: './sidebar.component.scss'

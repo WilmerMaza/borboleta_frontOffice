@@ -2,6 +2,7 @@ import { CommonModule, DOCUMENT, isPlatformBrowser } from '@angular/common';
 import { Component, inject, Inject, PLATFORM_ID } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { NgbRatingConfig } from '@ng-bootstrap/ng-bootstrap';
+import { TranslateService } from '@ngx-translate/core';
 import { Select, Store } from '@ngxs/store';
 import { Observable } from 'rxjs';
 import { Analytics, Values } from './shared/interface/setting.interface';
@@ -39,9 +40,12 @@ export class AppComponent {
     public meta: Meta,
     private store: Store,
     public seoService: SeoService,
+    private translate: TranslateService,
     @Inject(PLATFORM_ID) private platformId: Object,
     ) {
       this.isBrowser = isPlatformBrowser(platformId);
+    this.translate.setDefaultLang('es');
+    this.translate.use('es');
     config.max = 5;
     config.readonly = true;
     this.store.dispatch(new GetCountries());
