@@ -43,8 +43,8 @@
                           </a>
                         }
 
-                        @if(menu.link_type === 'link' && menu.is_target_blank === 0){
-                          <a class="dropdown-item" [class.show]="menu.active" (click)="redirect(menu.path)">
+                        @if(menu.link_type === 'link' && !isExternalLink(menu)){
+                          <a class="dropdown-item" [class.show]="menu.active" href="javascript:void(0)" (click)="redirect(menu.path)">
                             {{ menu.title | translate }}
 
                             @if(menu.badge_text){
@@ -53,8 +53,8 @@
                           </a>
                         }
 
-                        @if(menu.is_target_blank === 1){
-                          <a class="dropdown-item" [class.show]="menu.active" target="_blank"  href="{{ menu.path }}">
+                        @if(menu.link_type === 'link' && isExternalLink(menu)){
+                          <a class="dropdown-item" [class.show]="menu.active" [href]="menu.path" target="_blank" rel="noopener noreferrer">
                             {{ menu.title | translate }}
 
                             @if(menu.badge_text){
@@ -157,12 +157,21 @@
                           <div class="dropdown-menu dropdown-menu-2 dropdown-image" [class.show]="menu.active">
                             <div class="dropdown-column">
                               @for(imageMenu of menu.child; track imageMenu.id){
-                                <a href="javascript:void(0)" class="dropdown-item text-center" (click)="redirect(imageMenu.path)">
-                                  @if(imageMenu.item_image){
-                                    <img [src]="imageMenu.item_image.original_url" class="img-fluid" [alt]="imageMenu.title">
-                                  }
-                                  <span>{{ imageMenu.title | translate }}</span>
-                                </a>
+                                @if(isExternalLink(imageMenu)){
+                                  <a [href]="imageMenu.path" class="dropdown-item text-center" target="_blank" rel="noopener noreferrer">
+                                    @if(imageMenu.item_image){
+                                      <img [src]="imageMenu.item_image.original_url" class="img-fluid" [alt]="imageMenu.title">
+                                    }
+                                    <span>{{ imageMenu.title | translate }}</span>
+                                  </a>
+                                } @else {
+                                  <a href="javascript:void(0)" class="dropdown-item text-center" (click)="redirect(imageMenu.path)">
+                                    @if(imageMenu.item_image){
+                                      <img [src]="imageMenu.item_image.original_url" class="img-fluid" [alt]="imageMenu.title">
+                                    }
+                                    <span>{{ imageMenu.title | translate }}</span>
+                                  </a>
+                                }
                               }
                             </div>
                           </div>
@@ -182,10 +191,26 @@
                           </a>
                           <ul class="dropdown-menu" [class.show]="categoriesExpanded">
                             @for(category of categories; track category.id){
-                              <li>
-                                <a class="dropdown-item" href="javascript:void(0)" [routerLink]="['/category', category.slug]" (click)="mainMenuClose(); categoriesExpanded = false">
-                                  {{ category.name }}
-                                </a>
+                              <li class="mobile-category-item" [class.expanded]="expandedCategoryId === category.id">
+                                @if(category.subcategories?.length){
+                                  <a class="dropdown-item category-name mobile-category-toggle" href="javascript:void(0)" (click)="toggleCategoryExpand(category.id)">
+                                    {{ category.name }}
+                                    <i class="ri-arrow-right-s-line" [class.rotated]="expandedCategoryId === category.id"></i>
+                                  </a>
+                                  <ul class="mobile-subcategories">
+                                    @for(sub of category.subcategories; track sub.id){
+                                      <li>
+                                        <a class="dropdown-item category-name mobile-subcategory-link" href="javascript:void(0)" [routerLink]="['/category', sub.slug]" (click)="mainMenuClose(); categoriesExpanded = false">
+                                          {{ sub.name }}
+                                        </a>
+                                      </li>
+                                    }
+                                  </ul>
+                                } @else {
+                                  <a class="dropdown-item category-name" href="javascript:void(0)" [routerLink]="['/category', category.slug]" (click)="mainMenuClose(); categoriesExpanded = false">
+                                    {{ category.name }}
+                                  </a>
+                                }
                               </li>
                             }
                           </ul>

@@ -1,9 +1,10 @@
 import { CommonModule } from '@angular/common';
 import { Component, Input } from '@angular/core';
+import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
     selector: 'app-theme-title',
-    imports: [CommonModule],
+    imports: [CommonModule, TranslateModule],
     templateUrl: './theme-title.component.html',
     styleUrl: './theme-title.component.scss'
 })

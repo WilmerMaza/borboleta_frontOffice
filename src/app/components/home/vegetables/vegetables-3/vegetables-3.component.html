@@ -5,7 +5,7 @@
         <div class="sidenav svg-icon-menu">
           <nav>
             <div>
-              <div class="sidebar-back text-start d-xl-none d-block">Back</div>
+              <div class="sidebar-back text-start d-xl-none d-block">{{ 'back' | translate }}</div>
             </div>
             <div class="left-sidebar_center">
               <app-categories [style]="'sidebar'" [categoryIds]="data?.content?.sidebar_category?.category_ids || []"></app-categories>

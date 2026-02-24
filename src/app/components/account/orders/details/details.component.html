@@ -209,8 +209,6 @@
                   @if(!order.is_digital_only){
                     <li>{{ 'shipping'| translate }} <span>{{ (order.shipping_total ? order.shipping_total : 0) | currencySymbol }}</span></li>
                   }
-                  <li>{{ 'tax'| translate }} <span>{{ (order.tax_total ? order.tax_total : 0) | currencySymbol }}</span></li>
-
                   @if(order.points_amount != 0){
                     <li class="txt-primary fw-bold">{{ 'points'| translate }} <span>{{ order.points_amount | currencySymbol }}</span></li>
                   }

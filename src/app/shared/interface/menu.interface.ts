@@ -15,6 +15,7 @@ export interface Menu {
     mega_menu_type: string;
     badge_text: string;
     is_target_blank: boolean | number;
+    externalLink?: boolean;
     badge_color: string;
     product_ids: number[];
     blog_ids: number[];

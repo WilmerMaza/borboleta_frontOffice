@@ -960,9 +960,9 @@ export class CheckoutComponent {
         const itemSubTotal = Number(item.sub_total || 0);
         return acc + itemSubTotal;
       }, 0);
-      const tax_total = amount * 0.19; // Calcular impuesto como 19% del subtotal
+      const tax_total = 0; // IVA ya incluido en el precio del producto
       const shipping_total = 0; // Si tienes el cálculo, ponlo aquí
-      const total = amount + tax_total + shipping_total;
+      const total = amount + shipping_total;
 
       // Arma el payload
       const payload = {

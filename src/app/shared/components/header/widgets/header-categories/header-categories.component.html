@@ -1,10 +1,28 @@
 <nav>
-  <ul>
+  <ul class="category-nav-list">
     @for(category of categories; track category.id){
-      <li>
-        <a href="javascript:void(0)" [routerLink]="['/category', category.slug]">
-          {{ category.name }}
-        </a>
+      <li class="category-nav-item" [class.has-subcategories]="category.subcategories?.length" [class.expanded]="expandedCategoryId === category.id">
+        @if(category.subcategories?.length){
+          <a href="javascript:void(0)" [routerLink]="['/category', category.slug]" class="category-name category-link category-link-toggle" (click)="onCategoryClick($event, category.id)">
+            <span>{{ category.name }}</span>
+            <i class="ri-arrow-right-s-line subcategory-indicator" aria-hidden="true"></i>
+          </a>
+        } @else {
+          <a href="javascript:void(0)" [routerLink]="['/category', category.slug]" class="category-name category-link">
+            <span>{{ category.name }}</span>
+          </a>
+        }
+        @if(category.subcategories?.length){
+          <ul class="subcategories-dropdown">
+            @for(sub of category.subcategories; track sub.id){
+              <li>
+                <a href="javascript:void(0)" [routerLink]="['/category', sub.slug]" class="category-name subcategory-link">
+                  {{ sub.name }}
+                </a>
+              </li>
+            }
+          </ul>
+        }
       </li>
     }
   </ul>
