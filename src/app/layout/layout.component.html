@@ -8,8 +8,15 @@
   <app-loader></app-loader>
 }
 
-<!-- Promotional Banner -->
-<app-promotional-banner></app-promotional-banner>
+<!-- Promotional Banner (viene de content en setting-theme API) -->
+@if((homePage$ | async)?.content?.promotional_banner?.is_enable !== false) {
+  <app-promotional-banner
+    [text]="(homePage$ | async)?.content?.promotional_banner?.text || 'Entrega mismo día Cartagena y envíos a todo el país'"
+    [background_color]="(homePage$ | async)?.content?.promotional_banner?.background_color || '#212121'"
+    [text_color]="(homePage$ | async)?.content?.promotional_banner?.text_color || '#ffffff'"
+    [font_family]="(homePage$ | async)?.content?.promotional_banner?.font_family ?? ''">
+  </app-promotional-banner>
+}
 
 <app-header [logo]="setLogo().header_logo"></app-header>
 <router-outlet></router-outlet>
@@ -42,7 +49,7 @@
        aria-label="Contactar por WhatsApp para ayuda">
       <span class="help-text">¿Necesitas ayuda?</span>
       <div class="help-icon">
-        <i class="ri-question-line"></i>
+        <i class="ri-whatsapp-fill"></i>
       </div>
     </a>
   </div>

@@ -17,7 +17,7 @@ import { MenuState } from '../../../store/state/menu.state';
 import { ProductState } from '../../../store/state/product.state';
 import { CategoryState } from '../../../store/state/category.state';
 import { CategoryModel, Category } from '../../../interface/category.interface';
-import { Menu } from '../../interface/menu.interface';
+import { Menu } from '../../../interface/menu.interface';
 import { NoDataComponent } from '../no-data/no-data.component';
 import { ProductBoxComponent } from '../product-box/product-box.component';
 import { LinkBoxComponent } from './link-box/link-box.component';
@@ -44,6 +44,7 @@ export class MenuComponent implements OnInit {
   public blogs: Blog[];
   public categories: Category[] = [];
   public categoriesExpanded: boolean = false;
+  expandedCategoryId: number | null = null;
 
   public StorageURL = environment.storageURL;
 
@@ -71,7 +72,7 @@ export class MenuComponent implements OnInit {
 
   ngOnInit() {
     // Obtener categorías
-    this.store.dispatch(new GetCategories({ status: 1, type: 'product' }));
+    this.store.dispatch(new GetCategories({ status: 1, type: 'product', include: 'subcategories' }));
 
     this.category$.subscribe(res => {
       if(res && res.data) {
@@ -85,11 +86,19 @@ export class MenuComponent implements OnInit {
     ).subscribe(() => {
       this.menuService.mainMenuToggle = false;
       this.categoriesExpanded = false;
+      this.expandedCategoryId = null;
     });
   }
 
   toggleCategories() {
     this.categoriesExpanded = !this.categoriesExpanded;
+    if (!this.categoriesExpanded) {
+      this.expandedCategoryId = null;
+    }
+  }
+
+  toggleCategoryExpand(categoryId: number) {
+    this.expandedCategoryId = this.expandedCategoryId === categoryId ? null : categoryId;
   }
 
   mainMenuOpen(){
@@ -100,8 +109,21 @@ export class MenuComponent implements OnInit {
     this.menuService.mainMenuToggle = false;
   }
 
-  redirect(path:string){
-    this.router.navigateByUrl(path)
+  isExternalLink(menu: Menu): boolean {
+    return (
+      menu?.externalLink === true ||
+      menu?.is_target_blank === 1 ||
+      menu?.is_target_blank === true ||
+      (typeof menu?.path === 'string' && (menu.path.startsWith('http://') || menu.path.startsWith('https://')))
+    );
+  }
+
+  redirect(path: string) {
+    if (path?.startsWith('http://') || path?.startsWith('https://')) {
+      window.open(path, '_blank', 'noopener,noreferrer');
+    } else {
+      this.router.navigateByUrl(path || '/');
+    }
   }
 
   toggle(menu: Menu){

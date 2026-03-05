@@ -1,16 +1,16 @@
 @if(menu.link_type === 'sub'){
   <h5 class="dropdown-header ">{{ menu.title }}</h5>
 }@else {
-  @if(menu.link_type === 'link' && menu.is_target_blank === 0){
-    <a class="dropdown-item" (click)="redirect(menu.path)">
+  @if(menu.link_type === 'link' && !isExternalLink(menu)){
+    <a class="dropdown-item" href="javascript:void(0)" (click)="redirect(menu.path)">
       {{ menu.title}}
       @if(menu.badge_text){
         <label class="menu-label {{ menu.badge_color }}">{{ menu.badge_text | translate }}</label>
       }
     </a>
   }
-  @if(menu.is_target_blank === 1){
-    <a href="{{ menu.path }}" class="dropdown-item" target="_blank">
+  @if(menu.link_type === 'link' && isExternalLink(menu)){
+    <a [href]="menu.path" class="dropdown-item" target="_blank" rel="noopener noreferrer">
       {{ menu.title }}
       @if(menu.badge_text){
         <label class="menu-label {{ menu.badge_color }}">{{ menu.badge_text | translate }}</label>

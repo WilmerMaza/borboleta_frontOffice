@@ -92,7 +92,7 @@ export class BlogState{
           }
         },
         error: err => {
-          this.router.navigate(['/404']);
+          this.router.navigate(['/']);
           throw new Error(err?.error?.message);
         }
       })

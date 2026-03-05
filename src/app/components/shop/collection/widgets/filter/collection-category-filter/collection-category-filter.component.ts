@@ -24,7 +24,7 @@ export class CollectionCategoryFilterComponent {
 
   @Input() filter: Params;
 
-  public categories: Category[];
+  public categories: Category[] = [];
   public selectedCategories: string[] = [];
   public searchText: string = '';
 
@@ -37,7 +37,9 @@ export class CollectionCategoryFilterComponent {
 
   ngOnInit(){
     this.category$.subscribe(res => {
-      this.categories = res.data.filter(category => category.type == 'product')});
+      const data = res?.data ?? [];
+      this.categories = data.filter((category: Category) => category?.type === 'product');
+    });
   }
 
   ngOnChanges() {

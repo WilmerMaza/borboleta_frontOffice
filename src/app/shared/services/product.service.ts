@@ -29,13 +29,20 @@ export class ProductService {
   getAllProducts(page: number = 1, paginate: number = 12, sortBy: string = 'asc'): Observable<ProductModel> {
     const params: Params = {
       page,
-      paginate,
+      limit: paginate,
       status: 1,
       field: 'created_at',
       sortBy,
     };
     return this.http.get<ProductModel>(`${environment.URLS}/products`, {
       params,
+    });
+  }
+
+  /** API de productos con descuento: GET {URLS}/products/discounts */
+  getDiscountProducts(page: number = 1, limit: number = 12): Observable<ProductModel> {
+    return this.http.get<ProductModel>(`${environment.URLS}/products/discounts`, {
+      params: { page, limit },
     });
   }
 

@@ -1,6 +1,8 @@
 import { CommonModule, isPlatformBrowser } from '@angular/common';
-import { Component, HostListener, Inject, Input, PLATFORM_ID } from '@angular/core';
-import { RouterModule } from '@angular/router';
+import { Component, HostListener, Inject, Input, OnDestroy, OnInit, PLATFORM_ID } from '@angular/core';
+import { NavigationStart, Router, RouterModule } from '@angular/router';
+import { Subscription } from 'rxjs';
+import { filter } from 'rxjs/operators';
 import { TranslateModule } from '@ngx-translate/core';
 import { NgbTooltip } from '@ng-bootstrap/ng-bootstrap';
 import { Option } from '../../../interface/theme-option.interface';
@@ -23,7 +25,7 @@ import { NoticeComponent } from "../widgets/notice/notice.component";
     templateUrl: './header-six.component.html',
     styleUrl: './header-six.component.scss'
 })
-export class HeaderSixComponent {
+export class HeaderSixComponent implements OnInit, OnDestroy {
 
   @Input() data: Option | null;
   @Input() logo: string | null | undefined;
@@ -34,9 +36,26 @@ export class HeaderSixComponent {
   public stick: boolean = false;
   public categoryFilter: boolean = false;
   public isBrowser: boolean;
+  private navSubscription: Subscription | null = null;
 
-  constructor(public menuService:MenuService, @Inject(PLATFORM_ID) platformId: object){
+  constructor(
+    public menuService: MenuService,
+    private router: Router,
+    @Inject(PLATFORM_ID) platformId: object
+  ) {
     this.isBrowser = isPlatformBrowser(platformId);
+  }
+
+  ngOnInit(): void {
+    this.navSubscription = this.router.events
+      .pipe(filter((e): e is NavigationStart => e instanceof NavigationStart))
+      .subscribe(() => {
+        this.categoryFilter = false;
+      });
+  }
+
+  ngOnDestroy(): void {
+    this.navSubscription?.unsubscribe();
   }
   // @HostListener Decorator
   @HostListener("window:scroll", [])

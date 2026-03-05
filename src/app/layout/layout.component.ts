@@ -19,8 +19,10 @@ import { AuthService } from '../shared/services/auth.service';
 import { ThemeOptionService } from '../shared/services/theme-option.service';
 import { GetMenu } from '../shared/store/action/menu.action';
 import { GetProductBySearchList } from '../shared/store/action/product.action';
+import { GetHomePage } from '../shared/store/action/theme.action';
 import { ThemeOptions } from '../shared/store/action/theme-option.action';
 import { ThemeOptionState } from '../shared/store/state/theme-option.state';
+import { ThemeState } from '../shared/store/state/theme.state';
 import { NgbModule } from "@ng-bootstrap/ng-bootstrap";
 
 @Component({
@@ -34,6 +36,7 @@ import { NgbModule } from "@ng-bootstrap/ng-bootstrap";
 export class LayoutComponent implements AfterViewInit, OnDestroy {
 
   themeOption$: Observable<Option> = inject(Store).select(ThemeOptionState.themeOptions) as Observable<Option>;
+  homePage$: Observable<any> = inject(Store).select(ThemeState.homePage);
   cookies$: Observable<boolean> = inject(Store).select(ThemeOptionState.cookies)
   exit$: Observable<boolean> = inject(Store).select(ThemeOptionState.exit)
 
@@ -72,6 +75,12 @@ export class LayoutComponent implements AfterViewInit, OnDestroy {
       this.isBrowser = isPlatformBrowser(this.platformId);
 
     this.store.dispatch(new ThemeOptions())
+    // Cargar contenido del tema (incluye promotional_banner) para que el banner esté disponible en todas las rutas
+    this.store.select(ThemeState.activeTheme).subscribe(activeTheme => {
+      if (activeTheme) {
+        this.store.dispatch(new GetHomePage(activeTheme));
+      }
+    });
     this.cookies$.subscribe(res => this.cookies = res);
     this.exit$.subscribe(res => this.exit = res);
 

@@ -14,6 +14,14 @@ export interface ThemeOption {
    options: Option;
 }
 
+export interface PromotionalBanner {
+   is_enable?: boolean;
+   text?: string;
+   background_color?: string;
+   text_color?: string;
+   font_family?: string;
+}
+
 export interface Option {
    logo: Logo;
    general: General;
@@ -27,7 +35,8 @@ export interface Option {
    about_us: AboutUs;
    contact_us: Contact;
    error_page: ErrorPage;
-   popup: Popup
+   popup: Popup;
+   promotional_banner?: PromotionalBanner;
 }
 
 export interface Logo {

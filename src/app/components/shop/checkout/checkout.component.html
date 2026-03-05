@@ -570,11 +570,6 @@
                             </li>
                             }
 
-                            <li>
-                              {{ 'tax' | translate }}
-                              <span class="count">{{ (checkoutTotal ? (checkoutTotal.total.tax_total | currencySymbol) : 'not_calculated_yet' | translate ) }}</span>
-                            </li>
-
                             @if((user$ | async) && checkoutTotal && (user$ | async)?.point?.balance && (setting$ | async)?.activation?.point_enable){
                             <li>
                               <h4 [class]="form.controls['points_amount'].value ? 'txt-primary fw-bold' : 'txt-muted'">
