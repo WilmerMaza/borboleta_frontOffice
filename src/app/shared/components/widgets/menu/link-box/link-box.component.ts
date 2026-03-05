@@ -14,10 +14,22 @@ export class LinkBoxComponent {
 
   @Input() menu: Menu
 
-  constructor( private router: Router){
+  constructor(private router: Router) {}
+
+  isExternalLink(menu: Menu): boolean {
+    return (
+      menu?.externalLink === true ||
+      menu?.is_target_blank === 1 ||
+      menu?.is_target_blank === true ||
+      (typeof menu?.path === 'string' && (menu.path.startsWith('http://') || menu.path.startsWith('https://')))
+    );
   }
 
-  redirect(path:string){
-    this.router.navigateByUrl(path)
+  redirect(path: string) {
+    if (path?.startsWith('http://') || path?.startsWith('https://')) {
+      window.open(path, '_blank', 'noopener,noreferrer');
+    } else {
+      this.router.navigateByUrl(path || '/');
+    }
   }
 }

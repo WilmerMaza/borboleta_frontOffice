@@ -17,6 +17,41 @@
   }
 }
 
+// Subcategorías en menú móvil (Categorías dropdown) - acordeón al tocar
+.mobile-category-item {
+  .mobile-category-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    i {
+      font-size: 14px;
+      transition: transform 0.2s ease;
+
+      &.rotated {
+        transform: rotate(90deg);
+      }
+    }
+  }
+
+  .mobile-subcategories {
+    list-style: none;
+    padding-left: 0;
+    margin: 0 0 4px 0;
+    display: none;
+
+    .mobile-subcategory-link {
+      padding-left: 28px !important;
+      font-size: 13px;
+      color: #6b7280;
+    }
+  }
+
+  &.expanded .mobile-subcategories {
+    display: block;
+  }
+}
+
 // Contenedor del menú: flex para que el botón Mayorista quede al final
 :host ::ng-deep .navbar-nav {
   display: flex;
@@ -24,12 +59,12 @@
   flex-wrap: wrap;
 }
 
-// Botón de mayorista: siempre al lado del último ítem (margin-left: auto) y 40px a la derecha
+// Botón de mayorista: empujado a la derecha del nav
 .wholesale-menu-item {
   display: flex;
   align-items: center;
   margin-left: auto;
-  margin-right: 40px;
+  margin-right: 0;
 
   @media (max-width: 1199px) {
     margin-left: 0;
@@ -45,7 +80,7 @@
   justify-content: center;
   gap: 8px;
   padding: 6px 12px 6px 16px;
-  background: var(--theme-color);
+  background: #C4B896;
   color: #ffffff;
   border-radius: 25px;
   text-decoration: none;
@@ -77,8 +112,8 @@
   }
 
   &:hover {
-    background: var(--theme-color);
-    opacity: 0.9;
+    background: #b3a585;
+    opacity: 0.95;
     color: #ffffff;
     text-decoration: none;
     transform: translateY(-2px);

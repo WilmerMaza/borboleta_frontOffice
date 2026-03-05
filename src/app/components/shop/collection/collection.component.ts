@@ -83,7 +83,7 @@ export class CollectionComponent {
         'rating': params['rating'] ? params['rating'] : '',
         'attribute': params['attribute'] ? params['attribute'] : '',
         'brand': params['brand'] ? params['brand'] : '',
-        'is_sale_enable': params['is_sale_enable'] === '1' ? '1' : ''
+        'is_sale_enable': '1' // Collections = solo productos con descuento
       };
 
       this.scrollFilter = {
@@ -92,10 +92,10 @@ export class CollectionComponent {
         'paginate': this.scrollFilter['paginate']
       };
 
-      // Breadcrumb: "Descuentos" cuando solo productos en oferta
+      // Breadcrumb: Collections = productos con descuento
       this.breadcrumb = {
-        title: this.filter['is_sale_enable'] === '1' ? 'products_on_sale' : 'collections',
-        items: [{ label: this.filter['is_sale_enable'] === '1' ? 'products_on_sale' : 'collections', active: true }]
+        title: 'products_on_sale',
+        items: [{ label: 'products_on_sale', active: true }]
       };
 
       this.store.dispatch(new GetProducts(this.filter));

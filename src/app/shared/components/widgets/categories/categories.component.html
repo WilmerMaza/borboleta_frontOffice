@@ -3,7 +3,7 @@
     @if(categories.length){
       <ul id="sub-menu" class="sm pixelstrap  sm-vertical ">
         @for(category of categories; track category.id){
-          <li><a href="javascript:void(0)" [routerLink]="['/category', category.slug]">{{ category.name }}</a></li>
+          <li><a href="javascript:void(0)" [routerLink]="['/category', category.slug]" class="category-name">{{ category.name }}</a></li>
         }
       </ul>
     }
@@ -23,7 +23,7 @@
         <ul class="nav nav-pills mb-3 custom-nav-tab">
           @for(category of categories; track category.id){
             <li class="nav-item">
-              <app-button [class]="selectedCategorySlug.length && selectedCategorySlug.includes(category.slug!) ? 'nav-link active' : 'nav-link'" [id]="'nav_link_btn'" [spinner]="false" (click)="redirectToCollection(category.slug!)">
+              <app-button [class]="selectedCategorySlug.length && selectedCategorySlug.includes(category.slug!) ? 'nav-link active category-name' : 'nav-link category-name'" [id]="'nav_link_btn'" [spinner]="false" (click)="redirectToCollection(category.slug!)">
                 {{ category.name }}
                 <img [src]="category?.category_icon ? category?.category_icon?.original_url : 'assets/images/placeholder/category.png'" [alt]="category?.name">
               </app-button>
@@ -46,7 +46,7 @@
             <div>
               <a href="javascript:void(0)" (click)="redirectToCollection(category.slug!)" class="category-box category-dark" [class.active]="selectedCategorySlug.length && selectedCategorySlug.includes(category.slug!)">
                 <img [src]="category?.category_icon ? category?.category_icon?.original_url : 'assets/images/placeholder/category.png'" [alt]="category?.name">
-                <h5>{{ category.name }}</h5>
+                <h5 class="category-name">{{ category.name }}</h5>
               </a>
             </div>
           </ng-template>
@@ -69,7 +69,7 @@
               <div class="img-sec bg-size" [ngStyle]="{ 'background-image': 'url(' + (category.category_image ? category?.category_image?.original_url : 'assets/images/placeholder/category.png') + ')'}">
                 <img [src]="category.category_image ? category?.category_image?.original_url : 'assets/images/placeholder/category.png'" class="img-fluid bg-img" [alt]="category.name">
               </div>
-              <h4>
+              <h4 class="category-name">
                 <a [routerLink]="['/category', category.slug]">
                   {{ category.name }}
                 </a>
@@ -88,7 +88,7 @@
                     <div class="img-sec bg-size" [ngStyle]="{ 'background-image': 'url(' + (category.category_image ? category?.category_image?.original_url : 'assets/images/placeholder/category.png') + ')'}">
                       <img [src]="category.category_image ? category?.category_image?.original_url : 'assets/images/placeholder/category.png'" class="img-fluid bg-img" [alt]="category.name">
                     </div>
-                    <h4>
+                    <h4 class="category-name">
                       <a [routerLink]="['/category', category.slug]">
                         {{ category.name }}
                       </a>
@@ -119,7 +119,7 @@
                     </a>
                     <div class="category-details">
                       <a href="javascript:void(0)" [routerLink]="['/category', category.slug]">
-                        <h5>{{ category.name }}</h5>
+                        <h5 class="category-name">{{ category.name }}</h5>
                       </a>
                     </div>
                   </div>
@@ -139,7 +139,7 @@
             </a>
             <div class="category-details">
               <a href="javascript:void(0)" [routerLink]="['/category', category.slug]">
-                <h5>{{ category.name }}</h5>
+                <h5 class="category-name">{{ category.name }}</h5>
               </a>
             </div>
           </div>
@@ -154,7 +154,7 @@
       @for(category of categories; track category.id){
       <ng-template carouselSlide>
         <div>
-          <a href="javascript:void(0)" class="btn btn-outline btn-block" [routerLink]="['/category', category.slug]">
+          <a href="javascript:void(0)" class="btn btn-outline btn-block category-name" [routerLink]="['/category', category.slug]">
             <img [src]="category.category_icon ? category.category_icon.original_url : 'assets/images/placeholder/category.png'" class="img-fluid" [alt]="category.name">
             {{ category.name }}
           </a>
@@ -182,7 +182,7 @@
                   </a>
                   <div class="category-details">
                     <a href="javascript:void(0)" [routerLink]="['/category', category.slug]">
-                      <h5>{{ category.name }}</h5>
+                      <h5 class="category-name">{{ category.name }}</h5>
                     </a>
                   </div>
                 </div>
@@ -204,7 +204,7 @@
               </a>
               <div class="category-details">
                 <a href="javascript:void(0)" [routerLink]="['/category', category.slug]">
-                  <h5>{{ category.name }}</h5>
+                  <h5 class="category-name">{{ category.name }}</h5>
                 </a>
               </div>
             </div>
@@ -221,9 +221,9 @@
         <div>
           <div class="category-wrapper">
             <div>
-              <h4 class="text-theme">{{ category.name }}</h4>
+              <h4 class="text-theme category-name">{{ category.name }}</h4>
               <ul class="category-link">
-                <li><a href="javascript:void(0)" [routerLink]="['/category', category.slug]">{{ category.name }}</a></li>
+                <li><a href="javascript:void(0)" [routerLink]="['/category', category.slug]" class="category-name">{{ category.name }}</a></li>
               </ul>
               <div>
                 <img [src]="category.category_image ? category?.category_image?.original_url : 'assets/images/placeholder/category.png'" class="img-fluid lazyload" alt="category-image">
@@ -243,7 +243,7 @@
           @for(category of categories; track category.id){
             <ng-template carouselSlide>
               <div class="col">
-                <a href="javascript:void(0)" class="btn btn-outline btn-block" [routerLink]="['/category', category.slug]">{{ category.name }}</a>
+                <a href="javascript:void(0)" class="btn btn-outline btn-block category-name" [routerLink]="['/category', category.slug]">{{ category.name }}</a>
               </div>
             </ng-template>
           }
@@ -253,7 +253,7 @@
       <div class="row row-cols-md-4 row-cols-2 g-sm-4 g-2">
         @for(category of categories; track category.id){
         <div class="col">
-          <a href="javascript:void(0)" class="btn btn-outline btn-block" [routerLink]="['/category', category.slug]">{{ category.name }}</a>
+          <a href="javascript:void(0)" class="btn btn-outline btn-block category-name" [routerLink]="['/category', category.slug]">{{ category.name }}</a>
         </div>
         }
       </div>
@@ -272,7 +272,7 @@
           </a>
           <div class="category-details">
             <a href="javascript:void(0)" [routerLink]="['/category', category.slug]">
-              <h5>{{ category.name }}</h5>
+              <h5 class="category-name">{{ category.name }}</h5>
             </a>
           </div>
         </div>
@@ -297,7 +297,7 @@
                   <img [src]="'assets/images/placeholder/category.png'" class="img-fluid" [alt]="category.name">
                 </div>
               }
-              <h4>
+              <h4 class="category-name">
                 <a [routerLink]="['/category', category.slug]">
                   {{ category.name }}
                 </a>
@@ -305,7 +305,7 @@
               <ul class="category-link">
                 @if(category.subcategories){
                   @for(categories of category.subcategories | slice: 0:5; track categories.id){
-                    <li><a href="javascript:void" [routerLink]="['/category', categories.slug]">{{categories.name }}</a></li>
+                    <li><a href="javascript:void" [routerLink]="['/category', categories.slug]" class="category-name">{{categories.name }}</a></li>
                   }
                 }
               </ul>
@@ -328,7 +328,7 @@
             </div>
             <div class="category-box">
               <a href="javascript:void(0)" [routerLink]="['/category', category.slug]">
-                <h2>{{ category.name }}</h2>
+                <h2 class="category-name">{{ category.name }}</h2>
               </a>
             </div>
           </div>
@@ -343,7 +343,7 @@
         <div class="col">
           <a href="javascript:void(0)" [routerLink]="['/category', category.slug]">
             <div class="contain-bg">
-              <h4 data-hover="size 06">{{ category.name }}</h4>
+              <h4 data-hover="size 06" class="category-name">{{ category.name }}</h4>
             </div>
           </a>
         </div>
@@ -362,7 +362,7 @@
                   <img [src]="category.category_icon ? category.category_icon.original_url : 'assets/images/placeholder/category.png'" class="img-fluid" [alt]="category.name">
                   <div class="skeleton-img-sec"></div>
                 </div>
-                <h4>{{ category.name }}</h4>
+                <h4 class="category-name">{{ category.name }}</h4>
               </div>
             </a>
           </div>
@@ -381,7 +381,7 @@
               <div class="img-sec">
                 <img [src]="category.category_icon ? category.category_icon.original_url : 'assets/images/placeholder/category.png'" class="img-fluid" [alt]="category.name">
               </div>
-              <h4>{{ category.name }}</h4>
+              <h4 class="category-name">{{ category.name }}</h4>
             </div>
           </a>
         </div>
@@ -401,7 +401,7 @@
                     <img [src]="category.category_image ? category?.category_image?.original_url : 'assets/images/placeholder/category.png'" class="img-fluid" [alt]="category.name">
                   </div>
                 </div>
-                <h4>{{ category.name }}</h4>
+                <h4 class="category-name">{{ category.name }}</h4>
               </div>
             </a>
           </div>
@@ -425,7 +425,7 @@
               </div>
 
               <div class="category-details">
-                  <h5>{{ category.name }}</h5>
+                  <h5 class="category-name">{{ category.name }}</h5>
               </div>
           </a>
           </div>
@@ -443,7 +443,7 @@
         <img [alt]="category?.name" class="img-fluid me-2 rounded-0 rounded-0" alt=""
           [src]="category?.category_icon ? category?.category_icon?.original_url : 'assets/images/placeholder/category.png'">
         <div class="skeleton-category-img"></div>
-        <span>{{ category.name }}</span>
+        <span class="category-name">{{ category.name }}</span>
         <span class="skeleton-category-text"></span>
       </a>
     </li>

@@ -50,6 +50,7 @@
           @for(category of categories; track category.id){
             <li>
               <a href="javascript:void(0)" 
+                 class="category-name"
                  [routerLink]="['/category', category.slug]" 
                  (click)="toggleCategories()">
                 {{ category.name }}

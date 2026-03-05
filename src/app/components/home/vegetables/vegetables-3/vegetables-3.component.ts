@@ -1,6 +1,7 @@
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { Component, inject, Inject, Input, PLATFORM_ID, SimpleChanges } from '@angular/core';
 import { RouterModule } from '@angular/router';
+import { TranslateModule } from '@ngx-translate/core';
 import { Select, Store } from '@ngxs/store';
 import { Observable, forkJoin, of } from 'rxjs';
 import { CategoriesComponent } from '../../../../shared/components/widgets/categories/categories.component';
@@ -25,7 +26,7 @@ import { ThemeTitleComponent } from '../../widgets/theme-title/theme-title.compo
 
 @Component({
     selector: 'app-vegetables-3',
-    imports: [CommonModule, RouterModule,
+    imports: [CommonModule, RouterModule, TranslateModule,
         ThemeHomeSliderComponent, ThemeServicesComponent, ThemeTitleComponent,
         ThemeProductComponent, ImageLinkComponent, ThemeProductTabSectionComponent,
         ThemeBlogComponent, ThemeBrandComponent, CategoriesComponent

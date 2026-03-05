@@ -23,7 +23,7 @@
                   <ul class="navbar-nav category-nav me-auto pt-0">
                     @for(category of categories; track category.id){
                       <li class="nav-item" [class.active]="activeCategory == category.id">
-                        <a class="nav-link" href="javascript:void(0)">{{ category.name }}</a>
+                        <a class="nav-link category-name" href="javascript:void(0)">{{ category.name }}</a>
                       </li>
                     }
                   </ul>

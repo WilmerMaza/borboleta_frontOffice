@@ -112,16 +112,25 @@ export class ProductState{
   getProducts(ctx: StateContext<ProductStateModel>, action: GetProducts) {
     this.productService.skeletonLoader = true;
 
-    // Sin filtros (category, brand, price, etc.) → usar API de todos los productos
     const p = action?.payload || {};
-    const hasNoFilters = !p['category'] && !p['brand'] && !p['price'] && !p['tag'] && !p['attribute'] && !p['search'] && !p['store_slug'] && !p['is_sale_enable'];
-    const request$ = hasNoFilters
-      ? this.productService.getAllProducts(
-          p['page'] ?? 1,
-          p['paginate'] ?? 12,
-          p['sortBy'] ?? 'asc'
-        )
-      : this.productService.getProducts(action.payload);
+    const isDiscountsOnly = p['is_sale_enable'] === '1' || p['is_sale_enable'] === 1;
+    const hasNoFilters = !p['category'] && !p['brand'] && !p['price'] && !p['tag'] && !p['attribute'] && !p['search'] && !p['store_slug'];
+
+    let request$;
+    if (isDiscountsOnly) {
+      request$ = this.productService.getDiscountProducts(
+        p['page'] ?? 1,
+        p['paginate'] ?? 12
+      );
+    } else if (hasNoFilters) {
+      request$ = this.productService.getAllProducts(
+        p['page'] ?? 1,
+        p['paginate'] ?? 12,
+        p['sortBy'] ?? 'asc'
+      );
+    } else {
+      request$ = this.productService.getProducts(action.payload);
+    }
 
     return request$.pipe(
 
@@ -143,7 +152,8 @@ export class ProductState{
           }
           console.log('==========================================');
           
-          let products = result.data || [];
+          const rawData = result?.data ?? (result as any)?.products;
+          let products = Array.isArray(rawData) ? rawData : [];
           if(action?.payload) {
             // Note:- For Internal filter purpose only, once you apply filter logic on server side then you can remove  it as per your requirement.
             // Note:- we have covered only few filters as demo purpose
@@ -236,7 +246,7 @@ export class ProductState{
           ctx.patchState({
             product: {
               data: products,
-              total: products.length ? products.length : result.data.length
+              total: (result as any)?.total ?? products.length
             }
           });
         },
@@ -244,6 +254,7 @@ export class ProductState{
           this.productService.skeletonLoader = false;
         },
         error: err => {
+          this.productService.skeletonLoader = false;
           throw new Error(err?.error?.message);
         }
       })
@@ -296,7 +307,7 @@ export class ProductState{
           this.themeOptionService.preloader = false;
         },
         error: err => {
-          this.router.navigate(['/404']);
+          this.router.navigate(['/']);
           throw new Error(err?.error?.message);
         }
       })
