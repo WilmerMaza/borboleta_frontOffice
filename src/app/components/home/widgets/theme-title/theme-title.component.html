@@ -120,8 +120,10 @@
 </div>
 }@else if(type == 'jewellery'){
 <div class="title1 title5">
+  @if(title.tag && shouldShowTag()){
   <h4>{{ title.tag | translate }}</h4>
   <h4 class="skeleton-text-h4"></h4>
+  }
   <h2 class="title-inner1">{{ title.title | translate }}</h2>
   <h2 class="skeleton-text-h2 title-inner1"></h2>
   <hr role="tournament6">
