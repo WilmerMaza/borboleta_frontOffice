@@ -47,9 +47,9 @@
        [class.prevent-click]="isDragging || hasDragged"
        (click)="onHelpButtonClick($event)"
        aria-label="Contactar por WhatsApp para ayuda">
-      <span class="help-text">¿Necesitas ayuda?</span>
-      <div class="help-icon">
-        <i class="ri-whatsapp-fill"></i>
+      <div class="help-icon" aria-label="Ayuda">
+        <img src="assets/images/help/help-tooltip.png" alt="Ayuda" class="help-icon-img" />
+        <div class="help-icon-tooltip">¿Necesitas ayuda?</div>
       </div>
     </a>
   </div>
