@@ -27,7 +27,6 @@ export class AddressesComponent implements OnInit {
 
   ngOnInit(): void {
     // Cargar las direcciones del usuario al inicializar el componente
-    console.log('🏠 === CARGANDO DIRECCIONES === 🏠');
     this.store.dispatch(new GetAddresses());
   }
 
