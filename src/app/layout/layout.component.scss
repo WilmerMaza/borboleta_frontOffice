@@ -74,7 +74,7 @@ app-sticky-compare {
     width: 72px;
     height: 72px;
     border-radius: 50%;
-    background: #ffffff;
+    background: #000000;
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
     border: 1px solid rgba(0, 0, 0, 0.08);
     display: flex;
@@ -101,7 +101,7 @@ app-sticky-compare {
       pointer-events: none;
       transition: opacity 0.25s ease, transform 0.25s ease, visibility 0.25s ease;
       z-index: 10001;
-      background: #000000 !important;
+      background: var(--theme-color) !important;
       color: #ffffff !important;
       padding: 10px 18px;
       border-radius: 20px;
@@ -112,7 +112,9 @@ app-sticky-compare {
     }
 
     i {
-      font-size: 24px;
+      font-size: 36px;
+      /* Usar color tierra alterno si existe para que no quede negro sobre el círculo negro. */
+      color: #ffffff !important;
       transition: transform 0.3s ease;
     }
   }
@@ -133,7 +135,7 @@ app-sticky-compare {
       }
 
       i {
-        font-size: 22px;
+        font-size: 32px;
       }
     }
   }
@@ -153,7 +155,7 @@ app-sticky-compare {
       }
 
       i {
-        font-size: 20px;
+        font-size: 28px;
       }
     }
   }
@@ -173,7 +175,7 @@ app-sticky-compare {
       }
 
       i {
-        font-size: 18px;
+        font-size: 26px;
       }
     }
   }
@@ -184,7 +186,7 @@ app-sticky-compare {
   text-decoration: none;
 
   .help-icon {
-    background: #ffffff;
+    background: #000000;
     transform: translateY(-2px);
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
 
