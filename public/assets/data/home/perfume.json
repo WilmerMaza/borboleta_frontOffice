@@ -91,7 +91,7 @@
             }
         },
         "category_product": {
-            "tag": "exclusive products",
+            "tag": "",
             "title": "special products",
             "status": true,
             "category_ids": [

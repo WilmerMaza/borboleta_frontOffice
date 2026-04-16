@@ -69,37 +69,52 @@ app-sticky-compare {
   cursor: grab;
   position: relative;
 
-  .help-text {
-    background: #000000;
-    color: #ffffff;
-    padding: 8px 16px;
-    border-radius: 20px;
-    font-size: 13px;
-    font-weight: 500;
-    white-space: nowrap;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-    opacity: 0;
-    visibility: hidden;
-    transform: translateY(5px);
-    transition: all 0.3s ease;
-    pointer-events: none;
-  }
-
   .help-icon {
-    background: #000000;
-    color: #ffffff;
-    width: 56px;
-    height: 56px;
+    position: relative;
+    width: 72px;
+    height: 72px;
     border-radius: 50%;
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+    background: #000000;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+    border: 1px solid rgba(0, 0, 0, 0.08);
     display: flex;
     align-items: center;
     justify-content: center;
+    overflow: visible;
     transition: all 0.3s ease;
 
+    .help-icon-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 50%;
+      transition: transform 0.3s ease;
+    }
+
+    .help-icon-tooltip {
+      position: absolute;
+      bottom: calc(100% + 14px);
+      left: 50%;
+      transform: translateX(-50%) translateY(6px);
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transition: opacity 0.25s ease, transform 0.25s ease, visibility 0.25s ease;
+      z-index: 10001;
+      background: var(--theme-color) !important;
+      color: #ffffff !important;
+      padding: 10px 18px;
+      border-radius: 20px;
+      font-size: 14px;
+      font-weight: 500;
+      white-space: nowrap;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+
     i {
-      font-size: 24px;
+      font-size: 36px;
+      /* Usar color tierra alterno si existe para que no quede negro sobre el círculo negro. */
+      color: #ffffff !important;
       transition: transform 0.3s ease;
     }
   }
@@ -110,17 +125,17 @@ app-sticky-compare {
 
   // Responsive - Tablet
   @media (max-width: 991px) {
-    .help-text {
-      font-size: 12px;
-      padding: 6px 14px;
-    }
-
     .help-icon {
-      width: 52px;
-      height: 52px;
+      width: 64px;
+      height: 64px;
+
+      .help-icon-img {
+        width: 100%;
+        height: 100%;
+      }
 
       i {
-        font-size: 22px;
+        font-size: 32px;
       }
     }
   }
@@ -128,14 +143,19 @@ app-sticky-compare {
   // Responsive - Móvil
   @media (max-width: 767px) {
     .help-icon {
-      width: 50px;
-      height: 50px;
+      width: 60px;
+      height: 60px;
       display: flex !important;
       visibility: visible !important;
       opacity: 1 !important;
 
+      .help-icon-img {
+        width: 100%;
+        height: 100%;
+      }
+
       i {
-        font-size: 20px;
+        font-size: 28px;
       }
     }
   }
@@ -143,14 +163,19 @@ app-sticky-compare {
   // Asegurar visibilidad en móviles pequeños
   @media (max-width: 480px) {
     .help-icon {
-      width: 48px;
-      height: 48px;
+      width: 56px;
+      height: 56px;
       display: flex !important;
       visibility: visible !important;
       opacity: 1 !important;
 
+      .help-icon-img {
+        width: 100%;
+        height: 100%;
+      }
+
       i {
-        font-size: 18px;
+        font-size: 26px;
       }
     }
   }
@@ -160,20 +185,19 @@ app-sticky-compare {
 .help-float-btn-container:not(.dragging) .help-float-btn:hover {
   text-decoration: none;
 
-  .help-text {
-    opacity: 1;
-    visibility: visible;
-    transform: translateY(0);
-  }
-
   .help-icon {
-    background: #1a1a1a;
+    background: #000000;
     transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
-    border-color: rgba(255, 255, 255, 0.25);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
 
-    i {
-      transform: scale(1.1);
+    .help-icon-img {
+      transform: scale(1.05);
+    }
+
+    .help-icon-tooltip {
+      opacity: 1;
+      visibility: visible;
+      transform: translateX(-50%) translateY(0);
     }
   }
 }
