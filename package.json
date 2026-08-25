@@ -62,27 +62,5 @@
     "karma-jasmine": "~5.1.0",
     "karma-jasmine-html-reporter": "~2.1.0",
     "typescript": "~5.5.2"
-  },
-  "overrides": {
-    "@ngxs/devtools-plugin": {
-      "@angular/core": "$@angular/core"
-    },
-    "@ngxs/form-plugin": {
-      "@angular/core": "$@angular/core",
-      "@angular/forms": "$@angular/forms"
-    },
-    "@ngxs/logger-plugin": {
-      "@angular/core": "$@angular/core"
-    },
-    "@ngxs/router-plugin": {
-      "@angular/core": "$@angular/core",
-      "@angular/router": "$@angular/router"
-    },
-    "@ngxs/storage-plugin": {
-      "@angular/core": "$@angular/core"
-    },
-    "@ngxs/store": {
-      "@angular/core": "$@angular/core"
-    }
   }
 }
