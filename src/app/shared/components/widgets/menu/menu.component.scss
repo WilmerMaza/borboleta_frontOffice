@@ -59,6 +59,24 @@
   flex-wrap: wrap;
 }
 
+// En desktop: desplegar submenú al pasar el mouse (hover)
+@media (min-width: 1200px) {
+  :host ::ng-deep .nav-item.dropdown:hover,
+  :host ::ng-deep .nav-item.dropdown-mega:hover {
+    > .dropdown-menu,
+    > .dropdown-menu-2 {
+      opacity: 1 !important;
+      visibility: visible !important;
+      transform: translateY(0) !important;
+      display: block !important;
+    }
+
+    > .dropdown-menu-2 {
+      display: flex !important;
+    }
+  }
+}
+
 // Botón de mayorista: empujado a la derecha del nav
 .wholesale-menu-item {
   display: flex;

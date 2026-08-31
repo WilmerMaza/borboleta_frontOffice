@@ -57,7 +57,9 @@
           </div>
           <div class="sidenav fixed-sidebar marketplace-sidebar svg-icon-menu" [class.open-side]="categoryFilter">
             <app-header-categories [categoryIds]="data?.header?.category_ids || []"></app-header-categories>
-            <!-- Sidebar -->
+            <div class="sidebar-view-all">
+              <a [routerLink]="['/collections']" class="sidebar-view-all-link">{{ 'view_all_categories' | translate }}</a>
+            </div>
           </div>
         </div>
         <div class="col-xxl-7 col-xl-9 position-unset">

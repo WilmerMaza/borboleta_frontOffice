@@ -127,6 +127,9 @@ export class MenuComponent implements OnInit {
   }
 
   toggle(menu: Menu){
+    if (typeof window !== 'undefined' && window.innerWidth >= 1200) {
+      return; // En desktop, el hover maneja el dropdown
+    }
     if(!menu.active){
       this.menu.forEach(item => {
         if(this.menu.includes(menu)){

@@ -1,0 +1,55 @@
+<nav class="sidebar-pages-section">
+  @if(menuItems.length){
+    <h6 class="sidebar-section-title">{{ 'pages' | translate }}</h6>
+  }
+  <ul class="pages-nav-list">
+    @for(menu of menuItems; track menu.id ?? $index){
+      <li class="page-nav-item" [class.has-children]="menu.child?.length" [class.expanded]="expandedMenuId === menu.id">
+        @if(menu.link_type === 'sub' && menu.child?.length){
+          <a href="javascript:void(0)" class="page-name page-link page-link-toggle" (click)="onMenuClick($event, menu.id)">
+            <span>{{ menu.title | translate }}</span>
+            <i class="ri-arrow-right-s-line subcategory-indicator" aria-hidden="true"></i>
+          </a>
+        } @else if(menu.link_type === 'link'){
+          @if(isExternalLink(menu)){
+            <a [href]="menu.path" class="page-name page-link" target="_blank" rel="noopener noreferrer">
+              <span>{{ menu.title | translate }}</span>
+            </a>
+          } @else {
+            <a [routerLink]="menu.path ? [menu.path] : ['/']" class="page-name page-link">
+              <span>{{ menu.title | translate }}</span>
+            </a>
+          }
+        }
+        @if(menu.child?.length){
+          <ul class="children-dropdown">
+            @for(child of menu.child; track child.id){
+              <li>
+                @if(child.link_type === 'sub' && child.child?.length){
+                  <span class="page-name child-header">{{ child.title | translate }}</span>
+                  <ul class="nested-children">
+                    @for(nested of child.child; track nested.id){
+                      <li>
+                        @if(isExternalLink(nested)){
+                          <a [href]="nested.path" class="page-name child-link" target="_blank" rel="noopener noreferrer">{{ nested.title | translate }}</a>
+                        } @else {
+                          <a [routerLink]="nested.path ? [nested.path] : ['/']" class="page-name child-link">{{ nested.title | translate }}</a>
+                        }
+                      </li>
+                    }
+                  </ul>
+                } @else if(child.link_type === 'link'){
+                  @if(isExternalLink(child)){
+                    <a [href]="child.path" class="page-name child-link" target="_blank" rel="noopener noreferrer">{{ child.title | translate }}</a>
+                  } @else {
+                    <a [routerLink]="child.path ? [child.path] : ['/']" class="page-name child-link">{{ child.title | translate }}</a>
+                  }
+                }
+              </li>
+            }
+          </ul>
+        }
+      </li>
+    }
+  </ul>
+</nav>

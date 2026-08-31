@@ -77,7 +77,7 @@
             ]
         },
         "category_product": {
-            "tag": "Exclusive Products",
+            "tag": "",
             "title": "SPECIAL PRODUCTS",
             "status": true,
             "category_ids": [

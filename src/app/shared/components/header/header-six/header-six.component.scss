@@ -114,3 +114,25 @@
   }
 }
 
+// Sidebar: enlace "Ver todas las categorías" (mismo aspecto que ítems de categoría)
+.sidebar-view-all {
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+
+  .sidebar-view-all-link {
+    display: flex;
+    align-items: center;
+    padding: 14px 20px;
+    color: #333;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.4;
+    background: transparent;
+    transition: color 0.2s ease, background-color 0.2s ease;
+
+    &:hover {
+      color: var(--theme-color, #C4B896);
+      background: rgba(196, 184, 150, 0.06);
+    }
+  }
+}

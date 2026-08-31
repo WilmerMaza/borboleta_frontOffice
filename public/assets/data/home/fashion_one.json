@@ -160,7 +160,7 @@
         "blog_ids": [3, 2, 1]
       },
       "category_product": {
-        "tag": "exclusive products",
+        "tag": "",
         "title": "everyday casual",
         "status": true,
         "category_ids": [8, 9, 10]
